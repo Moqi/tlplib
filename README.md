@@ -22,7 +22,7 @@ Disclaimer
 
 You are free to use this for your own games. Patches and improvements are welcome. A mention in your game credits would be nice.
 
-If you are considering using this it would be also nice if you contacted me (Artûras Ðlajus, arturas@tinylabproductions.com) so we could create a community around this.
+If you are considering using this it would be also nice if you contacted me (ArtÅ«ras Å lajus, arturas@tinylabproductions.com) so we could create a community around this.
 
 Using in your project
 ---------------------
