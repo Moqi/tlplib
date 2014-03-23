@@ -1,7 +1,7 @@
 Tiny Lab Productions Library
 ============================
 
-This is library which we, Tiny Lab Productions <www.tinylabproductions.com> use
+This is library which we, [Tiny Lab Productions](www.tinylabproductions.com) use
 in our Unity3D games. 
 
 It contains various things, including but not limited to:
