@@ -22,7 +22,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
   }
 
-  class RxRef<A> : Observable<A>, IRxRef<A> {
+  public class RxRef<A> : Observable<A>, IRxRef<A> {
     private static ObserverBuilder<Elem, RxRef<Elem>> builder<Elem>(Elem value) {
       return builder => {
         var rxRef = new RxRef<Elem>(value);
