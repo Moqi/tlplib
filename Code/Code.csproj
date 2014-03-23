@@ -43,9 +43,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TLPLib\Android\AndroidActivity.cs" />
     <Compile Include="TLPLib\Android\AndroidView.cs" />
+    <Compile Include="TLPLib\Binding\DFBind.cs" />
     <Compile Include="TLPLib\Collection\BiMap.cs" />
     <Compile Include="TLPLib\Concurrent\Concurrent.cs" />
     <Compile Include="TLPLib\Concurrent\CoroutineHelperBehaviour.cs" />
@@ -87,7 +87,9 @@
     <Compile Include="TLPLib\Formats\SimpleJSON.cs" />
     <Compile Include="TLPLib\Data\ValueWithStorage.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
