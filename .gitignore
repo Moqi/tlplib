@@ -5,5 +5,8 @@
 bin
 obj
 
+# Solution User Options
+*.suo
+
 # Unity3D meta files
 *.meta
