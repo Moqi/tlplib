@@ -59,6 +59,17 @@ And you should be good to go.
 Don't forget that when you clone your git repository to a new place, your 
 ```tlplib``` remote will be lost so you will need to readd it.
 
+### Defining compiler constants ###
+
+There are bits of code that depend on third party libraries that you might not
+want to use in your project. They are disabled by default via precompiler 
+defines.
+
+If you wish to use them, you need to define the constants in Unity3D (Menu Bar > Edit > Project Settings > Player > (your platform) > Other Settings > Scripting Define Symbols).
+
+* GOTWEEN - if you are using [GoKit](https://github.com/prime31/GoKit).
+* DFGUI - if you are using [Daikon Forge GUI](http://www.daikonforge.com/dfgui/(. Beware that this also uses GOTWEEN as well.
+
 Getting latest updates
 ----------------------
 
