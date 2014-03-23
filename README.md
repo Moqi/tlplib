@@ -68,7 +68,7 @@ defines.
 If you wish to use them, you need to define the constants in Unity3D (Menu Bar > Edit > Project Settings > Player > (your platform) > Other Settings > Scripting Define Symbols).
 
 * GOTWEEN - if you are using [GoKit](https://github.com/prime31/GoKit).
-* DFGUI - if you are using [Daikon Forge GUI](http://www.daikonforge.com/dfgui/(. Beware that this also uses GOTWEEN as well.
+* DFGUI - if you are using [Daikon Forge GUI](http://www.daikonforge.com/dfgui/). Beware that this also uses GOTWEEN as well.
 
 Getting latest updates
 ----------------------
