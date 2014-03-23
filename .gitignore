@@ -1,1 +1,9 @@
+# Backup files
 *~
+
+# Binary VS files
+bin
+obj
+
+# Unity3D meta files
+*.meta
