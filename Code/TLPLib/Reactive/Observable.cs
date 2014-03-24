@@ -39,9 +39,18 @@ namespace com.tinylabproductions.TLPLib.Reactive {
   }
 
   public static class Observable {
-    public static IObservable<Unit> everyFrame(
-      MonoBehaviour behaviour
-      ) {
+    public static Tpl<A, IObservable<Evt>> a<A, Evt>
+    (Fn<IObserver<Evt>, A> creator) {
+      IObserver<Evt> observer = null;
+      var observable = new Observable<Evt>(obs => observer = obs);
+      var obj = creator(observer);
+      return F.t(obj, observable);
+    }
+
+    public static IObservable<A> fromEvent<A>(Act<Act<A>> registerCallback) {
+      return new Observable<A>(obs => registerCallback(obs.push));
+    }
+
     public static IObservable<Unit> everyFrame() {
       return new Observable<Unit>(observer =>
         Concurrent.ASync.StartCoroutine(everyFrame(observer))
