@@ -4,7 +4,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
-  public static class Concurrent {
+  public static class ASync {
     private static CoroutineHelperBehaviour behaviour { get {
       const string name = "Coroutine Helper";
       var go = GameObject.Find(name);

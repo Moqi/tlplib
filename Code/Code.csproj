@@ -47,7 +47,7 @@
     <Compile Include="TLPLib\Android\AndroidView.cs" />
     <Compile Include="TLPLib\Binding\DFBind.cs" />
     <Compile Include="TLPLib\Collection\BiMap.cs" />
-    <Compile Include="TLPLib\Concurrent\Concurrent.cs" />
+    <Compile Include="TLPLib\Concurrent\ASync.cs" />
     <Compile Include="TLPLib\Concurrent\CoroutineHelperBehaviour.cs" />
     <Compile Include="TLPLib\Concurrent\Future.cs" />
     <Compile Include="TLPLib\IllegalStateException.cs" />

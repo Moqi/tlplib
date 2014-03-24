@@ -42,28 +42,31 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public static IObservable<Unit> everyFrame(
       MonoBehaviour behaviour
       ) {
+    public static IObservable<Unit> everyFrame() {
       return new Observable<Unit>(observer =>
-        behaviour.StartCoroutine(everyFrame(observer))
-        );
+        Concurrent.ASync.StartCoroutine(everyFrame(observer))
+      );
     }
 
     public static IObservable<DateTime> interval(
       MonoBehaviour behaviour, float intervalS
       ) {
-      return interval(behaviour, intervalS, F.none<float>());
+      return interval(intervalS, F.none<float>());
     }
 
     public static IObservable<DateTime> interval(
       MonoBehaviour behaviour, float intervalS, float delayS
     ) {
-      return interval(behaviour, intervalS, F.some(delayS));
+      return interval(intervalS, F.some(delayS));
     }
 
     public static IObservable<DateTime> interval(
-      MonoBehaviour behaviour, float intervalS, Option<float> delayS
-      ) {
+      float intervalS, Option<float> delayS
+    ) {
       return new Observable<DateTime>(observer =>
-        behaviour.StartCoroutine(interval(observer, intervalS, delayS))
+        Concurrent.ASync.StartCoroutine(
+          interval(observer, intervalS, delayS)
+        )
       );
     }
 
