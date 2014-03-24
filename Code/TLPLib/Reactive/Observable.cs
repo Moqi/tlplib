@@ -44,7 +44,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       IObserver<Evt> observer = null;
       var observable = new Observable<Evt>(obs => observer = obs);
       var obj = creator(observer);
-      return F.t(obj, observable);
+      return F.t(obj, (IObservable<Evt>) observable);
     }
 
     public static IObservable<A> fromEvent<A>(Act<Act<A>> registerCallback) {
