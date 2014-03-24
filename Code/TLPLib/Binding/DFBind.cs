@@ -16,6 +16,11 @@ namespace com.tinylabproductions.TLPLib.Binding {
     private static readonly Regex intFilter = new Regex(@"\D");
 
     public static readonly Fn<string, string> strMapper = _ => _;
+    public static readonly Fn<int, string> intMapper = _ => _.ToString();
+    public static readonly Fn<string, int> intComapper = text => {
+      var filtered = intFilter.Replace(text, "");
+      return filtered.Length == 0 ? 0 : int.Parse(filtered);
+    };
     public static readonly Fn<uint, string> uintMapper = v => v.ToString();
     public static readonly Fn<string, uint> uintComapper = text => {
       var filtered = intFilter.Replace(text, "");
@@ -196,6 +201,12 @@ namespace com.tinylabproductions.TLPLib.Binding {
     }
 
     public static ISubscription bind(
+      this IRxRef<int> subject, dfTextbox control
+    ) {
+      return subject.bind(control, intMapper, intComapper);
+    }
+
+    public static ISubscription bind(
       this IRxRef<uint> subject, dfTextbox control
     ) {
       return subject.bind(control, uintMapper, uintComapper);
@@ -217,6 +228,12 @@ namespace com.tinylabproductions.TLPLib.Binding {
       this IRxRef<string> subject, dfLabel control
     ) {
       return subject.bind(control, strMapper, strMapper);
+    }
+
+    public static ISubscription bind(
+      this IRxRef<int> subject, dfLabel control
+    ) {
+      return subject.bind(control, intMapper, intComapper);
     }
 
     public static ISubscription bind(
