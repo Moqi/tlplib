@@ -4,7 +4,7 @@ using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
-  public class RxListView {
+  public static class RxListView {
     public static RxListView<A> a<A>(
       RxList<A> list, int startIndex, int windowSize
     ) { return new RxListView<A>(list, startIndex, windowSize); }
