@@ -135,7 +135,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return subscription;
     }
 
-    public virtual IObservable<B> map<B>(Fn<A, B> mapper) {
+    public IObservable<B> map<B>(Fn<A, B> mapper) {
       return mapImpl(mapper, builder<B>());
     }
 
