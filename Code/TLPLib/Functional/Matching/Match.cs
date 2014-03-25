@@ -39,7 +39,7 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
       if (casted == null) return this;
 
       onMatch(casted);
-      return new SuccessfulMatcher<Base, Unit>(F.unit());
+      return new SuccessfulMatcher<Base, Unit>(F.unit);
     }
 
     public IVoidMatcher<Base> whenSealed<T>(Act<T> onMatch) 

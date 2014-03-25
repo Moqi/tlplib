@@ -18,7 +18,7 @@ namespace com.tinylabproductions.TLPLib.Functional {
 
     public static IList<A> ilist<A>(params A[] args) { return list(args); }
 
-    public static Unit unit() { return Unit.instance; }
+    public static Unit unit { get { return Unit.instance; } }
 
     public static Lazy<A> lazy<A>(Fn<A> func) {
       return new LazyImpl<A>(func);
