@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
@@ -68,6 +69,10 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public int mapIndex(int viewIndex) {
       return startIndex + viewIndex;
+    }
+
+    public new IRxVal<B> map<B>(Fn<ReadOnlyCollection<Option<A>>, B> mapper) {
+      return mapImpl(mapper, RxVal.builder(mapper(value)));
     }
 
     private void submit() { submit(value); }

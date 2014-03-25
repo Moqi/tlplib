@@ -7,6 +7,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
    **/
   public interface IRxVal<A> : IObservable<A> {
     A value { get; }
+    new IRxVal<B> map<B>(Fn<A, B> mapper);
   }
 
   /**
@@ -16,14 +17,20 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     new A value { get; set; }
   }
 
-  public static class RxRef {
-    public static IRxRef<A> a<A>(A value) {
-      return new RxRef<A>(value);
+  public static class RxVal {
+    public static ObserverBuilder<Elem, IRxVal<Elem>> builder<Elem>(Elem value) {
+      // Unity Mono doesn't quite understand that it is the same type :|
+      // return RxRef.builder(value);
+      return builder => {
+        var rxRef = new RxRef<Elem>(value);
+        builder(rxRef);
+        return (IRxVal<Elem>) rxRef;
+      };
     }
   }
 
-  public class RxRef<A> : Observable<A>, IRxRef<A> {
-    private static ObserverBuilder<Elem, RxRef<Elem>> builder<Elem>(Elem value) {
+  public static class RxRef {
+    public static ObserverBuilder<Elem, IRxRef<Elem>> builder<Elem>(Elem value) {
       return builder => {
         var rxRef = new RxRef<Elem>(value);
         builder(rxRef);
@@ -31,6 +38,12 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       };
     }
 
+    public static IRxRef<A> a<A>(A value) {
+      return new RxRef<A>(value);
+    }
+  }
+
+  public class RxRef<A> : Observable<A>, IRxRef<A> {
     private A _value;
     public A value { 
       get { return _value; }
@@ -49,6 +62,10 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       var subscription = base.subscribe(onChange);
       onChange(value); // Emit current value on subscription.
       return subscription;
+    }
+
+    public new IRxVal<B> map<B>(Fn<A, B> mapper) {
+      return mapImpl(mapper, RxVal.builder(mapper(value)));
     }
 
     public void push(A pushedValue) { value = pushedValue; }
