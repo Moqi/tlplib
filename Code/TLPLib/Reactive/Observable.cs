@@ -10,8 +10,14 @@ using com.tinylabproductions.TLPLib.Functional;
 namespace com.tinylabproductions.TLPLib.Reactive {
   public interface IObservable<A> {
     ISubscription subscribe(Act<A> onChange);
+    /** Maps events coming from this observable. **/
     IObservable<B> map<B>(Fn<A, B> mapper);
+    /** 
+     * Maps events coming from this observable and emits all events contained 
+     * in returned enumerable.
+     **/
     IObservable<B> flatMap<B>(Fn<A, IEnumerable<B>> mapper);
+    /** Only emits events that pass the predicate. **/
     IObservable<A> filter(Fn<A, bool> predicate);
     /**
      * Buffers values into a linked list of specified size. Oldest values 
