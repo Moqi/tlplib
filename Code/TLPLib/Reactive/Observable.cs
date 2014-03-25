@@ -1,17 +1,41 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Extensions;
 using UnityEngine;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
-  public interface IObservable<out A> {
+  public interface IObservable<A> {
     ISubscription subscribe(Act<A> onChange);
     IObservable<B> map<B>(Fn<A, B> mapper);
     IObservable<B> flatMap<B>(Fn<A, IEnumerable<B>> mapper);
     IObservable<B> flatMap<B>(Fn<A, IObservable<B>> mapper);
     IObservable<A> filter(Fn<A, bool> predicate);
+    /**
+     * Buffers values into a linked list of specified size. Oldest values 
+     * are at the front of the buffer.
+     **/
+    IObservable<ILinkedList<A>> buffer(int size);
+    /**
+     * Joins events of two observables returning an observable which emits
+     * events when either observable emits them.
+     **/
+    IObservable<A> join<B>(IObservable<B> other) where B : A;
+    /** 
+     * Only emits an event if other event was not emmited in specified 
+     * time range.
+     **/
+    IObservable<A> onceEvery(float seconds);
+    /**
+     * Waits until `count` events are emmited within a single `timeframe` 
+     * seconds window and emits a read only linked list of 
+     * (element, emmision time) tuples with emmission time taken from 
+     * `Time.time`.
+     **/
+    IObservable<ILinkedList<Tpl<A, float>>> withinTimeframe(int count, float timeframe);
     IObservable<Tpl<A, B>> zip<B>(IObservable<B> other);
     // Returns pairs of (old, new) values when they are changing.
     // If there was no events before, old may be None.
@@ -51,11 +75,15 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return new Observable<A>(obs => registerCallback(obs.push));
     }
 
-    public static IObservable<Unit> everyFrame() {
-      return new Observable<Unit>(observer =>
-        Concurrent.ASync.StartCoroutine(everyFrame(observer))
+    private static IObservable<Unit> everyFrameInstance;
+
+    public static IObservable<Unit> everyFrame { get {
+      return everyFrameInstance ?? (
+        everyFrameInstance = new Observable<Unit>(observer =>
+          Concurrent.ASync.StartCoroutine(everyFrameCR(observer))
+        )
       );
-    }
+    } }
 
     public static IObservable<DateTime> interval(
       MonoBehaviour behaviour, float intervalS
@@ -86,7 +114,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         map<Tpl<P1, P2, P3, P4>>(t => F.t(t._1._1._1, t._1._1._2, t._1._2, t._2));
     }
 
-    private static IEnumerator everyFrame(IObserver<Unit> observer) {
+    private static IEnumerator everyFrameCR(IObserver<Unit> observer) {
       while (true) {
         observer.push(Unit.instance);
         yield return null;
@@ -170,6 +198,73 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return builder(obs => subscribe(val => {
         if (predicate(val)) obs.push(val);
       }));
+    }
+
+    public IObservable<ILinkedList<A>> buffer(int size) {
+      return bufferImpl(size, builder<ILinkedList<A>>());
+    }
+
+    protected O bufferImpl<O>
+    (int size, ObserverBuilder<ILinkedList<A>, O> builder) {
+      return builder(obs => {
+        var buffer = new LinkedList<A>();
+        var roFacade = new ReadOnlyLinkedList<A>(buffer);
+        subscribe(val => {
+          buffer.AddLast(val);
+          if (buffer.Count > size) buffer.RemoveFirst();
+          obs.push(roFacade);
+        });
+      });
+    }
+
+    public IObservable<A> join<B>(IObservable<B> other) where B : A {
+      return joinImpl(other, builder<A>());
+    }
+
+    protected O joinImpl<B, O>
+    (IObservable<B> other, ObserverBuilder<A, O> builder) where B : A {
+      return builder(obs => {
+        subscribe(obs.push);
+        other.subscribe(v => obs.push(v));
+      });
+    }
+
+    public IObservable<A> onceEvery(float seconds) {
+      return onceEveryImpl(seconds, builder<A>());
+    }
+
+    protected O onceEveryImpl<O>
+    (float seconds, ObserverBuilder<A, O> builder) {
+      return builder(obs => {
+        var lastEmit = float.NegativeInfinity;
+        subscribe(value => {
+          if (lastEmit + seconds > Time.time) return;
+          lastEmit = Time.time;
+          obs.push(value);
+        });
+      });
+    }
+
+    public IObservable<ILinkedList<Tpl<A, float>>> 
+    withinTimeframe(int count, float timeframe) {
+      return withinTimeframeImpl(
+        count, timeframe, builder <ILinkedList<Tpl<A, float>>>()
+      );
+    }
+
+    protected O withinTimeframeImpl<O>(
+      int count, float timeframe, 
+      ObserverBuilder<ILinkedList<Tpl<A, float>>, O> builder
+    ) {
+      return builder(obs => 
+        map(value => F.t(value, Time.time)).
+        buffer(count).
+        filter(events => {
+          if (events.Count != count) return false;
+          var last = events.Last.Value._2;
+          return events.All(t => last - t._2 <= timeframe);
+        }).subscribe(obs.push)
+      );
     }
 
     public IObservable<Tpl<A, B>> zip<B>(IObservable<B> other) {

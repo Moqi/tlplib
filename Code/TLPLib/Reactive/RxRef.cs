@@ -5,7 +5,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
   /**
    * RxVal is an observable which has a current value.
    **/
-  public interface IRxVal<out A> : IObservable<A> {
+  public interface IRxVal<A> : IObservable<A> {
     A value { get; }
   }
 
