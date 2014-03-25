@@ -15,6 +15,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
    **/
   public interface IRxRef<A> : IRxVal<A>, IObserver<A> {
     new A value { get; set; }
+    /** Returns a new ref that is bound to this ref and vice versa. **/
+    IRxRef<B> comap<B>(Fn<A, B> mapper, Fn<B, A> comapper);
   }
 
   public static class RxVal {
@@ -66,6 +68,12 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public new IRxVal<B> map<B>(Fn<A, B> mapper) {
       return mapImpl(mapper, RxVal.builder(mapper(value)));
+    }
+
+    public IRxRef<B> comap<B>(Fn<A, B> mapper, Fn<B, A> comapper) {
+      var bRef = mapImpl(mapper, RxRef.builder(mapper(value)));
+      bRef.subscribe(b => value = comapper(b));
+      return bRef;
     }
 
     public void push(A pushedValue) { value = pushedValue; }
