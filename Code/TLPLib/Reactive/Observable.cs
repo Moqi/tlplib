@@ -3,13 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Collection;
+using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Extensions;
-using UnityEngine;
 using com.tinylabproductions.TLPLib.Functional;
+using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
   public interface IObservable<A> {
     ISubscription subscribe(Act<A> onChange);
+    /** Emits first value to the future and unsubscribes. **/
+    Future<A> toFuture();
     /** Maps events coming from this observable. **/
     IObservable<B> map<B>(Fn<A, B> mapper);
     /** 
@@ -157,7 +160,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     protected virtual void submit(A value) {
-      foreach (var t in subscriptions) t._2(value);
+      // Make a copy of subscriptions to prevent concurrent modification of it.
+      var localSubscription = subscriptions.ToArray();
+      foreach (var t in localSubscription) t._2(value);
     }
 
     public virtual ISubscription subscribe(Act<A> onChange) {
@@ -166,6 +171,13 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       subscription = new Subscription(() => unsubscribe(subscription));
       subscriptions.Add(F.t(subscription, onChange));
       return subscription;
+    }
+
+    public Future<A> toFuture() {
+      var f = new FutureImpl<A>();
+      var subscription = subscribe(f.complete);
+      f.onComplete(_ => subscription.unsubscribe());
+      return f;
     }
 
     public IObservable<B> map<B>(Fn<A, B> mapper) {
