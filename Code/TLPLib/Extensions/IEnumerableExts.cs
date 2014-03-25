@@ -207,5 +207,14 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static void each<A>(this IEnumerable<A> enumerable, Act<A> action) {
       foreach (var a in enumerable) action(a);
     }
+
+    public static void eachWithIndex<A>
+    (this IEnumerable<A> enumerable, Act<A, uint> action) {
+      var index = 0u;
+      foreach (var a in enumerable) {
+        action(a, index);
+        index++;
+      }
+    }
   }
 }
