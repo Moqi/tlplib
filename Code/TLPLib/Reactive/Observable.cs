@@ -12,7 +12,6 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     ISubscription subscribe(Act<A> onChange);
     IObservable<B> map<B>(Fn<A, B> mapper);
     IObservable<B> flatMap<B>(Fn<A, IEnumerable<B>> mapper);
-    IObservable<B> flatMap<B>(Fn<A, IObservable<B>> mapper);
     IObservable<A> filter(Fn<A, bool> predicate);
     /**
      * Buffers values into a linked list of specified size. Oldest values 
@@ -178,15 +177,6 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public O flatMapImpl<B, O>
     (Fn<A, IEnumerable<B>> mapper, ObserverBuilder<B, O> builder) {
       return builder(obs => subscribe(val => mapper(val).each(obs.push)));
-    }
-
-    public IObservable<B> flatMap<B>(Fn<A, IObservable<B>> mapper) {
-      return flatMapImpl(mapper, builder<B>());
-    }
-
-    public O flatMapImpl<B, O>
-    (Fn<A, IObservable<B>> mapper, ObserverBuilder<B, O> builder) {
-      return builder(obs => subscribe(val => mapper(val).subscribe(obs.push)));
     }
 
     public IObservable<A> filter(Fn<A, bool> predicate) {
