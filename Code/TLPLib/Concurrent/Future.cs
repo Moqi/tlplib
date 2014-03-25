@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
@@ -16,11 +19,42 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     void complete(A v);
   }
   
-  public static class CoFuture {
+  public static class Future {
     public static Future<A> successful<A>(A value) {
       var f = new FutureImpl<A>();
       f.complete(value);
       return f;
+    }
+
+    /**
+     * Converts enumerable of futures into future of enumerable that is completed
+     * when all futures complete.
+     **/
+    public static Future<A[]> sequence<A>(
+      this IEnumerable<Future<A>> enumerable
+    ) {
+      var completed = 0u;
+      var sourceFutures = enumerable.ToArray();
+      var results = new A[sourceFutures.Length];
+      var future = new FutureImpl<A[]>();
+      sourceFutures.eachWithIndex((f, idx) => f.onComplete(value => {
+        results[idx] = value;
+        completed++;
+        if (completed == results.Length) future.complete(results);
+      }));
+      return future;
+    }
+
+    public static Future<Unit> fromCoroutine(IEnumerator enumerator) {
+      var f = new FutureImpl<Unit>();
+      ASync.StartCoroutine(coroutineEnum(f, enumerator));
+      return f;
+    }
+
+    private static IEnumerator coroutineEnum
+    (Promise<Unit> p, IEnumerator enumerator) {
+      yield return ASync.StartCoroutine(enumerator);
+      p.complete(Unit.instance);
     }
   }
 
