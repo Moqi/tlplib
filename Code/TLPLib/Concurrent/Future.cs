@@ -16,7 +16,10 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
 
   /** Couroutine based promise **/
   public interface Promise<in A> {
+    /** Complete with value, exception if already completed. **/
     void complete(A v);
+    /** Complete with value, return false if already completed. **/
+    bool tryComplete(A v);
   }
   
   public static class Future {
@@ -45,6 +48,16 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return future;
     }
 
+    /**
+     * Returns result from the first future that completes.
+     **/
+    public static Future<A> firstOf<A>
+    (this IEnumerable<Future<A>> enumerable) {
+      var future = new FutureImpl<A>();
+      enumerable.each(f => f.onComplete(v => future.tryComplete(v)));
+      return future;
+    }
+
     public static Future<Unit> fromCoroutine(IEnumerator enumerator) {
       var f = new FutureImpl<Unit>();
       ASync.StartCoroutine(coroutineEnum(f, enumerator));
@@ -65,11 +78,15 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     public Option<A> value { get { return _value; } }
 
     public void complete(A v) {
-      value.voidFold(
-        () => _value = F.some(v), 
-        _ => { throw new Exception("Promise is already completed with " + _); }
-      );
+      if (! tryComplete(v)) 
+        throw new Exception("Promise is already completed with " + value.get);
+    }
+
+    public bool tryComplete(A v) {
+      var ret = value.
+        fold(() => { _value = F.some(v); return true; }, _ => false);
       completed(v);
+      return ret;
     }
 
     public Future<B> map<B>(Fn<A, B> mapper) {
