@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -215,6 +216,22 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         action(a, index);
         index++;
       }
+    }
+
+    /**
+     * Returns tuple of linked lists where first one contains all the items
+     * that matched the predicate and second - those who didn't.
+     **/
+    public static Tpl<LinkedList<A>, LinkedList<A>> partition<A>(
+      this IEnumerable<A> enumerable, Fn<A, bool> predicate
+    ) {
+      var trues = new LinkedList<A>();
+      var falses = new LinkedList<A>();
+      foreach (var a in enumerable) {
+        if (predicate(a)) trues.AddLast(a);
+        else falses.AddLast(a);
+      }
+      return F.t(trues, falses);
     }
   }
 }
