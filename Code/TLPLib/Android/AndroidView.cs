@@ -1,4 +1,5 @@
 ﻿#if UNITY_ANDROID
+using com.tinylabproductions.TLPLib.Concurrent;
 using System;
 using UnityEngine;
 
@@ -16,12 +17,12 @@ namespace com.tinylabproductions.TLPLib.Android {
       view = new AndroidJavaClass("android.view.View");
     }
 
-    public static CoFuture<bool> hideNavigationBar() {
-      if (Application.isEditor) return CoFuture.successful(false);
+    public static Future<bool> hideNavigationBar() {
+      if (Application.isEditor) return Future.successful(false);
 
       Debug.Log("Trying to hide android navigation bar.");
       var activity = AndroidActivity.current;
-      var promise = new CoPromiseImpl<bool>();
+      var future = new FutureImpl<bool>();
       activity.Call("runOnUiThread", new AndroidJavaRunnable(() => {
         try {
           int flags;
@@ -45,17 +46,17 @@ namespace com.tinylabproductions.TLPLib.Android {
             Call<AndroidJavaObject>("getDecorView");
           decor.Call("setSystemUiVisibility", flags);
           Debug.Log("Hiding android navigation bar succeeded.");
-          promise.complete(true);
+          future.complete(true);
         }
         catch (Exception e2) {
           Debug.LogWarning(
             "Error while trying to hide navigation bar on android: " + e2
           );
-          promise.complete(false);
+          future.complete(false);
         }
       }));
 
-      return promise.future;
+      return future;
     }
   }
 }
