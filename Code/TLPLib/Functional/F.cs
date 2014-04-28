@@ -12,6 +12,12 @@ namespace com.tinylabproductions.TLPLib.Functional {
     public static Option<A> some<A>(A value) { return new Some<A>(value); }
     public static Option<A> none<A>() { return None<A>.instance; }
 
+    public static Either<A, B> left<A, B>(A value) { return new Left<A, B>(value); }
+    public static Either<A, B> right<A, B>(B value) { return new Right<A, B>(value); }
+
+    public static Try<A> scs<A>(A value) { return new Success<A>(value); }
+    public static Try<A> err<A>(Exception ex) { return new Error<A>(ex); }
+
     public static List<A> list<A>(params A[] args) {
       return new List<A>(args);
     }

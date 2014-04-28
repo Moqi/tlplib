@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -59,6 +60,27 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       var temp = list[aIndex];
       list[aIndex] = list[bIndex];
       list[bIndex] = temp;
+    }
+
+    public static Option<A> headOpt<A>(this IList<A> list) {
+      return list.Count == 0 ? F.none<A>() : F.some(list[0]);
+    }
+
+    public static Option<A> lastOpt<A>(this IList<A> list) {
+      return list.Count == 0 ? F.none<A>() : F.some(list[list.Count - 1]);
+    }
+
+    public static IEnumerable<A> dropRight<A>(this IList<A> list, int count) {
+      var end = list.Count - count;
+      var idx = 0;
+      foreach (var item in list) {
+        if (idx < end) yield return item;
+        idx++;
+      }
+    }
+
+    public static string mkString<A>(this IList<A> list, string separator) {
+      return string.Join(separator, list.Select(_ => _.ToString()).ToArray());
     }
   }
 }

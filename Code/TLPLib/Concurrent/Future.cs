@@ -8,24 +8,30 @@ using com.tinylabproductions.TLPLib.Functional;
 namespace com.tinylabproductions.TLPLib.Concurrent {
   /** Coroutine based future **/
   public interface Future<out A> {
-    Option<A> value { get; }
+    Option<Try<A>> value { get; }
     Future<B> map<B>(Fn<A, B> mapper);
     Future<B> flatMap<B>(Fn<A, Future<B>> mapper);
-    Future<A> onComplete(Act<A> action);
+    Future<A> onComplete(Act<Try<A>> action);
+    Future<A> onSuccess(Act<A> action);
+    Future<A> onFailure(Act<Exception> action);
   }
 
   /** Couroutine based promise **/
   public interface Promise<in A> {
     /** Complete with value, exception if already completed. **/
-    void complete(A v);
+    void complete(Try<A> v);
+    void completeSuccess(A v);
+    void completeError(Exception ex);
     /** Complete with value, return false if already completed. **/
-    bool tryComplete(A v);
+    bool tryComplete(Try<A> v);
+    bool tryCompleteSuccess(A v);
+    bool tryCompleteError(Exception ex);
   }
   
   public static class Future {
     public static Future<A> successful<A>(A value) {
       var f = new FutureImpl<A>();
-      f.complete(value);
+      f.completeSuccess(value);
       return f;
     }
 
@@ -40,11 +46,14 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       var sourceFutures = enumerable.ToArray();
       var results = new A[sourceFutures.Length];
       var future = new FutureImpl<A[]>();
-      sourceFutures.eachWithIndex((f, idx) => f.onComplete(value => {
-        results[idx] = value;
-        completed++;
-        if (completed == results.Length) future.complete(results);
-      }));
+      sourceFutures.eachWithIndex((f, idx) => {
+        f.onSuccess(value => {
+          results[idx] = value;
+          completed++;
+          if (completed == results.Length) future.tryCompleteSuccess(results);
+        });
+        f.onFailure(future.completeError);
+      });
       return future;
     }
 
@@ -67,46 +76,78 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     private static IEnumerator coroutineEnum
     (Promise<Unit> p, IEnumerator enumerator) {
       yield return ASync.StartCoroutine(enumerator);
-      p.complete(Unit.instance);
+      p.completeSuccess(Unit.instance);
     }
   }
 
   class FutureImpl<A> : Future<A>, Promise<A> {
-    private readonly IList<Act<A>> listeners = new List<Act<A>>();
+    private readonly IList<Act<Try<A>>> listeners = new List<Act<Try<A>>>();
 
-    private Option<A> _value = F.none<A>();
-    public Option<A> value { get { return _value; } }
+    private Option<Try<A>> _value = F.none<Try<A>>();
+    public Option<Try<A>> value { get { return _value; } }
 
-    public void complete(A v) {
-      if (! tryComplete(v)) 
+    public void complete(Try<A> v) {
+      if (! tryComplete(v))
         throw new Exception("Promise is already completed with " + value.get);
     }
 
-    public bool tryComplete(A v) {
+    public void completeSuccess(A v) { complete(F.scs(v)); }
+
+    public void completeError(Exception ex) { complete(F.err<A>(ex)); }
+
+    public bool tryComplete(Try<A> v) {
       var ret = value.
         fold(() => { _value = F.some(v); return true; }, _ => false);
       completed(v);
       return ret;
     }
 
+    public bool tryCompleteSuccess(A v) {
+      return tryComplete(F.scs(v));
+    }
+
+    public bool tryCompleteError(Exception ex) {
+      return tryComplete(F.err<A>(ex));
+    }
+
     public Future<B> map<B>(Fn<A, B> mapper) {
       var p = new FutureImpl<B>();
-      onComplete(v => p.complete(mapper(v)));
+      onComplete(t => t.voidFold(
+        v => {
+          try { p.completeSuccess(mapper(v)); }
+          catch (Exception e) { p.completeError(e); }
+        },
+        p.completeError
+      ));
       return p;
     }
 
     public Future<B> flatMap<B>(Fn<A, Future<B>> mapper) {
       var p = new FutureImpl<B>();
-      onComplete(v => mapper(v).onComplete(p.complete));
+      onComplete(t => t.voidFold(
+        v => {
+          try { mapper(v).onComplete(p.complete); }
+          catch (Exception e) { p.completeError(e); }
+        },
+        p.completeError
+      ));
       return p;
     }
 
-    public Future<A> onComplete(Act<A> action) {
+    public Future<A> onComplete(Act<Try<A>> action) {
       value.voidFold(() => listeners.Add(action), action);
       return this;
     }
 
-    public void completed(A v) {
+    public Future<A> onSuccess(Act<A> action) {
+      return onComplete(t => t.value.each(action));
+    }
+
+    public Future<A> onFailure(Act<Exception> action) {
+      return onComplete(t => t.exception.each(action));
+    }
+
+    public void completed(Try<A> v) {
       foreach (var listener in listeners) listener(v);
       listeners.Clear();
     }

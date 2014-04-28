@@ -40,6 +40,10 @@ public static class Option {
   ) where B : A {
     return opt.isDefined ? opt : (Option<A>) other();
   }
+
+  public static A orNull<A>(this Option<A> opt) where A : class {
+    return opt.fold(() => null, _ => _);
+  }
 }
 
 public interface Option<out A> {
