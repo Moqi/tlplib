@@ -86,6 +86,18 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       yield return ASync.StartCoroutine(enumerator);
       p.completeSuccess(Unit.instance);
     }
+
+    public class FinishedCancellationToken : CancellationToken {
+      private static FinishedCancellationToken _instance;
+
+      public static FinishedCancellationToken instance { get {
+        return _instance ?? (_instance = new FinishedCancellationToken());
+      } }
+
+      private FinishedCancellationToken() {}
+
+      public bool cancel() { return false; }
+    }
   }
 
   class FutureImpl<A> : Future<A>, Promise<A> {
@@ -155,8 +167,13 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     }
 
     public CancellationToken onComplete(Act<Try<A>> action) {
-      value.voidFold(() => listeners.Add(action), action);
-      return new CancellationTokenImpl(action, this);
+      return value.fold<CancellationToken>(() => {
+        listeners.Add(action);
+        return new CancellationTokenImpl(action, this);
+      }, v => {
+        action(v);
+        return Future.FinishedCancellationToken.instance;
+      });
     }
 
     public CancellationToken onSuccess(Act<A> action) {
