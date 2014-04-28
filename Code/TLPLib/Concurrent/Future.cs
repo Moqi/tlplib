@@ -11,9 +11,17 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     Option<Try<A>> value { get; }
     Future<B> map<B>(Fn<A, B> mapper);
     Future<B> flatMap<B>(Fn<A, Future<B>> mapper);
-    Future<A> onComplete(Act<Try<A>> action);
-    Future<A> onSuccess(Act<A> action);
-    Future<A> onFailure(Act<Exception> action);
+    CancellationToken onComplete(Act<Try<A>> action);
+    CancellationToken onSuccess(Act<A> action);
+    CancellationToken onFailure(Act<Exception> action);
+  }
+
+  /**
+   * You can use this token to cancel a callback before future is completed.
+   **/
+  public interface CancellationToken {
+    // Returns true if cancelled or false if already cancelled before.
+    bool cancel();
   }
 
   /** Couroutine based promise **/
@@ -81,6 +89,18 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
   }
 
   class FutureImpl<A> : Future<A>, Promise<A> {
+    public class CancellationTokenImpl : CancellationToken {
+      private readonly Act<Try<A>> action;
+      private readonly FutureImpl<A> future;
+
+      public CancellationTokenImpl(Act<Try<A>> action, FutureImpl<A> future) {
+        this.action = action;
+        this.future = future;
+      }
+
+      public bool cancel() { return future.cancel(action); }
+    }
+
     private readonly IList<Act<Try<A>>> listeners = new List<Act<Try<A>>>();
 
     private Option<Try<A>> _value = F.none<Try<A>>();
@@ -134,22 +154,26 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return p;
     }
 
-    public Future<A> onComplete(Act<Try<A>> action) {
+    public CancellationToken onComplete(Act<Try<A>> action) {
       value.voidFold(() => listeners.Add(action), action);
-      return this;
+      return new CancellationTokenImpl(action, this);
     }
 
-    public Future<A> onSuccess(Act<A> action) {
+    public CancellationToken onSuccess(Act<A> action) {
       return onComplete(t => t.value.each(action));
     }
 
-    public Future<A> onFailure(Act<Exception> action) {
+    public CancellationToken onFailure(Act<Exception> action) {
       return onComplete(t => t.exception.each(action));
     }
 
     public void completed(Try<A> v) {
       foreach (var listener in listeners) listener(v);
       listeners.Clear();
+    }
+
+    private bool cancel(Act<Try<A>> action) {
+      return listeners.Remove(action);
     }
   }
 }
