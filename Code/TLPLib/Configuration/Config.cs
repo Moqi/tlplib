@@ -23,7 +23,8 @@ namespace com.tinylabproductions.TLPLib.Configuration {
    * the configuration shouldn't know whether you're fetching values with
    * subconfig or not to correctly write the configuration.
    **/
-  class Config {
+
+  public class Config {
     public static Future<Config> apply(string url) {
       return ASync.StartCoroutine<JSONClass>(
         p => getConfiguration(url, p)
