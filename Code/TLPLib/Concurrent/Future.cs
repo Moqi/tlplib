@@ -20,6 +20,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
    * You can use this token to cancel a callback before future is completed.
    **/
   public interface CancellationToken {
+    bool isCancelled { get; }
     // Returns true if cancelled or false if already cancelled before.
     bool cancel();
   }
@@ -96,6 +97,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
 
       private FinishedCancellationToken() {}
 
+      public bool isCancelled { get { return true; } }
       public bool cancel() { return false; }
     }
   }
@@ -104,13 +106,18 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     public class CancellationTokenImpl : CancellationToken {
       private readonly Act<Try<A>> action;
       private readonly FutureImpl<A> future;
+      public bool isCancelled { get; private set; } 
 
       public CancellationTokenImpl(Act<Try<A>> action, FutureImpl<A> future) {
         this.action = action;
         this.future = future;
+        isCancelled = false;
       }
 
-      public bool cancel() { return future.cancel(action); }
+      public bool cancel() {
+        isCancelled = true;
+        return future.cancel(action);
+      }
     }
 
     private readonly IList<Act<Try<A>>> listeners = new List<Act<Try<A>>>();
