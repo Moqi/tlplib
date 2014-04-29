@@ -78,9 +78,5 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         idx++;
       }
     }
-
-    public static string mkString<A>(this IList<A> list, string separator) {
-      return string.Join(separator, list.Select(_ => _.ToString()).ToArray());
-    }
   }
 }

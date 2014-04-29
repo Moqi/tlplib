@@ -175,7 +175,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public Future<A> toFuture() {
       var f = new FutureImpl<A>();
-      var subscription = subscribe(f.complete);
+      var subscription = subscribe(f.completeSuccess);
       f.onComplete(_ => subscription.unsubscribe());
       return f;
     }

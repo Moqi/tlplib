@@ -5,13 +5,13 @@ namespace com.tinylabproductions.TLPLib.Functional {
   * Hack to not lose covariance of Either.
   **/
   public static class Either {
-    public static Either<A, B> flatMapLeft<A, B>(
-      this Either<A, B> either, Fn<A, Either<A, B>> mapper
-    ) { return either.fold(mapper, _ => either); }
+    public static Either<C, B> flatMapLeft<A, B, C>(
+      this Either<A, B> either, Fn<A, Either<C, B>> mapper
+    ) { return either.fold(mapper, F.right<C, B>); }
 
-    public static Either<A, B> flatMapRight<A, B>(
-      this Either<A, B> either, Fn<B, Either<A, B>> mapper
-    ) { return either.fold(_ => either, mapper); }
+    public static Either<A, C> flatMapRight<A, B, C>(
+      this Either<A, B> either, Fn<B, Either<A, C>> mapper
+    ) { return either.fold(F.left<A, C>, mapper); }
   }
 
   public interface Either<out A, out B> {

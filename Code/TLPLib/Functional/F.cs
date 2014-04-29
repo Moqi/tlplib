@@ -30,6 +30,13 @@ namespace com.tinylabproductions.TLPLib.Functional {
       return new LazyImpl<A>(func);
     }
 
+    public static Act andThen(this Act first, Act second) {
+      return () => {
+        first();
+        second();
+      };
+    }
+
 #region Generated code
     public static Tpl<P1, P2> t<P1, P2>(P1 p1, P2 p2) { return new TplImpl<P1, P2>(p1, p2); }
     public static Tpl<P1, P2> ht<P1, P2>(P1 p1, P2 p2) { return new HTplImpl<P1, P2>(p1, p2); }

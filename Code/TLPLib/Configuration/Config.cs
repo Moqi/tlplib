@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Formats.SimpleJSON;
@@ -33,6 +35,13 @@ namespace com.tinylabproductions.TLPLib.Configuration {
 
     // Implementation
 
+    private delegate Option<A> Parser<out A>(JSONNode node);
+
+    private static readonly Parser<string> stringParser = n => F.some(n.Value);
+    private static readonly Parser<int> intParser = n => n.Value.parseInt();
+    private static readonly Parser<float> floatParser = n => n.Value.parseFloat();
+    private static readonly Parser<bool> boolParser = n => n.Value.parseBool();
+
     public readonly string url;
     private readonly JSONClass configuration;
 
@@ -41,83 +50,156 @@ namespace com.tinylabproductions.TLPLib.Configuration {
       this.configuration = configuration;
     }
 
+    #region getters
+
     public string getString(string key) { return tryString(key).getOrThrow; }
+    public IList<string> getStringList(string key) 
+      { return tryStringList(key).getOrThrow; }
     public int getInt(string key) { return tryInt(key).getOrThrow; }
+    public IList<int> getIntList(string key) 
+      { return tryIntList(key).getOrThrow; }
     public float getFloat(string key) { return tryFloat(key).getOrThrow; }
+    public IList<float> getFloatList(string key) { return tryFloatList(key).getOrThrow; }
     public bool getBool(string key) { return tryBool(key).getOrThrow; }
+    public IList<bool> getBoolList(string key) { return tryBoolList(key).getOrThrow; }
     public Config getSubConfig(string key) 
       { return trySubConfig(key).getOrThrow; }
 
+    #endregion
+
+    #region opt getters
+
     public Option<string> optString(string key) {
-      return get(key, n => F.some(n.Value)).
-        fold(_ => F.none<string>(), F.some);
+      return get(key, stringParser).fold(_ => F.none<string>(), F.some);
+    }
+
+    public Option<IList<string>> optStringList(string key) {
+      return getList(key, stringParser).
+        fold(_ => F.none<IList<string>>(), F.some);
     }
 
     public Option<int> optInt(string key) {
-      return get(key, n => n.Value.parseInt()).
-        fold(_ => F.none<int>(), F.some);
+      return get(key, intParser).fold(_ => F.none<int>(), F.some);
+    }
+
+    public Option<IList<int>> optIntList(string key) {
+      return getList(key, intParser).
+        fold(_ => F.none<IList<int>>(), F.some);
     }
 
     public Option<float> optFloat(string key) {
-      return get(key, n => n.Value.parseFloat()).
-        fold(_ => F.none<float>(), F.some);
+      return get(key, floatParser).fold(_ => F.none<float>(), F.some);
+    }
+
+    public Option<IList<float>> optFloatList(string key) {
+      return getList(key, floatParser).
+        fold(_ => F.none<IList<float>>(), F.some);
     }
 
     public Option<bool> optBool(string key) {
-      return get(key, n => n.Value.parseBool()).
-        fold(_ => F.none<bool>(), F.some);
+      return get(key, boolParser).fold(_ => F.none<bool>(), F.some);
+    }
+
+    public Option<IList<bool>> optBoolList(string key) {
+      return getList(key, boolParser).
+        fold(_ => F.none<IList<bool>>(), F.some);
     }
 
     public Option<Config> optSubConfig(string key) {
       return fetchSubConfig(key).fold(_ => F.none<Config>(), F.some);
     }
 
+    #endregion
+
+    #region try getters
+
     public Try<string> tryString(string key) {
-      return get(key, n => F.some(n.Value)).fold(tryArgEx<string>, F.scs);
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
+      return get(key, stringParser).fold<Try<string>>(tryArgEx<string>, F.scs);
+    }
+
+    public Try<IList<string>> tryStringList(string key) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
+      return getList(key, stringParser).
+        fold<Try<IList<string>>>(tryArgEx<IList<string>>, F.scs);
     }
 
     public Try<int> tryInt(string key) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
       return get(key, n => n.Value.parseInt()).
-        fold(tryArgEx<int>, F.scs);
+        fold<Try<int>>(tryArgEx<int>, F.scs);
+    }
+
+    public Try<IList<int>> tryIntList(string key) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
+      return getList(key, intParser).
+        fold<Try<IList<int>>>(tryArgEx<IList<int>>, F.scs);
     }
 
     public Try<float> tryFloat(string key) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
       return get(key, n => n.Value.parseFloat()).
-        fold(tryArgEx<float>, F.scs);
+        fold<Try<float>>(tryArgEx<float>, F.scs);
+    }
+
+    public Try<IList<float>> tryFloatList(string key) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
+      return getList(key, floatParser).
+        fold<Try<IList<float>>>(tryArgEx<IList<float>>, F.scs);
     }
 
     public Try<bool> tryBool(string key) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
       return get(key, n => n.Value.parseBool()).
-        fold(tryArgEx<bool>, F.scs);
+        fold<Try<bool>>(tryArgEx<bool>, F.scs);
+    }
+
+    public Try<IList<bool>> tryBoolList(string key) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
+      return getList(key, boolParser).
+        fold<Try<IList<bool>>>(tryArgEx<IList<bool>>, F.scs);
     }
 
     public Try<Config> trySubConfig(string key) {
-      return fetchSubConfig(key).fold(tryArgEx<Config>, F.scs);
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
+      return fetchSubConfig(key).
+        fold<Try<Config>>(tryArgEx<Config>, F.scs);
     }
 
     private static Try<A> tryArgEx<A>(string msg) {
       return F.err<A>(new ArgumentException(msg));
     }
 
+    #endregion
+
     private Either<string, Config> fetchSubConfig(string key) {
       return getConcrete(split(key), n => F.opt(n.AsObject)).
         mapRight(n => new Config(url, n));
     }
 
-    private Either<string, A> get<A>(string key, Fn<JSONNode, Option<A>> getter) {
+    private Either<string, A> get<A>(string key, Parser<A> parser) {
       var parts = split(key);
 
       var fullPlatform = Platform.fullName;
       var platform = Platform.name;
 
       // Try getting platform + subplatform, then platform, then generic key.
-      var current = getConcrete(injectPlatform(parts, fullPlatform), getter);
+      var current = getConcrete(injectPlatform(parts, fullPlatform), parser);
       current = current.flatMapLeft(_ =>
         // Do not access again if fullPlatform == platform.
         fullPlatform == platform 
-          ? current : getConcrete(injectPlatform(parts, platform), getter)
+          ? current : getConcrete(injectPlatform(parts, platform), parser)
       );
-      current = current.flatMapLeft(__ => getConcrete(parts, getter));
+      current = current.flatMapLeft(__ => getConcrete(parts, parser));
       return current;
     }
 
@@ -133,8 +215,31 @@ namespace com.tinylabproductions.TLPLib.Configuration {
       return output;
     }
 
+    private Either<string, IList<A>> getList<A>(
+      string key, Parser<A> parser
+    ) {
+      return getConcrete(split(key), n => F.some(n.AsArray)).
+        flatMapRight(arr => arr.Childs.ZipWithIndex().Aggregate(
+          F.right<string, IList<A>>(new List<A>(arr.Count)),
+          // Mono compiler bug
+          (state, t) => parser(t._1).fold<Either<string, IList<A>>>(
+            () => F.left<string, IList<A>>(string.Format(
+              "Cannot convert '{0}'[{1}] to {2}: {3}",
+              key, t._2, typeof(A), t._1
+            )),
+            // ReSharper disable once RedundantTypeArgumentsOfMethod
+            // Mono compiler bug
+            item => state.mapRight<IList<A>>(list => {
+              list.Add(item);
+              return list;
+            })
+          )
+        )
+      );
+    }
+
     private Either<string, A> getConcrete<A>(
-      string[] parts, Fn<JSONNode, Option<A>> getter
+      IList<string> parts, Parser<A> parser
     ) {
       var current = configuration;
 
@@ -153,7 +258,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
       }
 
       var lastPart = parts.lastOpt().get;
-      var converted = getter(current[lastPart]);
+      var converted = parser(current[lastPart]);
       return converted.fold(() => F.left<string, A>(string.Format(
         "Cannot convert part '{0}' from key '{1}' to '{2}'. Contents: {3}",
         lastPart, parts.mkString("."), typeof(A), current

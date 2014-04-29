@@ -1,4 +1,5 @@
-﻿#if UNITY_ANDROID
+﻿using com.tinylabproductions.TLPLib.Functional;
+#if UNITY_ANDROID
 using com.tinylabproductions.TLPLib.Concurrent;
 using System;
 using UnityEngine;
@@ -46,13 +47,13 @@ namespace com.tinylabproductions.TLPLib.Android {
             Call<AndroidJavaObject>("getDecorView");
           decor.Call("setSystemUiVisibility", flags);
           Debug.Log("Hiding android navigation bar succeeded.");
-          future.complete(true);
+          future.completeSuccess(true);
         }
         catch (Exception e2) {
           Debug.LogWarning(
             "Error while trying to hide navigation bar on android: " + e2
           );
-          future.complete(false);
+          future.completeSuccess(false);
         }
       }));
 

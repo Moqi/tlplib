@@ -44,6 +44,10 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return f;
     }
 
+    public static Future<A> unfullfiled<A>() {
+      return new FutureImpl<A>();
+    }
+
     /**
      * Converts enumerable of futures into future of enumerable that is completed
      * when all futures complete.
