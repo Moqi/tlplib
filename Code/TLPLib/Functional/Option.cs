@@ -42,7 +42,9 @@ public static class Option {
   }
 
   public static A orNull<A>(this Option<A> opt) where A : class {
-    return opt.fold(() => null, _ => _);
+    // ReSharper disable once RedundantTypeArgumentsOfMethod
+    // Mono compiler bug
+    return opt.fold<A>(() => null, _ => _);
   }
 }
 
