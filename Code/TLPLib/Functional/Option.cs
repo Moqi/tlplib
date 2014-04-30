@@ -63,8 +63,8 @@ public interface Option<out A> {
   Option<Tpl<A, B>> zip<B>(Option<B> opt);
 }
 
-public struct Some<A> : Option<A> {
-  public Some(A value) : this() { get = value; }
+public class Some<A> : Option<A> {
+  public Some(A value) { get = value; }
 
   public A getOrThrow(Fn<Exception> orElse) { return get; }
 

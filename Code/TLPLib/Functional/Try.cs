@@ -23,6 +23,10 @@ namespace com.tinylabproductions.TLPLib.Functional {
     }
 
     public A getOrThrow { get { return _value; } }
+
+    public override string ToString() {
+      return string.Format("Success({0})", _value);
+    }
   }
 
   public class Error<A> : Try<A> {
@@ -40,5 +44,9 @@ namespace com.tinylabproductions.TLPLib.Functional {
     }
 
     public A getOrThrow { get { throw _exception; } }
+
+    public override string ToString() {
+      return string.Format("Error({0})", _exception);
+    }
   }
 }

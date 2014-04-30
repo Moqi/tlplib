@@ -7,7 +7,8 @@ using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
   /** Coroutine based future **/
-  public interface Future<out A> {
+  // If you make it covariant Unity mono runtime crashes randomly.
+  public interface Future<A> {
     Option<Try<A>> value { get; }
     Future<B> map<B>(Fn<A, B> mapper);
     Future<B> flatMap<B>(Fn<A, Future<B>> mapper);

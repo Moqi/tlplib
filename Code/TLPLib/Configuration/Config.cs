@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Formats.SimpleJSON;
@@ -30,7 +29,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     public static Future<Config> apply(string url) {
       return ASync.StartCoroutine<JSONClass>(
         p => getConfiguration(url, p)
-      ).map(data => new Config(url, data));
+      ).map(data => new Config(url, "", data));
     }
 
     // Implementation
@@ -42,11 +41,12 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     private static readonly Parser<float> floatParser = n => n.Value.parseFloat();
     private static readonly Parser<bool> boolParser = n => n.Value.parseBool();
 
-    public readonly string url;
+    public readonly string url, scope;
     private readonly JSONClass configuration;
 
-    private Config(string url, JSONClass configuration) {
+    public Config(string url, string scope, JSONClass configuration) {
       this.url = url;
+      this.scope = scope;
       this.configuration = configuration;
     }
 
@@ -183,7 +183,9 @@ namespace com.tinylabproductions.TLPLib.Configuration {
 
     private Either<string, Config> fetchSubConfig(string key) {
       return getConcrete(split(key), n => F.opt(n.AsObject)).
-        mapRight(n => new Config(url, n));
+        mapRight(n => new Config(
+          url, scope == "" ? key : scope + "." + key, n
+        ));
     }
 
     private Either<string, A> get<A>(string key, Parser<A> parser) {
@@ -211,31 +213,26 @@ namespace com.tinylabproductions.TLPLib.Configuration {
       var output = new string[parts.Length + 1];
       Array.Copy(parts, output, parts.Length - 1);
       output[parts.Length - 1] = platform;
-      output[parts.Length] = parts[parts.Length];
+      output[parts.Length] = parts[parts.Length - 1];
       return output;
     }
 
     private Either<string, IList<A>> getList<A>(
       string key, Parser<A> parser
     ) {
-      return getConcrete(split(key), n => F.some(n.AsArray)).
-        flatMapRight(arr => arr.Childs.ZipWithIndex().Aggregate(
-          F.right<string, IList<A>>(new List<A>(arr.Count)),
-          // Mono compiler bug
-          (state, t) => parser(t._1).fold<Either<string, IList<A>>>(
-            () => F.left<string, IList<A>>(string.Format(
-              "Cannot convert '{0}'[{1}] to {2}: {3}",
-              key, t._2, typeof(A), t._1
-            )),
-            // ReSharper disable once RedundantTypeArgumentsOfMethod
-            // Mono compiler bug
-            item => state.mapRight<IList<A>>(list => {
-              list.Add(item);
-              return list;
-            })
-          )
-        )
-      );
+      return getConcrete(split(key), n => F.some(n.AsArray)).flatMapRight(arr => {
+        var list = new List<A>(arr.Count);
+        for (var idx = 0; idx < arr.Count; idx++) {
+          var node = arr[idx];
+          var parsed = parser(node);
+          if (parsed.isDefined) list.Add(parsed.get);
+          else return F.left<string, IList<A>>(string.Format(
+            "Cannot convert '{0}'[{1}] to {2}: {3}",
+            key, idx, typeof(A), node
+          ));
+        }
+        return F.right<string, IList<A>>(list);
+      });
     }
 
     private Either<string, A> getConcrete<A>(
@@ -263,6 +260,12 @@ namespace com.tinylabproductions.TLPLib.Configuration {
         "Cannot convert part '{0}' from key '{1}' to '{2}'. Contents: {3}",
         lastPart, parts.mkString("."), typeof(A), current
       )), F.right<string, A>);
+    }
+
+    public override string ToString() {
+      return string.Format(
+        "Config(url: {0}, scope: \"{1}\", data: {2})", url, scope, configuration
+      );
     }
 
     private static IEnumerator getConfiguration(
