@@ -131,8 +131,11 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     public Option<Try<A>> value { get { return _value; } }
 
     public void complete(Try<A> v) {
-      if (! tryComplete(v))
-        throw new Exception("Promise is already completed with " + value.get);
+      if (! tryComplete(v)) throw new IllegalStateException(string.Format(
+        "Try to complete future with \"{0}\" but it is already " +
+        "completed with \"{1}\"",
+        v, value.get
+      ));
     }
 
     public void completeSuccess(A v) { complete(F.scs(v)); }
