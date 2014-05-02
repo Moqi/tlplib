@@ -19,5 +19,15 @@ namespace com.tinylabproductions.TLPLib.Utilities {
       var absTopEnd = sh * topEnd;
       return new Rect(absLeft, absTop, absLeftEnd - absLeft, absTopEnd - absTop);
     }
+
+    public static Rect with(
+      this Rect rect, float? left = null, float? top = null,
+      float? width = null, float? height = null
+    ) {
+      return new Rect(
+        left ?? rect.xMin, top ?? rect.yMin,
+        width ?? rect.width, height ?? rect.height
+      );
+    }
   }
 }
