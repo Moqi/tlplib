@@ -48,6 +48,9 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     public static IObservable<Unit> onAppQuit
       { get { return behaviour.onQuit; } }
 
+    public static IObservable<Unit> onGUI
+      { get { return behaviour.onGUI; } }
+
     /**
      * Takes a function that transforms an element into a future and 
      * applies it to all elements in given sequence.
