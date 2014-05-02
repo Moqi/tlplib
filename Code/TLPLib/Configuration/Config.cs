@@ -36,6 +36,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
 
     private delegate Option<A> Parser<out A>(JSONNode node);
 
+    private static readonly Parser<JSONClass> jsClassParser = n => F.opt(n.AsObject);
     private static readonly Parser<string> stringParser = n => F.some(n.Value);
     private static readonly Parser<int> intParser = n => n.Value.parseInt();
     private static readonly Parser<float> floatParser = n => n.Value.parseFloat();
@@ -240,26 +241,30 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     ) {
       var current = configuration;
 
+      var key = parts.mkString(".");
       foreach (var part in parts.dropRight(1)) {
-        var node = current[part];
-        if (node == null) return F.left<string, A>(string.Format(
-          "Cannot find part '{0}' from key '{1}' in {2}",
-          part, parts.mkString("."), current
-        ));
-        var obj = node.AsObject;
-        if (obj == null) return F.left<string, A>(string.Format(
-          "Cannot convert part '{0}' from key '{1}' to js object. Contents: {2}",
-          part, parts.mkString("."), current
-        ));
-        current = obj;
+        var either = fetch(current, key, part, jsClassParser);
+        if (either.isLeft) return either.mapRight(_ => default(A));
+        current = either.rightValue.get;
       }
 
-      var lastPart = parts.lastOpt().get;
-      var converted = parser(current[lastPart]);
-      return converted.fold(() => F.left<string, A>(string.Format(
-        "Cannot convert part '{0}' from key '{1}' to '{2}'. Contents: {3}",
-        lastPart, parts.mkString("."), typeof(A), current
-      )), F.right<string, A>);
+      return fetch(current, key, parts.lastOpt().get, parser);
+    }
+
+    private static Either<string, A> fetch<A>(
+      JSONClass current, string key, string part, Parser<A> parser
+    ) {
+      if (! current.Contains(part)) return F.left<string, A>(string.Format(
+        "Cannot find part '{0}' from key '{1}' in {2}",
+        part, key, current
+      ));
+      var node = current[part];
+      return parser(node).fold(
+        () => F.left<string, A>(string.Format(
+          "Cannot convert part '{0}' from key '{1}' to {2}. Contents: {3}",
+          part, key, typeof(A), current
+        )), F.right<string, A>
+      );
     }
 
     public override string ToString() {
