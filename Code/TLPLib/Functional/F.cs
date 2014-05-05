@@ -47,6 +47,10 @@ namespace com.tinylabproductions.TLPLib.Functional {
       };
     }
 
+    public static Fn<B> andThen<A, B>(this Fn<A> first, Fn<A, B> second) {
+      return () => second(first());
+    }
+
 #region Generated code
     public static Tpl<P1, P2> t<P1, P2>(P1 p1, P2 p2) { return new TplImpl<P1, P2>(p1, p2); }
     public static Tpl<P1, P2> ht<P1, P2>(P1 p1, P2 p2) { return new HTplImpl<P1, P2>(p1, p2); }
