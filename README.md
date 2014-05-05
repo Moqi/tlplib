@@ -12,7 +12,7 @@ It contains various things, including but not limited to:
 * Various data structures.
 * A bunch of extension methods.
 * JSON parser/emmiter.
-* Functional utilities: Option, Lazy, Tuple, Unit, co-variant functions and actions, rudimentary pattern matching.
+* Functional utilities: Option, Lazy, Tuple, Either, Try, Unit, co-variant functions and actions, rudimentary pattern matching.
 * Reactive extensions: observables, reactive references, lists and list views.
 * Tween utilities: mainly to make tweens type-safe.
 * Various other misc utilities.
@@ -23,6 +23,42 @@ Disclaimer
 You are free to use this for your own games. Patches and improvements are welcome. A mention in your game credits would be nice.
 
 If you are considering using this it would be also nice if you contacted me (Artūras Šlajus, arturas@tinylabproductions.com) so we could create a community around this.
+
+Known bugs
+----------
+
+There's a bug in current version of Mono Runtime which Unity 4.3.3f uses. 
+This is not something we can fix and we have reported this bug to Unity.
+
+If you have an interface and a class implementing it you'll want to 
+explicitly specify the interface type for operations working on covariant
+containers.
+
+For example, using Future:
+
+    // TLPAds is an interface.
+    public readonly Future<TLPAds> ads;
+
+    ...
+    
+    // configuration is Future<TLPConfig>, which is a class.
+    // Mono runtime covariance bug. Crashes otherwise.
+    ads = configuration.map<TLPAds>(c => new TlpAdsImpl(c));
+
+Or using Option:
+
+    // Again, IAdNetworkProvider is an interface
+    public static Option<IAdNetworkProvider> apply(TLPConfig config) {
+
+    ...
+
+    // Mono runtime covariance bug. Crashes otherwise.
+    return F.some<IAdNetworkProvider>(new AdMobAdNet(
+      ...
+    ));
+
+Report this crash to Unity when you encounter it - the more people report it,
+the better. Perhaps they'll even fix it! ;)
 
 Using in your project
 ---------------------
