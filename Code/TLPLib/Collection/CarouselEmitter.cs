@@ -44,6 +44,18 @@ namespace com.tinylabproductions.TLPLib.Collection {
       }
     }
 
+    /** Returns an enumerator with N elements skipped. **/
+    public IEnumerator<A> GetEnumerator(int skippedElements) {
+      var enumerator = GetEnumerator();
+      for (var i = 0; i < skippedElements; i++) enumerator.MoveNext();
+      return enumerator;
+    }
+
+    /** Returns an enumerator which has (0, itemCount] elements skipped. **/
+    public IEnumerator<A> GetRandomSkipEnumerator() {
+      return GetEnumerator((new Random()).Next(0, itemCount));
+    }
+
     IEnumerator IEnumerable.GetEnumerator() {
       return GetEnumerator();
     }
