@@ -17,6 +17,8 @@ namespace com.tinylabproductions.TLPLib.Functional {
 
     // Exception thrower which "returns" a value for use in expressions.
     public static A throws<A>(Exception ex) { throw ex; }
+    // Function that can be used to throw exceptions.
+    public static void doThrow(Exception ex) { throw ex; }
 
     public static Try<A> doTry<A>(Fn<A> f) {
       try { return scs(f()); }
