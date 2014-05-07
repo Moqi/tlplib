@@ -18,7 +18,6 @@ namespace com.tinylabproductions.TLPLib.Collection {
    * 
    * This enumerable is endless.
    **/
-
   public class CarouselEmitter<A> : IEnumerable<A> {
     protected readonly Tpl<A, int>[] counts;
 
@@ -27,7 +26,7 @@ namespace com.tinylabproductions.TLPLib.Collection {
     ) {
       this.counts = priorities.Select(a =>
         F.t(a, counts.get(a).getOrElse(() => 0))
-      ).ToArray();
+      ).Where(t => t._2 > 0).ToArray();
     }
 
     public int itemCount { get { return counts.Length; } }
