@@ -65,6 +65,8 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     public IList<bool> getBoolList(string key) { return tryBoolList(key).getOrThrow; }
     public Config getSubConfig(string key) 
       { return trySubConfig(key).getOrThrow; }
+    public IList<Config> getSubConfigList(string key) 
+      { return trySubConfigList(key).getOrThrow; }
 
     #endregion
 
@@ -108,6 +110,10 @@ namespace com.tinylabproductions.TLPLib.Configuration {
 
     public Option<Config> optSubConfig(string key) {
       return fetchSubConfig(key).fold(_ => F.none<Config>(), F.some);
+    }
+
+    public Option<IList<Config>> optSubConfigList(string key) {
+      return fetchSubConfigList(key).fold(_ => F.none<IList<Config>>(), F.some);
     }
 
     #endregion
@@ -176,6 +182,13 @@ namespace com.tinylabproductions.TLPLib.Configuration {
         fold<Try<Config>>(tryArgEx<Config>, F.scs);
     }
 
+    public Try<IList<Config>> trySubConfigList(string key) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug
+      return fetchSubConfigList(key).
+        fold<Try<IList<Config>>>(tryArgEx<IList<Config>>, F.scs);
+    }
+
     private static Try<A> tryArgEx<A>(string msg) {
       return F.err<A>(new ArgumentException(msg));
     }
@@ -183,10 +196,19 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     #endregion
 
     private Either<string, Config> fetchSubConfig(string key) {
-      return getConcrete(split(key), n => F.opt(n.AsObject)).
+      return getConcrete(split(key), jsClassParser).
         mapRight(n => new Config(
           url, scope == "" ? key : scope + "." + key, n
         ));
+    }
+
+    private Either<string, IList<Config>> fetchSubConfigList(string key) {
+      return getList(key, jsClassParser).
+        mapRight(nList => nList.mapWithIndex((n, idx) => new Config(
+          url, string.Format(
+            "{0}[{1}]", scope == "" ? key : scope + "." + key, idx
+          ), n
+        )));
     }
 
     private Either<string, A> get<A>(string key, Parser<A> parser) {
