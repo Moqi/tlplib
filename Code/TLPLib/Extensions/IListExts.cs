@@ -10,6 +10,15 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         ? F.some(list[index]) : F.none<T>();
     }
 
+    public static IList<B> mapWithIndex<A, B>(
+      this IList<A> list, Fn<A, int, B> mapper
+    ) {
+      var nList = new List<B>(list.Count);
+      for (var idx = 0; idx < list.Count; idx++)
+        nList.Add(mapper(list[idx], idx));
+      return nList;
+    }
+
     public static T updateOrAdd<T>(
       this IList<T> list, Fn<T, bool> finder, Fn<T> ifNotFound, Fn<T, T> ifFound
     ) {
