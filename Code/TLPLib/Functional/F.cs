@@ -30,6 +30,10 @@ namespace com.tinylabproductions.TLPLib.Functional {
     public static Try<A> scs<A>(A value) { return new Success<A>(value); }
     public static Try<A> err<A>(Exception ex) { return new Error<A>(ex); }
 
+    public static KeyValuePair<K, V> kv<K, V>(K key, V value) {
+      return new KeyValuePair<K, V>(key, value);
+    }
+
     public static List<A> list<A>(params A[] args) {
       return new List<A>(args);
     }
