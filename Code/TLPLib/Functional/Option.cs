@@ -42,9 +42,31 @@ public static class Option {
   }
 
   public static A orNull<A>(this Option<A> opt) where A : class {
-    // ReSharper disable once RedundantTypeArgumentsOfMethod
-    // Mono compiler bug
-    return opt.fold<A>(() => null, _ => _);
+    return opt.fold(() => null, _ => _);
+  }
+
+  public static Option<B> map<A, B>(this Option<A> opt, Fn<A, B> func) {
+    return opt.isDefined ? F.some(func(opt.get)) : F.none<B>();
+  }
+
+  public static Option<B> flatMap<A, B>(
+    this Option<A> opt, Fn<A, Option<B>> func
+  ) {
+    return opt.isDefined ? func(opt.get) : F.none<B>();
+  }
+
+  public static B fold<A, B>(
+    this Option<A> opt, Fn<B> ifEmpty, Fn<A, B> ifNonEmpty
+  ) {
+    return opt.isDefined ? ifNonEmpty(opt.get) : ifEmpty();
+  }
+
+  public static Option<Tpl<A, B>> zip<A, B>(
+    this Option<A> opt1, Option<B> opt2
+  ) {
+    return opt1.isDefined && opt2.isDefined
+      ? F.some(F.t(opt1.get, opt2.get))
+      : F.none<Tpl<A, B>>();
   }
 }
 
@@ -54,13 +76,9 @@ public interface Option<out A> {
   A get { get; }
   A getOrThrow(Fn<Exception> orElse);
   void each(Act<A> action);
-  Option<A> tap(Act<A> action);
-  Option<B> map<B>(Fn<A, B> func);
-  Option<To> flatMap<To>(Fn<A, Option<To>> func);
-  B fold<B>(Fn<B> ifEmpty, Fn<A, B> ifNonEmpty);
   void voidFold(Action ifEmpty, Act<A> ifNonEmpty);
+  Option<A> tap(Act<A> action);
   Option<A> filter(Fn<A, bool> predicate);
-  Option<Tpl<A, B>> zip<B>(Option<B> opt);
 }
 
 public class Some<A> : Option<A> {
@@ -75,26 +93,12 @@ public class Some<A> : Option<A> {
     return this;
   }
 
-  public Option<B> map<B>(Fn<A, B> func) {
-    return new Some<B>(func(get));
-  }
-
-  public Option<B> flatMap<B>(Fn<A, Option<B>> func) { return func(get); }
-
-  public B fold<B>(Fn<B> ifEmpty, Fn<A, B> ifNonEmpty) {
-    return ifNonEmpty(get);
-  }
-
   public void voidFold(Action ifEmpty, Act<A> ifNonEmpty) {
     ifNonEmpty(get);
   }
 
   public Option<A> filter(Fn<A, bool> predicate) {
     return predicate(get) ? this : F.none<A>();
-  }
-
-  public Option<Tpl<A, B>> zip<B>(Option<B> opt) {
-    return opt.isDefined ? F.some(F.t(get, opt.get)) : F.none<Tpl<A, B>>();
   }
 
   public bool isDefined { get { return true; } }
@@ -118,28 +122,12 @@ public class None<A> : Option<A> {
     return this;
   }
 
-  public Option<B> map<B>(Fn<A, B> func) {
-    return F.none<B>();
-  }
-
-  public Option<B> flatMap<B>(Fn<A, Option<B>> func) {
-    return F.none<B>();
-  }
-
-  public B fold<B>(Fn<B> ifEmpty, Fn<A, B> ifNonEmpty) {
-    return ifEmpty();
-  }
-
   public void voidFold(Action ifEmpty, Act<A> ifNonEmpty) {
     ifEmpty();
   }
 
   public Option<A> filter(Fn<A, bool> predicate) {
     return this;
-  }
-
-  public Option<Tpl<A, B>> zip<B>(Option<B> opt) {
-    return F.none<Tpl<A, B>>();
   }
 
   public bool isDefined { get { return false; } }

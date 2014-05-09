@@ -6,11 +6,37 @@ using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
+  public static class FutureExts {
+    public static Future<B> map<A, B>(this Future<A> future, Fn<A, B> mapper) {
+      var p = new FutureImpl<B>();
+      future.onComplete(t => t.voidFold(
+        v => {
+          try { p.completeSuccess(mapper(v)); }
+          catch (Exception e) { p.completeError(e); }
+        },
+        p.completeError
+      ));
+      return p;
+    }
+
+    public static Future<B> flatMap<A, B>(
+      this Future<A> future, Fn<A, Future<B>> mapper
+    ) {
+      var p = new FutureImpl<B>();
+      future.onComplete(t => t.voidFold(
+        v => {
+          try { mapper(v).onComplete(p.complete); }
+          catch (Exception e) { p.completeError(e); }
+        },
+        p.completeError
+      ));
+      return p;
+    }
+  }
+
   /** Coroutine based future **/
   public interface Future<out A> {
     Option<Try<A>> value { get; }
-    Future<B> map<B>(Fn<A, B> mapper);
-    Future<B> flatMap<B>(Fn<A, Future<B>> mapper);
     CancellationToken onComplete(Act<Try<A>> action);
     CancellationToken onSuccess(Act<A> action);
     CancellationToken onFailure(Act<Exception> action);
@@ -156,32 +182,8 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return tryComplete(F.err<A>(ex));
     }
 
-    public Future<B> map<B>(Fn<A, B> mapper) {
-      var p = new FutureImpl<B>();
-      onComplete(t => t.voidFold(
-        v => {
-          try { p.completeSuccess(mapper(v)); }
-          catch (Exception e) { p.completeError(e); }
-        },
-        p.completeError
-      ));
-      return p;
-    }
-
-    public Future<B> flatMap<B>(Fn<A, Future<B>> mapper) {
-      var p = new FutureImpl<B>();
-      onComplete(t => t.voidFold(
-        v => {
-          try { mapper(v).onComplete(p.complete); }
-          catch (Exception e) { p.completeError(e); }
-        },
-        p.completeError
-      ));
-      return p;
-    }
-
     public CancellationToken onComplete(Act<Try<A>> action) {
-      return value.fold<CancellationToken>(() => {
+      return value.fold<Try<A>, CancellationToken>(() => {
         listeners.Add(action);
         return new CancellationTokenImpl(action, this);
       }, v => {

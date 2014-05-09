@@ -22,9 +22,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static T updateOrAdd<T>(
       this IList<T> list, Fn<T, bool> finder, Fn<T> ifNotFound, Fn<T, T> ifFound
     ) {
-      // ReSharper disable once RedundantTypeArgumentsOfMethod
-      // Mono compiler bug.
-      return list.FindWithIndex(finder).fold<T>(
+      return list.FindWithIndex(finder).fold(
         () => {
           var item = ifNotFound();
           list.Add(item);

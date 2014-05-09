@@ -94,9 +94,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       foreach (var a in enumerable) {
         var b = selector(a);
         if (
-          // ReSharper disable once RedundantTypeArgumentsOfMethod
-          // Mono Compiler bug.
-          bOpt.fold<bool>(() => true, prevB => decider(comparer.Compare(b, prevB)))
+          bOpt.fold(() => true, prevB => decider(comparer.Compare(b, prevB)))
         ) {
           aOpt = F.some(a);
           bOpt = F.some(b);
@@ -121,9 +119,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static Option<T> FindOpt<T>(
       this IEnumerable<T> enumerable, Fn<T, bool> predicate
     ) {
-      // ReSharper disable once RedundantTypeArgumentsOfMethod
-      // Mono compiler bug.
-      return enumerable.FindWithIndex(predicate).map<T>(t => t._1);
+      return enumerable.FindWithIndex(predicate).map(t => t._1);
     }
 
     public static Option<B> FindFlatMap<A, B>(
@@ -139,9 +135,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static Option<int> IndexWhere<T>(
       this IEnumerable<T> enumerable, Fn<T, bool> predicate
     ) {
-      // ReSharper disable once RedundantTypeArgumentsOfMethod
-      // Mono compiler bug.
-      return enumerable.FindWithIndex(predicate).map<int>(t => t._2);
+      return enumerable.FindWithIndex(predicate).map(t => t._2);
     }
 
     /** Create enumerable with 1 element **/
