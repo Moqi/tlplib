@@ -1,10 +1,10 @@
 ﻿using com.tinylabproductions.TLPLib.Functional;
-#if UNITY_ANDROID
 using com.tinylabproductions.TLPLib.Concurrent;
 using System;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Android {
+#if UNITY_ANDROID
   public static class AndroidView {
     private const string FLAG_HIDE_NAVIGATION = "SYSTEM_UI_FLAG_HIDE_NAVIGATION";
     private const string FLAG_STABLE_LAYOUT = "SYSTEM_UI_FLAG_LAYOUT_STABLE";
@@ -60,5 +60,5 @@ namespace com.tinylabproductions.TLPLib.Android {
       return future;
     }
   }
-}
 #endif
+}
