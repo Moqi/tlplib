@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -8,6 +9,18 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static Option<T> get<T>(this IList<T> list, int index) {
       return (index >= 0 && index < list.Count) 
         ? F.some(list[index]) : F.none<T>();
+    }
+
+    // AOT safe version of ToDictionary.
+    public static IDictionary<K, V> toDict<A, K, V>(
+      this IList<A> list, Fn<A, K> keyGetter, Fn<A, V> valueGetter
+    ) {
+      var dict = new Dictionary<K, V>();
+      // ReSharper disable once LoopCanBeConvertedToQuery
+      // We're trying to avoid LINQ to avoid iOS AOT related issues.
+      foreach (var item in list) 
+        dict.Add(keyGetter(item), valueGetter(item));
+      return dict;
     }
 
     public static IList<B> mapWithIndex<A, B>(
