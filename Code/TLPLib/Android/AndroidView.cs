@@ -1,6 +1,7 @@
 ﻿using com.tinylabproductions.TLPLib.Functional;
 using com.tinylabproductions.TLPLib.Concurrent;
 using System;
+using com.tinylabproductions.TLPLib.Logger;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Android {
@@ -21,7 +22,7 @@ namespace com.tinylabproductions.TLPLib.Android {
     public static Future<bool> hideNavigationBar() {
       if (Application.isEditor) return Future.successful(false);
 
-      Debug.Log("Trying to hide android navigation bar.");
+      Log.debug("Trying to hide android navigation bar.");
       var activity = AndroidActivity.current;
       var future = new FutureImpl<bool>();
       activity.Call("runOnUiThread", new AndroidJavaRunnable(() => {
@@ -35,7 +36,7 @@ namespace com.tinylabproductions.TLPLib.Android {
               view.GetStatic<int>(FLAG_FULLSCREEN);
           }
           catch (Exception e1) {
-            Debug.LogWarning("Failed to get immersive sticky mode flags: " + e1);
+            Log.warn("Failed to get immersive sticky mode flags: " + e1);
             flags =
               view.GetStatic<int>(FLAG_HIDE_NAVIGATION) |
               view.GetStatic<int>(FLAG_STABLE_LAYOUT) |
@@ -46,11 +47,11 @@ namespace com.tinylabproductions.TLPLib.Android {
             Call<AndroidJavaObject>("getWindow").
             Call<AndroidJavaObject>("getDecorView");
           decor.Call("setSystemUiVisibility", flags);
-          Debug.Log("Hiding android navigation bar succeeded.");
+          Log.debug("Hiding android navigation bar succeeded.");
           future.completeSuccess(true);
         }
         catch (Exception e2) {
-          Debug.LogWarning(
+          Log.warn(
             "Error while trying to hide navigation bar on android: " + e2
           );
           future.completeSuccess(false);
