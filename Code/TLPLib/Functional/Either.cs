@@ -51,6 +51,10 @@ namespace com.tinylabproductions.TLPLib.Functional {
     public bool isRight { get { return false; } }
     public Option<A> leftValue { get { return F.some(value); } }
     public Option<B> rightValue { get { return F.none<B>(); } }
+
+    public override string ToString() {
+      return string.Format("Left({0})", value);
+    }
   }
 
   class Right<A, B> : Either<A, B> {
@@ -64,5 +68,9 @@ namespace com.tinylabproductions.TLPLib.Functional {
     public bool isRight { get { return true; } }
     public Option<A> leftValue { get { return F.none<A>(); } }
     public Option<B> rightValue { get { return F.some(value); } }
+
+    public override string ToString() {
+      return string.Format("Right({0})", value);
+    }
   }
 }
