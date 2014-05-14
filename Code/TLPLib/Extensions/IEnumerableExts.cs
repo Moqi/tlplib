@@ -84,18 +84,6 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return last;
     }
 
-    // AOT safe version of ToArray.
-    public static A[] toArr<A>(this IEnumerable<A> enumerable) {
-      var count = F.opt(enumerable as ICollection<A>).
-      // ReSharper disable once RedundantTypeArgumentsOfMethod
-      // Mono compiler bug.
-        map(_ => _.Count).getOrElse<int, int>(enumerable.Count);
-
-      var arr = new A[count];
-      enumerable.eachWithIndex((a, idx) => arr[idx] = a);
-      return arr;
-    }
-
     // AOT safe version of Min and Max.
     public static Option<A> minMax<A>(
       this IEnumerable<A> enumerable, Fn<A, A, bool> keepLeft
