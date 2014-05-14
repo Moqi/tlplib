@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Logger;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
   public static class FutureExts {
@@ -62,8 +63,10 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     bool tryCompleteSuccess(A v);
     bool tryCompleteError(Exception ex);
   }
-  
+
   public static class Future {
+    public static bool LOG_EXCEPTIONS = true;
+
     public static Future<A> successful<A>(A value) {
       var f = new FutureImpl<A>();
       f.completeSuccess(value);
@@ -168,8 +171,12 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     public void completeError(Exception ex) { complete(F.err<A>(ex)); }
 
     public bool tryComplete(Try<A> v) {
-      var ret = value.
-        fold(() => { _value = F.some(v); return true; }, _ => false);
+      // Cannot use fold here because of iOS AOT.
+      var ret = value.isEmpty;
+      if (ret) {
+        if (Future.LOG_EXCEPTIONS) v.exception.each(Log.error);
+        _value = F.some(v);
+      }
       completed(v);
       return ret;
     }
