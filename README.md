@@ -27,6 +27,9 @@ If you are considering using this it would be also nice if you contacted me (Art
 Known bugs
 ----------
 
+Covariant interfaces
+~~~~~~~~~~~~~~~~~~~~
+
 There's a bug in current version of Mono Runtime which Unity 4.3.3f uses. 
 This is not something we can fix and we have reported this bug to Unity.
 
@@ -59,6 +62,44 @@ Or using Option:
 
 Report this crash to Unity when you encounter it - the more people report it,
 the better. Perhaps they'll even fix it! ;)
+
+AOT bugs
+~~~~~~~~
+
+AOT is used in iOS builds.
+
+Generic instance methods does not work at all. E.g.:
+
+    public T doStuff<T>(T param) { ... }
+
+will just get ignored by AOT compiler. Strangely if we move the same method
+to a static class and make it an extension method, it works just fine.
+
+More info can be found at http://www.reentrygames.com/unity-3d-using-extension-methods-to-solve-problems-with-generics-and-aot-on-ios/
+
+AOT compiler is pretty stupid with generic value types as well.
+
+For example:
+
+    var either = F.left<int, float>(3);
+    either.mapLeft(_ => _ * 3);
+
+This will fail at runtime, because #mapLeft uses Option<float> under the hood
+and AOT compiler doesn't pick it up in AOT compilation time.
+
+Current workaround is to use compiler hints (stupid and direct code which monoc
+can pick up, so it generates the appropriate machine code) for every single
+value type that you can imagine and then never define value types yourself.
+
+Obviously this needs a better solution, but it is currently out of scope for us.
+
+General iOS
+~~~~~~~~~~~
+
+Whether this library works on iOS is questionable. We've succesfully built and
+ran our own games with it, but there might be hidden bugs out there. If 
+something breaks, expect to fix it yourself (and then do a pull request). But it
+shouldn't. Hopefully.
 
 Using in your project
 ---------------------
