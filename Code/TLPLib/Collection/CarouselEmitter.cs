@@ -32,7 +32,9 @@ namespace com.tinylabproductions.TLPLib.Collection {
     public int itemCount { get { return counts.Length; } }
 
     public IEnumerator<A> GetEnumerator() {
-      var maxShows = counts.Max(t => t._2);
+      var maxShows = 
+        counts.minMax((t1, t2) => t1._2 > t2._2).map(_ => _._2).
+        getOrElse(() => 0);
       if (maxShows <= 0) yield break;
 
       while (true) {

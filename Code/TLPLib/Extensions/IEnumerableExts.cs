@@ -84,36 +84,13 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return last;
     }
 
-    private static Option<A> minMax<A, B>(
-      this IEnumerable<A> enumerable, Fn<A, B> selector, Fn<int, bool> decider
+    // AOT safe version of Min and Max.
+    public static Option<A> minMax<A>(
+      this IEnumerable<A> enumerable, Fn<A, A, bool> keepLeft
     ) {
-      var aOpt = F.none<A>();
-      var bOpt = F.none<B>();
-
-      var comparer = Comparer<B>.Default;
-      foreach (var a in enumerable) {
-        var b = selector(a);
-        if (
-          bOpt.fold(() => true, prevB => decider(comparer.Compare(b, prevB)))
-        ) {
-          aOpt = F.some(a);
-          bOpt = F.some(b);
-        }
-      }
-
-      return aOpt;
-    }
-
-    public static Option<A> min<A, B>(
-      this IEnumerable<A> enumerable, Fn<A, B> selector
-    ) {
-      return enumerable.minMax(selector, _ => _ < 0);
-    }
-
-    public static Option<A> max<A, B>(
-      this IEnumerable<A> enumerable, Fn<A, B> selector
-    ) {
-      return enumerable.minMax(selector, _ => _ > 0);
+      return enumerable.Aggregate(F.none<A>(), (maxOpt, a) =>
+        maxOpt.map(max => keepLeft(max, a) ? a : max).orElse(() => F.some(a))
+      );
     }
 
     public static Option<T> FindOpt<T>(
