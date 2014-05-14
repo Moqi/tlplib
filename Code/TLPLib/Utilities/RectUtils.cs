@@ -2,18 +2,19 @@
 
 namespace com.tinylabproductions.TLPLib.Utilities {
   public static class RectUtils {
-    private static float sw { get { return Screen.width; } }
-    private static float sh { get { return Screen.height; } }
-
     /** Create rect that has values from percentages of screen. **/
-    public static Rect percent(float left, float top, float width, float height) {
-      return new Rect(sw * left, sh * top, sw * width, sh * height);
+    public static Rect percent(float leftP, float topP, float widthP, float heightP) {
+      return new Rect(
+        leftP.pWidthToAbs(), topP.pHeightToAbs(),
+        widthP.pWidthToAbs(), heightP.pHeightToAbs()
+      );
     }
 
     /** Convert absolute rect to percentage rect. **/
     public static Rect absoluteToPercentage(this Rect pRect) {
       return new Rect(
-        pRect.xMin / sw, pRect.yMin / sh, pRect.width / sw, pRect.height / sh
+        pRect.xMin.aWidthToPerc(), pRect.yMin.aHeightToPerc(),
+        pRect.width.aWidthToPerc(), pRect.height.aHeightToPerc()
       );
     }
 
