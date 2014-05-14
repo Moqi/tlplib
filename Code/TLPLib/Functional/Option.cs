@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Extensions;
+using com.tinylabproductions.TLPLib.Logger;
 
 namespace com.tinylabproductions.TLPLib.Functional {
 /** 
@@ -10,6 +11,24 @@ namespace com.tinylabproductions.TLPLib.Functional {
   * http://stackoverflow.com/questions/1188354/can-i-specify-a-supertype-relation-in-c-sharp-generic-constraints
   **/
 public static class Option {
+  static Option() {
+    #if UNITY_IOS
+    Log.debug(
+      "iOS AOT type hints: " +
+
+      new Some<byte>(0) + new Some<short>(0) + new Some<int>(0) +
+      new Some<long>(0) + new Some<float>(0) + new Some<double>(0) +
+      new Some<decimal>(0) + new Some<bool>(true) + new Some<DateTime>(DateTime.MinValue) +
+      new Some<char>('0') +
+        
+      None<byte>.instance + None<short>.instance + None<int>.instance + 
+      None<long>.instance + None<float>.instance + None<double>.instance +
+      None<decimal>.instance + None<bool>.instance + None<DateTime>.instance +
+      None<char>.instance
+    );
+    #endif
+  }
+
   public static IEnumerable<A> asEnum<A, B>(this Option<B> opt)
   where B : A {
     return opt.isDefined 
