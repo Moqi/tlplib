@@ -2,19 +2,12 @@
 
 namespace com.tinylabproductions.TLPLib.Functional.Matching {
   public interface IVoidMatcher<in Base> where Base : class {
-    IVoidMatcher<Base> when<T>(Act<T> onMatch)
-    where T : class;
-
-    IVoidMatcher<Base> whenSealed<T>(Act<T> onMatch)
-    where T : class, Base;
+    IVoidMatcher<Base> when<T>(Act<T> onMatch) where T : Base;
   }
 
   public interface IMatcher<in Base, Return> where Base : class {
     IMatcher<Base,Return> when<T>(Fn<T, Return> onMatch)
-    where T : class;
-
-    IMatcher<Base,Return> whenSealed<T>(Fn<T, Return> onMatch)
-    where T : class, Base;
+    where T : Base;
 
     Return get();
     Return getOrElse(Fn<Return> elseFunc);
@@ -24,7 +17,7 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
     public MatchError(string message) : base(message) { }
   }
 
-  public class Matcher<Base, Return> 
+  public struct Matcher<Base, Return> 
   : IVoidMatcher<Base>, IMatcher<Base, Return>
   where Base : class {
     private readonly Base subject;
@@ -33,29 +26,23 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
       this.subject = subject;
     }
 
-    public IVoidMatcher<Base> when<T>(Act<T> onMatch) 
-    where T : class {
-      var casted = subject as T;
-      if (casted == null) return this;
-
-      onMatch(casted);
-      return new SuccessfulMatcher<Base, Unit>(F.unit);
+    public IVoidMatcher<Base> when<T>(Act<T> onMatch) where T : Base {
+      if (subject is T) {
+        onMatch((T) subject);
+        return new SuccessfulMatcher<Base, Unit>(F.unit);
+      }
+      else return this;
     }
 
-    public IVoidMatcher<Base> whenSealed<T>(Act<T> onMatch) 
-    where T : class, Base { return when(onMatch); }
-
     public IMatcher<Base, Return> when<T>(Fn<T, Return> onMatch)
-    where T : class {
-      var casted = subject as T;
-      if (casted != null)
+    where T : Base {
+      if (subject is T) {
+        var casted = (T) subject;
         return new SuccessfulMatcher<Base, Return>(onMatch.Invoke(casted));
+      }
 
       return this;
     }
-
-    public IMatcher<Base, Return> whenSealed<T>(Fn<T, Return> onMatch)
-    where T : class, Base { return when(onMatch); }
 
     public Return get() {
       throw new MatchError(string.Format(
@@ -66,7 +53,7 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
     public Return getOrElse(Fn<Return> elseFunc) { return elseFunc.Invoke(); }
   }
 
-  public class SuccessfulMatcher<Base, Return> 
+  public struct SuccessfulMatcher<Base, Return> 
   : IVoidMatcher<Base>, IMatcher<Base, Return>
   where Base : class {
     private readonly Return result;
@@ -76,23 +63,17 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
     }
 
     public IVoidMatcher<Base> when<T>(Act<T> onMatch) 
-    where T : class { return this; }
-
-    public IVoidMatcher<Base> whenSealed<T>(Act<T> onMatch)
-    where T : class, Base { return this; }
+    where T : Base { return this; }
 
     public IMatcher<Base, Return> when<T>(Fn<T, Return> onMatch)
-    where T : class { return this; }
-
-    public IMatcher<Base, Return> whenSealed<T>(Fn<T, Return> onMatch)
-    where T : class, Base { return this; }
+    where T : Base { return this; }
 
     public Return get() { return result; }
 
     public Return getOrElse(Fn<Return> elseFunc) { return get(); }
   }
 
-  public class MatcherBuilder<T> where T : class {
+  public struct MatcherBuilder<T> where T : class {
     private readonly T subject;
 
     public MatcherBuilder(T subject) {
