@@ -61,5 +61,19 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       list[aIndex] = list[bIndex];
       list[bIndex] = temp;
     }
+
+    /**
+     * Basically LINQ #Select, but for arrays. Needed because of performance/iOS
+     * limitations of AOT.
+     **/
+    public static IList<To> map<From, To>(
+      this IList<From> source, Func<From, To> mapper
+    ) {
+      var target = new List<To>(source.Count);
+      // ReSharper disable once ForCanBeConvertedToForeach
+      // Do not allocate en enumerator.
+      for (var i = 0; i < source.Count; i++) target.Add(mapper(source[i]));
+      return target;
+    }
   }
 }
