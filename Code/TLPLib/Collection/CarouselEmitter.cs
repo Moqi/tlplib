@@ -10,36 +10,36 @@ namespace com.tinylabproductions.TLPLib.Collection {
    * Carousel like item emitter.
    * 
    * Given:
-   * * priorities: ["a", "c", "b"]
-   * * counts: {"a" => 3, "b" => 2, "c" => 1}
+   * * itemsWithCounts: [("a", 3), ("c", 1), ("b", 2), ("c", 2)]
    * 
    * Will yield:
-   * "a", "c", "b", "a", "b", "a", starts from beggining.
+   * "a", "c", "b", "c", "a", "b", "c", "a", starts from beggining.
    * 
    * This enumerable is endless.
    **/
   public class CarouselEmitter<A> : IEnumerable<A> {
-    protected readonly Tpl<A, int>[] counts;
+    protected readonly Tpl<A, int>[] itemsWithCounts;
+    // Total number of counts. E.g. from [("a", 3), ("b", 1)] this would be 4.
+    public readonly int totalCount;
+    // Max number of counts. E.g. from [("a", 3), ("b", 1)] this would be 3.
+    public readonly int maxCount;
 
     public CarouselEmitter(
-      IEnumerable<A> priorities, IDictionary<A, int> counts
+      IEnumerable<Tpl<A, int>> itemsWithCounts
     ) {
-      this.counts = priorities.Select(a =>
-        F.t(a, counts.get(a).getOrElse(() => 0))
-      ).Where(t => t._2 > 0).ToArray();
+      this.itemsWithCounts = itemsWithCounts.Where(t => t._2 > 0).ToArray();
+      totalCount = this.itemsWithCounts.Sum(_ => _._2);
+      maxCount =
+        this.itemsWithCounts.minMax((t1, t2) => t1._2 > t2._2).
+        map(_ => _._2).getOrElse(() => 0);
     }
 
-    public int itemCount { get { return counts.Length; } }
-
     public IEnumerator<A> GetEnumerator() {
-      var maxShows = 
-        counts.minMax((t1, t2) => t1._2 > t2._2).map(_ => _._2).
-        getOrElse(() => 0);
-      if (maxShows <= 0) yield break;
+      if (maxCount <= 0) yield break;
 
       while (true) {
-        for (var idx = 0; idx < maxShows; idx++) {
-          foreach (var t in counts.Where(t => t._2 > idx))
+        for (var idx = 0; idx < maxCount; idx++) {
+          foreach (var t in itemsWithCounts.Where(t => t._2 > idx))
             yield return t._1;
         }
       }
@@ -52,9 +52,9 @@ namespace com.tinylabproductions.TLPLib.Collection {
       return enumerator;
     }
 
-    /** Returns an enumerator which has (0, itemCount] elements skipped. **/
+    /** Returns an enumerator which has [0, totalCount) elements skipped. **/
     public IEnumerator<A> GetRandomSkipEnumerator() {
-      return GetEnumerator((new Random()).Next(0, itemCount));
+      return GetEnumerator((new Random()).Next(0, totalCount));
     }
 
     IEnumerator IEnumerable.GetEnumerator() {
