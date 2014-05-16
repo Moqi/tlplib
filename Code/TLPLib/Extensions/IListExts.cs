@@ -51,8 +51,9 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       }
     }
 
-    public static A random<A>(this IList<A> list) {
-      return list[UnityEngine.Random.Range(0, list.Count)];
+    public static Option<A> random<A>(this IList<A> list) {
+      if (list.Count == 0) return F.none<A>();
+      return F.some(list[UnityEngine.Random.Range(0, list.Count)]);
     }
 
     public static void swap<A>(this IList<A> list, int aIndex, int bIndex) {
