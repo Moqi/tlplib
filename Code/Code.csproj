@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0F87331D-74CF-41EF-97CB-48DD4B94BD61}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.tinylabproductions</RootNamespace>
+    <AssemblyName>RXLib</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="GoKit, Version=1.0.4989.40565, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\GoKit.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="TLPLib\Android\AndroidActivity.cs" />
+    <Compile Include="TLPLib\Android\AndroidView.cs" />
+    <Compile Include="TLPLib\Binding\DFBind.cs" />
+    <Compile Include="TLPLib\Collection\BiMap.cs" />
+    <Compile Include="TLPLib\Concurrent\ASync.cs" />
+    <Compile Include="TLPLib\Concurrent\CoroutineHelperBehaviour.cs" />
+    <Compile Include="TLPLib\Concurrent\Future.cs" />
+    <Compile Include="TLPLib\IllegalStateException.cs" />
+    <Compile Include="TLPLib\Extensions\AndroidExts.cs" />
+    <Compile Include="TLPLib\Extensions\AnyExts.cs" />
+    <Compile Include="TLPLib\Extensions\ArrayExts.cs" />
+    <Compile Include="TLPLib\Extensions\BoolExts.cs" />
+    <Compile Include="TLPLib\Extensions\ColorExts.cs" />
+    <Compile Include="TLPLib\Extensions\ComponentExts.cs" />
+    <Compile Include="TLPLib\Extensions\FuncExts.cs" />
+    <Compile Include="TLPLib\Extensions\GameObjectExts.cs" />
+    <Compile Include="TLPLib\Extensions\IDictionaryExts.cs" />
+    <Compile Include="TLPLib\Extensions\IEnumerableExts.cs" />
+    <Compile Include="TLPLib\Extensions\IListExts.cs" />
+    <Compile Include="TLPLib\Extensions\TimeSpanExts.cs" />
+    <Compile Include="TLPLib\Extensions\TransformExts.cs" />
+    <Compile Include="TLPLib\Functional\F.cs" />
+    <Compile Include="TLPLib\Functional\Functions.cs" />
+    <Compile Include="TLPLib\Functional\Lazy.cs" />
+    <Compile Include="TLPLib\Functional\Matching\Match.cs" />
+    <Compile Include="TLPLib\Functional\Option.cs" />
+    <Compile Include="TLPLib\Functional\Tuple.cs" />
+    <Compile Include="TLPLib\Functional\Unit.cs" />
+    <Compile Include="TLPLib\Reactive\Observable.cs" />
+    <Compile Include="TLPLib\Reactive\RxList.cs" />
+    <Compile Include="TLPLib\Reactive\RxListView.cs" />
+    <Compile Include="TLPLib\Reactive\RxRef.cs" />
+    <Compile Include="TLPLib\Reactive\Subscription.cs" />
+    <Compile Include="TLPLib\Tween\FuncTween.cs" />
+    <Compile Include="TLPLib\Tween\GoF.cs" />
+    <Compile Include="TLPLib\Utilities\Base36.cs" />
+    <Compile Include="TLPLib\Utilities\MathUtils.cs" />
+    <Compile Include="TLPLib\Data\Point2D.cs" />
+    <Compile Include="TLPLib\Data\PointBounds.cs" />
+    <Compile Include="TLPLib\Data\Range.cs" />
+    <Compile Include="TLPLib\Utilities\Rng.cs" />
+    <Compile Include="TLPLib\Formats\SimpleJSON.cs" />
+    <Compile Include="TLPLib\Data\ValueWithStorage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
