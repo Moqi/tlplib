@@ -16,5 +16,9 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static T locally<T>(this object any, Fn<T> local) {
       return local();
     }
-}
+
+    public static B mapVal<A, B>(this A any, Fn<A, B> mapper) {
+      return mapper(any);
+    }
+  }
 }

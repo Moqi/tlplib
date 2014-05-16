@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace com.tinylabproductions.TLPLib.Collection {
-  internal class BiMap<A, B> : IEnumerable<KeyValuePair<A, B>>  {
+  public class BiMap<A, B> : IEnumerable<KeyValuePair<A, B>>  {
     private readonly Dictionary<A, B> a2b = new Dictionary<A, B>();
     private readonly Dictionary<B, A> b2a = new Dictionary<B, A>();
 

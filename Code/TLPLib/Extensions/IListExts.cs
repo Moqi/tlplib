@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -9,12 +11,31 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         ? F.some(list[index]) : F.none<T>();
     }
 
+    // AOT safe version of ToDictionary.
+    public static IDictionary<K, V> toDict<A, K, V>(
+      this IList<A> list, Fn<A, K> keyGetter, Fn<A, V> valueGetter
+    ) {
+      var dict = new Dictionary<K, V>();
+      // ReSharper disable once LoopCanBeConvertedToQuery
+      // We're trying to avoid LINQ to avoid iOS AOT related issues.
+      foreach (var item in list) 
+        dict.Add(keyGetter(item), valueGetter(item));
+      return dict;
+    }
+
+    public static IList<B> mapWithIndex<A, B>(
+      this IList<A> list, Fn<A, int, B> mapper
+    ) {
+      var nList = new List<B>(list.Count);
+      for (var idx = 0; idx < list.Count; idx++)
+        nList.Add(mapper(list[idx], idx));
+      return nList;
+    }
+
     public static T updateOrAdd<T>(
       this IList<T> list, Fn<T, bool> finder, Fn<T> ifNotFound, Fn<T, T> ifFound
     ) {
-      // ReSharper disable once RedundantTypeArgumentsOfMethod
-      // Mono compiler bug.
-      return list.FindWithIndex(finder).fold<T>(
+      return list.FindWithIndex(finder).fold(
         () => {
           var item = ifNotFound();
           list.Add(item);
@@ -51,9 +72,8 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       }
     }
 
-    public static Option<A> random<A>(this IList<A> list) {
-      if (list.Count == 0) return F.none<A>();
-      return F.some(list[UnityEngine.Random.Range(0, list.Count)]);
+    public static A random<A>(this IList<A> list) {
+      return list[UnityEngine.Random.Range(0, list.Count)];
     }
 
     public static void swap<A>(this IList<A> list, int aIndex, int bIndex) {
@@ -62,18 +82,21 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       list[bIndex] = temp;
     }
 
-    /**
-     * Basically LINQ #Select, but for arrays. Needed because of performance/iOS
-     * limitations of AOT.
-     **/
-    public static IList<To> map<From, To>(
-      this IList<From> source, Func<From, To> mapper
-    ) {
-      var target = new List<To>(source.Count);
-      // ReSharper disable once ForCanBeConvertedToForeach
-      // Do not allocate en enumerator.
-      for (var i = 0; i < source.Count; i++) target.Add(mapper(source[i]));
-      return target;
+    public static Option<A> headOpt<A>(this IList<A> list) {
+      return list.Count == 0 ? F.none<A>() : F.some(list[0]);
+    }
+
+    public static Option<A> lastOpt<A>(this IList<A> list) {
+      return list.Count == 0 ? F.none<A>() : F.some(list[list.Count - 1]);
+    }
+
+    public static IEnumerable<A> dropRight<A>(this IList<A> list, int count) {
+      var end = list.Count - count;
+      var idx = 0;
+      foreach (var item in list) {
+        if (idx < end) yield return item;
+        idx++;
+      }
     }
   }
 }

@@ -12,7 +12,7 @@ It contains various things, including but not limited to:
 * Various data structures.
 * A bunch of extension methods.
 * JSON parser/emmiter.
-* Functional utilities: Option, Lazy, Tuple, Unit, co-variant functions and actions, rudimentary pattern matching.
+* Functional utilities: Option, Lazy, Tuple, Either, Try, Unit, co-variant functions and actions, rudimentary pattern matching.
 * Reactive extensions: observables, reactive references, lists and list views.
 * Tween utilities: mainly to make tweens type-safe.
 * Various other misc utilities.
@@ -23,6 +23,83 @@ Disclaimer
 You are free to use this for your own games. Patches and improvements are welcome. A mention in your game credits would be nice.
 
 If you are considering using this it would be also nice if you contacted me (Artūras Šlajus, arturas@tinylabproductions.com) so we could create a community around this.
+
+Known bugs
+----------
+
+Covariant interfaces
+~~~~~~~~~~~~~~~~~~~~
+
+There's a bug in current version of Mono Runtime which Unity 4.3.3f uses. 
+This is not something we can fix and we have reported this bug to Unity.
+
+If you have an interface and a class implementing it you'll want to 
+explicitly specify the interface type for operations working on covariant
+containers.
+
+For example, using Future:
+
+    // TLPAds is an interface.
+    public readonly Future<TLPAds> ads;
+
+    ...
+    
+    // configuration is Future<TLPConfig>, which is a class.
+    // Mono runtime covariance bug. Crashes otherwise.
+    ads = configuration.map<TLPAds>(c => new TlpAdsImpl(c));
+
+Or using Option:
+
+    // Again, IAdNetworkProvider is an interface
+    public static Option<IAdNetworkProvider> apply(TLPConfig config) {
+
+    ...
+
+    // Mono runtime covariance bug. Crashes otherwise.
+    return F.some<IAdNetworkProvider>(new AdMobAdNet(
+      ...
+    ));
+
+Report this crash to Unity when you encounter it - the more people report it,
+the better. Perhaps they'll even fix it! ;)
+
+AOT bugs
+~~~~~~~~
+
+AOT is used in iOS builds.
+
+Generic instance methods does not work at all. E.g.:
+
+    public T doStuff<T>(T param) { ... }
+
+will just get ignored by AOT compiler. Strangely if we move the same method
+to a static class and make it an extension method, it works just fine.
+
+More info can be found at http://www.reentrygames.com/unity-3d-using-extension-methods-to-solve-problems-with-generics-and-aot-on-ios/
+
+AOT compiler is pretty stupid with generic value types as well.
+
+For example:
+
+    var either = F.left<int, float>(3);
+    either.mapLeft(_ => _ * 3);
+
+This will fail at runtime, because #mapLeft uses Option<float> under the hood
+and AOT compiler doesn't pick it up in AOT compilation time.
+
+Current workaround is to use compiler hints (stupid and direct code which monoc
+can pick up, so it generates the appropriate machine code) for every single
+value type that you can imagine and then never define value types yourself.
+
+Obviously this needs a better solution, but it is currently out of scope for us.
+
+General iOS
+~~~~~~~~~~~
+
+Whether this library works on iOS is questionable. We've succesfully built and
+ran our own games with it, but there might be hidden bugs out there. If 
+something breaks, expect to fix it yourself (and then do a pull request). But it
+shouldn't. Hopefully.
 
 Using in your project
 ---------------------

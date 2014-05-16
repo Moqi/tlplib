@@ -31,6 +31,26 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return behaviour.StartCoroutine(coroutine);
     }
 
+    public static Coroutine WithDelay(float seconds, Action action) {
+      return behaviour.StartCoroutine(WithDelayEnumerator(seconds, action));
+    }
+
+    private static IEnumerator WithDelayEnumerator(
+      float seconds, Action action
+    ) {
+      yield return new WaitForSeconds(seconds);
+      action();
+    }
+
+    public static IObservable<bool> onAppPause 
+      { get { return behaviour.onPause; } }
+
+    public static IObservable<Unit> onAppQuit
+      { get { return behaviour.onQuit; } }
+
+    public static IObservable<Unit> onGUI
+      { get { return behaviour.onGUI; } }
+
     /**
      * Takes a function that transforms an element into a future and 
      * applies it to all elements in given sequence.
@@ -42,16 +62,16 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
      * Returns reactive value that can be used to observe current stage
      * of the application.
      **/
-    public static IRxVal<Option<B>> inAsyncSeq<A, B>(
+    public static IRxVal<Option<Try<B>>> inAsyncSeq<A, B>(
       this IEnumerable<A> enumerable, Fn<A, Future<B>> asyncAction
     ) {
-      var rxRef = RxRef.a(F.none<B>());
+      var rxRef = RxRef.a(F.none<Try<B>>());
       inAsyncSeq(enumerable.GetEnumerator(), rxRef, asyncAction);
       return rxRef;
     }
 
     private static void inAsyncSeq<A, B>(
-      IEnumerator<A> e, IRxRef<Option<B>> rxRef, 
+      IEnumerator<A> e, IRxRef<Option<Try<B>>> rxRef, 
       Fn<A, Future<B>> asyncAction
     ) {
       if (! e.MoveNext()) return;

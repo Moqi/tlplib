@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Extensions;
+using com.tinylabproductions.TLPLib.Logger;
 
 namespace com.tinylabproductions.TLPLib.Functional {
 /** 
@@ -10,6 +11,24 @@ namespace com.tinylabproductions.TLPLib.Functional {
   * http://stackoverflow.com/questions/1188354/can-i-specify-a-supertype-relation-in-c-sharp-generic-constraints
   **/
 public static class Option {
+  static Option() {
+    #if UNITY_IOS
+    Log.debug(
+      "iOS AOT type hints: " +
+
+      new Some<byte>(0) + new Some<short>(0) + new Some<int>(0) +
+      new Some<long>(0) + new Some<float>(0) + new Some<double>(0) +
+      new Some<decimal>(0) + new Some<bool>(true) + new Some<DateTime>(DateTime.MinValue) +
+      new Some<char>('0') +
+        
+      None<byte>.instance + None<short>.instance + None<int>.instance + 
+      None<long>.instance + None<float>.instance + None<double>.instance +
+      None<decimal>.instance + None<bool>.instance + None<DateTime>.instance +
+      None<char>.instance
+    );
+    #endif
+  }
+
   public static IEnumerable<A> asEnum<A, B>(this Option<B> opt)
   where B : A {
     return opt.isDefined 
@@ -40,6 +59,34 @@ public static class Option {
   ) where B : A {
     return opt.isDefined ? opt : (Option<A>) other();
   }
+
+  public static A orNull<A>(this Option<A> opt) where A : class {
+    return opt.fold(() => null, _ => _);
+  }
+
+  public static Option<B> map<A, B>(this Option<A> opt, Fn<A, B> func) {
+    return opt.isDefined ? F.some(func(opt.get)) : F.none<B>();
+  }
+
+  public static Option<B> flatMap<A, B>(
+    this Option<A> opt, Fn<A, Option<B>> func
+  ) {
+    return opt.isDefined ? func(opt.get) : F.none<B>();
+  }
+
+  public static B fold<A, B>(
+    this Option<A> opt, Fn<B> ifEmpty, Fn<A, B> ifNonEmpty
+  ) {
+    return opt.isDefined ? ifNonEmpty(opt.get) : ifEmpty();
+  }
+
+  public static Option<Tpl<A, B>> zip<A, B>(
+    this Option<A> opt1, Option<B> opt2
+  ) {
+    return opt1.isDefined && opt2.isDefined
+      ? F.some(F.t(opt1.get, opt2.get))
+      : F.none<Tpl<A, B>>();
+  }
 }
 
 public interface Option<out A> {
@@ -48,17 +95,13 @@ public interface Option<out A> {
   A get { get; }
   A getOrThrow(Fn<Exception> orElse);
   void each(Act<A> action);
-  Option<A> tap(Act<A> action);
-  Option<B> map<B>(Fn<A, B> func);
-  Option<To> flatMap<To>(Fn<A, Option<To>> func);
-  B fold<B>(Fn<B> ifEmpty, Fn<A, B> ifNonEmpty);
   void voidFold(Action ifEmpty, Act<A> ifNonEmpty);
+  Option<A> tap(Act<A> action);
   Option<A> filter(Fn<A, bool> predicate);
-  Option<Tpl<A, B>> zip<B>(Option<B> opt);
 }
 
-public struct Some<A> : Option<A> {
-  public Some(A value) : this() { get = value; }
+public class Some<A> : Option<A> {
+  public Some(A value) { get = value; }
 
   public A getOrThrow(Fn<Exception> orElse) { return get; }
 
@@ -69,26 +112,12 @@ public struct Some<A> : Option<A> {
     return this;
   }
 
-  public Option<B> map<B>(Fn<A, B> func) {
-    return new Some<B>(func(get));
-  }
-
-  public Option<B> flatMap<B>(Fn<A, Option<B>> func) { return func(get); }
-
-  public B fold<B>(Fn<B> ifEmpty, Fn<A, B> ifNonEmpty) {
-    return ifNonEmpty(get);
-  }
-
   public void voidFold(Action ifEmpty, Act<A> ifNonEmpty) {
     ifNonEmpty(get);
   }
 
   public Option<A> filter(Fn<A, bool> predicate) {
     return predicate(get) ? this : F.none<A>();
-  }
-
-  public Option<Tpl<A, B>> zip<B>(Option<B> opt) {
-    return opt.isDefined ? F.some(F.t(get, opt.get)) : F.none<Tpl<A, B>>();
   }
 
   public bool isDefined { get { return true; } }
@@ -112,28 +141,12 @@ public class None<A> : Option<A> {
     return this;
   }
 
-  public Option<B> map<B>(Fn<A, B> func) {
-    return F.none<B>();
-  }
-
-  public Option<B> flatMap<B>(Fn<A, Option<B>> func) {
-    return F.none<B>();
-  }
-
-  public B fold<B>(Fn<B> ifEmpty, Fn<A, B> ifNonEmpty) {
-    return ifEmpty();
-  }
-
   public void voidFold(Action ifEmpty, Act<A> ifNonEmpty) {
     ifEmpty();
   }
 
   public Option<A> filter(Fn<A, bool> predicate) {
     return this;
-  }
-
-  public Option<Tpl<A, B>> zip<B>(Option<B> opt) {
-    return F.none<Tpl<A, B>>();
   }
 
   public bool isDefined { get { return false; } }

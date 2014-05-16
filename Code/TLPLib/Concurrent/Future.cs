@@ -4,29 +4,77 @@ using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Logger;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
+  public static class FutureExts {
+    public static Future<B> map<A, B>(this Future<A> future, Fn<A, B> mapper) {
+      var p = new FutureImpl<B>();
+      future.onComplete(t => t.voidFold(
+        v => {
+          try { p.completeSuccess(mapper(v)); }
+          catch (Exception e) { p.completeError(e); }
+        },
+        p.completeError
+      ));
+      return p;
+    }
+
+    public static Future<B> flatMap<A, B>(
+      this Future<A> future, Fn<A, Future<B>> mapper
+    ) {
+      var p = new FutureImpl<B>();
+      future.onComplete(t => t.voidFold(
+        v => {
+          try { mapper(v).onComplete(p.complete); }
+          catch (Exception e) { p.completeError(e); }
+        },
+        p.completeError
+      ));
+      return p;
+    }
+  }
+
   /** Coroutine based future **/
   public interface Future<out A> {
-    Option<A> value { get; }
-    Future<B> map<B>(Fn<A, B> mapper);
-    Future<B> flatMap<B>(Fn<A, Future<B>> mapper);
-    Future<A> onComplete(Act<A> action);
+    Option<Try<A>> value { get; }
+    CancellationToken onComplete(Act<Try<A>> action);
+    CancellationToken onSuccess(Act<A> action);
+    CancellationToken onFailure(Act<Exception> action);
+  }
+
+  /**
+   * You can use this token to cancel a callback before future is completed.
+   **/
+  public interface CancellationToken {
+    bool isCancelled { get; }
+    // Returns true if cancelled or false if already cancelled before.
+    bool cancel();
   }
 
   /** Couroutine based promise **/
   public interface Promise<in A> {
     /** Complete with value, exception if already completed. **/
-    void complete(A v);
+    void complete(Try<A> v);
+    void completeSuccess(A v);
+    void completeError(Exception ex);
     /** Complete with value, return false if already completed. **/
-    bool tryComplete(A v);
+    bool tryComplete(Try<A> v);
+    bool tryCompleteSuccess(A v);
+    bool tryCompleteError(Exception ex);
   }
-  
+
   public static class Future {
+    public static bool LOG_EXCEPTIONS = true;
+
     public static Future<A> successful<A>(A value) {
       var f = new FutureImpl<A>();
-      f.complete(value);
+      f.completeSuccess(value);
       return f;
+    }
+
+    public static Future<A> unfullfiled<A>() {
+      return new FutureImpl<A>();
     }
 
     /**
@@ -40,11 +88,14 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       var sourceFutures = enumerable.ToArray();
       var results = new A[sourceFutures.Length];
       var future = new FutureImpl<A[]>();
-      sourceFutures.eachWithIndex((f, idx) => f.onComplete(value => {
-        results[idx] = value;
-        completed++;
-        if (completed == results.Length) future.complete(results);
-      }));
+      sourceFutures.eachWithIndex((f, idx) => {
+        f.onSuccess(value => {
+          results[idx] = value;
+          completed++;
+          if (completed == results.Length) future.tryCompleteSuccess(results);
+        });
+        f.onFailure(future.completeError);
+      });
       return future;
     }
 
@@ -67,48 +118,102 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     private static IEnumerator coroutineEnum
     (Promise<Unit> p, IEnumerator enumerator) {
       yield return ASync.StartCoroutine(enumerator);
-      p.complete(Unit.instance);
+      p.completeSuccess(Unit.instance);
+    }
+
+    public class FinishedCancellationToken : CancellationToken {
+      private static FinishedCancellationToken _instance;
+
+      public static FinishedCancellationToken instance { get {
+        return _instance ?? (_instance = new FinishedCancellationToken());
+      } }
+
+      private FinishedCancellationToken() {}
+
+      public bool isCancelled { get { return true; } }
+      public bool cancel() { return false; }
     }
   }
 
   class FutureImpl<A> : Future<A>, Promise<A> {
-    private readonly IList<Act<A>> listeners = new List<Act<A>>();
+    public class CancellationTokenImpl : CancellationToken {
+      private readonly Act<Try<A>> action;
+      private readonly FutureImpl<A> future;
+      public bool isCancelled { get; private set; } 
 
-    private Option<A> _value = F.none<A>();
-    public Option<A> value { get { return _value; } }
+      public CancellationTokenImpl(Act<Try<A>> action, FutureImpl<A> future) {
+        this.action = action;
+        this.future = future;
+        isCancelled = false;
+      }
 
-    public void complete(A v) {
-      if (! tryComplete(v)) 
-        throw new Exception("Promise is already completed with " + value.get);
+      public bool cancel() {
+        isCancelled = true;
+        return future.cancel(action);
+      }
     }
 
-    public bool tryComplete(A v) {
-      var ret = value.
-        fold(() => { _value = F.some(v); return true; }, _ => false);
+    private readonly IList<Act<Try<A>>> listeners = new List<Act<Try<A>>>();
+
+    private Option<Try<A>> _value = F.none<Try<A>>();
+    public Option<Try<A>> value { get { return _value; } }
+
+    public void complete(Try<A> v) {
+      if (! tryComplete(v)) throw new IllegalStateException(string.Format(
+        "Try to complete future with \"{0}\" but it is already " +
+        "completed with \"{1}\"",
+        v, value.get
+      ));
+    }
+
+    public void completeSuccess(A v) { complete(F.scs(v)); }
+
+    public void completeError(Exception ex) { complete(F.err<A>(ex)); }
+
+    public bool tryComplete(Try<A> v) {
+      // Cannot use fold here because of iOS AOT.
+      var ret = value.isEmpty;
+      if (ret) {
+        if (Future.LOG_EXCEPTIONS) v.exception.each(Log.error);
+        _value = F.some(v);
+      }
       completed(v);
       return ret;
     }
 
-    public Future<B> map<B>(Fn<A, B> mapper) {
-      var p = new FutureImpl<B>();
-      onComplete(v => p.complete(mapper(v)));
-      return p;
+    public bool tryCompleteSuccess(A v) {
+      return tryComplete(F.scs(v));
     }
 
-    public Future<B> flatMap<B>(Fn<A, Future<B>> mapper) {
-      var p = new FutureImpl<B>();
-      onComplete(v => mapper(v).onComplete(p.complete));
-      return p;
+    public bool tryCompleteError(Exception ex) {
+      return tryComplete(F.err<A>(ex));
     }
 
-    public Future<A> onComplete(Act<A> action) {
-      value.voidFold(() => listeners.Add(action), action);
-      return this;
+    public CancellationToken onComplete(Act<Try<A>> action) {
+      return value.fold<Try<A>, CancellationToken>(() => {
+        listeners.Add(action);
+        return new CancellationTokenImpl(action, this);
+      }, v => {
+        action(v);
+        return Future.FinishedCancellationToken.instance;
+      });
     }
 
-    public void completed(A v) {
+    public CancellationToken onSuccess(Act<A> action) {
+      return onComplete(t => t.value.each(action));
+    }
+
+    public CancellationToken onFailure(Act<Exception> action) {
+      return onComplete(t => t.exception.each(action));
+    }
+
+    public void completed(Try<A> v) {
       foreach (var listener in listeners) listener(v);
       listeners.Clear();
+    }
+
+    private bool cancel(Act<Try<A>> action) {
+      return listeners.Remove(action);
     }
   }
 }
