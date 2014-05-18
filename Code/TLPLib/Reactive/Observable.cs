@@ -44,6 +44,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
      * `Time.time`.
      **/
     IObservable<ILinkedList<Tpl<A, float>>> withinTimeframe(int count, float timeframe);
+    /** Delays each event X seconds. **/
+    IObservable<A> delayed(float seconds);
     IObservable<Tpl<A, B>> zip<B>(IObservable<B> other);
     // Returns pairs of (old, new) values when they are changing.
     // If there was no events before, old may be None.
@@ -256,7 +258,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public IObservable<ILinkedList<Tpl<A, float>>> 
     withinTimeframe(int count, float timeframe) {
       return withinTimeframeImpl(
-        count, timeframe, builder <ILinkedList<Tpl<A, float>>>()
+        count, timeframe, builder<ILinkedList<Tpl<A, float>>>()
       );
     }
 
@@ -272,6 +274,18 @@ namespace com.tinylabproductions.TLPLib.Reactive {
           var last = events.Last.Value._2;
           return events.All(t => last - t._2 <= timeframe);
         }).subscribe(obs.push)
+      );
+    }
+
+    public IObservable<A> delayed(float seconds) {
+      return delayedImpl(seconds, builder<A>());
+    }
+
+    protected O delayedImpl<O>(
+      float seconds, ObserverBuilder<A, O> builder
+    ) {
+      return builder(obs => 
+        subscribe(v => ASync.WithDelay(seconds, () => obs.push(v)))
       );
     }
 
