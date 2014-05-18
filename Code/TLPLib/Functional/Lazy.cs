@@ -1,6 +1,12 @@
 ﻿using System;
 
 namespace com.tinylabproductions.TLPLib.Functional {
+  public static class LazyExts {
+    public static Lazy<B> map<A, B>(this Lazy<A> lazy, Fn<A, B> mapper) {
+      return F.lazy(() => mapper(lazy.get));
+    }
+  }
+
   public interface Lazy<out A> {
     A get { get; }
   }
