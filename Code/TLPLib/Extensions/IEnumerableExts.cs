@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Logger;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class IEnumerableExts {
@@ -154,23 +155,22 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     }
 
     public static A RandomElementByWeight<A>(
-      this IEnumerable<A> sequence, Func<A, float> weightSelector
+      this IEnumerable<A> sequence, 
+      // If we change to Func here, Unity crashes. So fun.
+      Fn<A, float> weightSelector
     ) {
-      var totalWeight = sequence.Sum(weightSelector);
+      var totalWeight = sequence.Sum(i => weightSelector(i));
       // The weight we are after...
       var itemWeightIndex = (float) (new Random().NextDouble() * totalWeight);
       var currentWeightIndex = 0f;
 
-      foreach (
-        var item in 
-          from weightedItem in sequence 
-          select new { Value = weightedItem, Weight = weightSelector(weightedItem) }
-      ) {
-        currentWeightIndex += item.Weight;
-
+      foreach (var item in sequence) {
+        currentWeightIndex += weightSelector(item);
         // If we've hit or passed the weight we are after for this item then it's the one we want....
-        if (currentWeightIndex >= itemWeightIndex)
-          return item.Value;
+        if (currentWeightIndex >= itemWeightIndex) {
+          Log.debug(item);
+          return item;
+        }
       }
 
       throw new IllegalStateException();
