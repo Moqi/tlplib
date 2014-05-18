@@ -167,10 +167,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       foreach (var item in sequence) {
         currentWeightIndex += weightSelector(item);
         // If we've hit or passed the weight we are after for this item then it's the one we want....
-        if (currentWeightIndex >= itemWeightIndex) {
-          Log.debug(item);
-          return item;
-        }
+        if (currentWeightIndex >= itemWeightIndex) return item;
       }
 
       throw new IllegalStateException();
