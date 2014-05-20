@@ -100,8 +100,8 @@ public interface Option<out A> {
   Option<A> filter(Fn<A, bool> predicate);
 }
 
-public class Some<A> : Option<A> {
-  public Some(A value) { get = value; }
+public struct Some<A> : Option<A> {
+  public Some(A value) : this() { get = value; }
 
   public A getOrThrow(Fn<Exception> orElse) { return get; }
 
@@ -129,9 +129,8 @@ public class Some<A> : Option<A> {
   }
 }
 
-public class None<A> : Option<A> {
+public struct None<A> : Option<A> {
   public static readonly None<A> instance = new None<A>();
-  private None() {}
 
   public A getOrThrow(Fn<Exception> orElse) { throw orElse(); }
 

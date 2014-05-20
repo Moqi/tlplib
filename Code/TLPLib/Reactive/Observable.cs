@@ -364,7 +364,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     private void unsubscribe(Subscription s) {
-      subscriptions.IndexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
+      subscriptions.indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
     }
   }
 }

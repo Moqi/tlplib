@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -23,19 +21,10 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return dict;
     }
 
-    public static IList<B> mapWithIndex<A, B>(
-      this IList<A> list, Fn<A, int, B> mapper
-    ) {
-      var nList = new List<B>(list.Count);
-      for (var idx = 0; idx < list.Count; idx++)
-        nList.Add(mapper(list[idx], idx));
-      return nList;
-    }
-
     public static T updateOrAdd<T>(
       this IList<T> list, Fn<T, bool> finder, Fn<T> ifNotFound, Fn<T, T> ifFound
     ) {
-      return list.FindWithIndex(finder).fold(
+      return list.findWithIndex(finder).fold(
         () => {
           var item = ifNotFound();
           list.Add(item);
@@ -52,12 +41,10 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static void updateWhere<T>(
       this IList<T> list, Fn<T, bool> finder, Fn<T, T> ifFound
     ) {
-      list.FindWithIndex(finder).each(
-        t => {
-          var updated = ifFound(t._1);
-          list[t._2] = updated;
-        }
-      );
+      list.findWithIndex(finder).each(t => {
+        var updated = ifFound(t._1);
+        list[t._2] = updated;
+      });
     }
 
     public static void Shuffle<A>(this IList<A> list) {
@@ -72,6 +59,24 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       }
     }
 
+    public static IList<B> map<A, B>(this IList<A> list, Fn<A, B> mapper) {
+      var nList = new List<B>(list.Count);
+      list.each(e => nList.Add(mapper(e)));
+      return nList;
+    }
+
+    public static IList<B> mapWithIndex<A, B>(this IList<A> list, Fn<A, int, B> mapper) {
+      var nList = new List<B>(list.Count);
+      list.eachWithIndex((e, i) => nList.Add(mapper(e, i)));
+      return nList;
+    }
+
+    public static IList<A> filter<A>(this IList<A> list, Fn<A, bool> predicate) {
+      var nList = new List<A>(list.Count);
+      list.each(e => { if (predicate(e)) nList.Add(e); });
+      return nList;
+    }
+
     public static A random<A>(this IList<A> list) {
       return list[UnityEngine.Random.Range(0, list.Count)];
     }
@@ -80,14 +85,6 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       var temp = list[aIndex];
       list[aIndex] = list[bIndex];
       list[bIndex] = temp;
-    }
-
-    public static Option<A> headOpt<A>(this IList<A> list) {
-      return list.Count == 0 ? F.none<A>() : F.some(list[0]);
-    }
-
-    public static Option<A> lastOpt<A>(this IList<A> list) {
-      return list.Count == 0 ? F.none<A>() : F.some(list[list.Count - 1]);
     }
 
     public static IEnumerable<A> dropRight<A>(this IList<A> list, int count) {

@@ -23,7 +23,7 @@ namespace com.tinylabproductions.TLPLib.Data {
     }
 
     public MarkovState<A> next {
-      get { return transitions.get.RandomElementByWeight(_ => _.weight).nextState; }
+      get { return transitions.get.randomElementByWeight(_ => _.weight).nextState; }
     }
   }
 

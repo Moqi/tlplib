@@ -38,6 +38,12 @@ namespace com.tinylabproductions.TLPLib.Functional {
       return new List<A>(args);
     }
 
+    public static List<A> listFill<A>(int size, Fn<int, A> creator) {
+      var list = new List<A>(size);
+      for (var idx = 0; idx < size; idx++) list.Add(creator(idx));
+      return list;
+    }
+
     public static IList<A> ilist<A>(params A[] args) { return list(args); }
 
     public static Unit unit { get { return Unit.instance; } }
