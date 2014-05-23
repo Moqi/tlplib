@@ -11,7 +11,7 @@ namespace com.tinylabproductions.TLPLib.Tween {
     }
   }
 
-  public class TweenFacade<A> {
+  public struct TweenFacade<A> {
     private readonly Fn<A> getter;
     private readonly Act<A> setter;
 
@@ -23,6 +23,22 @@ namespace com.tinylabproductions.TLPLib.Tween {
     public A value {
       get { return getter(); }
       set { setter(value); }
+    }
+  }
+
+  public static class TweenCfg {
+    public static TweenCfg<A> a<A>(TweenFacade<A> facade, GoTweenConfig config) {
+      return new TweenCfg<A>(facade, config);
+    }
+  }
+
+  public struct TweenCfg<A> {
+    public readonly TweenFacade<A> facade;
+    public readonly GoTweenConfig config;
+
+    public TweenCfg(TweenFacade<A> facade, GoTweenConfig config) {
+      this.facade = facade;
+      this.config = config;
     }
   }
 }
