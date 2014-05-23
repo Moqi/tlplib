@@ -35,10 +35,19 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return behaviour.StartCoroutine(WithDelayEnumerator(seconds, action));
     }
 
+    public static Coroutine NextFrame(Action action) {
+      return behaviour.StartCoroutine(NextFrameEnumerator(action));
+    }
+
     private static IEnumerator WithDelayEnumerator(
       float seconds, Action action
     ) {
       yield return new WaitForSeconds(seconds);
+      action();
+    }
+
+    private static IEnumerator NextFrameEnumerator(Action action) {
+      yield return null;
       action();
     }
 
