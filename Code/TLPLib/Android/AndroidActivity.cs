@@ -3,16 +3,16 @@ using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Android {
   public static class AndroidActivity {
-    private static AndroidJavaClass unityPlayer;
-    private static AndroidJavaObject activity;
+    private readonly static AndroidJavaClass unityPlayer = 
+      new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+    private readonly static AndroidJavaClass bridge =
+      new AndroidJavaClass("com.tinylabproductions.tlplib.Bridge");
+    public readonly static AndroidJavaObject current =
+      unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
 
-    public static AndroidJavaObject current { get {
-      if (unityPlayer == null) 
-        unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-      if (activity == null)
-        activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-      return activity;
-    } }
+    public static void sharePNG(string path, string title, string sharerText) {
+      bridge.CallStatic("sharePNG", path, title, sharerText);
+    }
   }
 }
 #endif
