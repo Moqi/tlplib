@@ -50,12 +50,12 @@ namespace com.tinylabproductions.TLPLib.Binding {
 
     /*********** Observable constructors ***********/
 
-    public static IObservable<Tpl<dfButton, dfMouseEventArgs>> clicksObservable(
-      this dfButton button
-    ) {
-      return new Observable<Tpl<dfButton, dfMouseEventArgs>>(observer =>
+    public static IObservable<Tpl<A, dfMouseEventArgs>> clicksObservable<A>(
+      this A button
+    ) where A : dfControl {
+      return new Observable<Tpl<A, dfMouseEventArgs>>(observer =>
         button.Click += (control, @event) => observer.push(F.t(
-          (dfButton) control, @event
+          (A) control, @event
         ))
       );
     }
@@ -166,7 +166,7 @@ namespace com.tinylabproductions.TLPLib.Binding {
         foreach (var cb in checkboxes) cb.IsChecked = false;
       };
       Act<Option<T>, string> check = (v, name) => 
-        checkboxes.FindOpt(cb => cb.name == name).voidFold(
+        checkboxes.findOpt(cb => cb.name == name).voidFold(
           () => {
             throw new Exception(String.Format(
               "Can't find checkbox with name {0} which was mapped from {1}",
