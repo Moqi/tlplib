@@ -4,9 +4,15 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace com.tinylabproductions.TLPLib.Collection {
+  public static class ReadOnlyLinkedList {
+    public static ReadOnlyLinkedList<A> a<A>(LinkedList<A> backingList) {
+      return new ReadOnlyLinkedList<A>(backingList);
+    }
+  }
+
   [ComVisible(false)]
   [DebuggerDisplay("Count = {Count}")]
-  class ReadOnlyLinkedList<A> : ILinkedList<A> {
+  public class ReadOnlyLinkedList<A> : ILinkedList<A> {
     private readonly LinkedList<A> backing;
 
     public ReadOnlyLinkedList(LinkedList<A> backingList) {
