@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -79,6 +78,15 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       this IEnumerable<A> enumerable, Fn<A, bool> predicate
     ) {
       return enumerable.findOpt(a => ! predicate(a)).isEmpty;
+    }
+
+    public static Option<float> avg<A>(
+      this IEnumerable<A> enumerable, Fn<A, float> extractor
+    ) {
+      return enumerable.reduceLeft(
+        e => F.t(extractor(e), 1),
+        (s, e) => F.t(s._1 + extractor(e), s._2 + 1)
+      ).map(t => t._1 / t._2);
     }
 
     public static String asString(
@@ -160,6 +168,22 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       enumerable.each(e => state = folder(state, e));
       return state;
     }
+
+    public static Option<B> reduceLeft<A, B>(
+      this IEnumerable<A> enumerable, Fn<A, B> initialStateExtractor, 
+      Fn<B, A, B> folder
+    ) {
+      var state = F.none<B>();
+      enumerable.each(e => state = state.fold(
+        () => F.some(initialStateExtractor(e)),
+        s => F.some(folder(s, e))
+      ));
+      return state;
+    }
+
+    public static Option<A> reduceLeft<A>(
+      this IEnumerable<A> enumerable, Fn<A, A, A> folder
+    ) { return enumerable.reduceLeft(_ => _, folder); }
 
     // AOT safe version of Min and Max.
     public static Option<A> minMax<A>(
