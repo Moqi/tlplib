@@ -6,5 +6,9 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static Option<T> opt<T>(this bool condition, Fn<T> value) {
       return condition ? F.some(value()) : F.none<T>();
     }
+
+    public static Option<T> opt<T>(this bool condition, T value) {
+      return condition ? F.some(value) : F.none<T>();
+    }
   }
 }

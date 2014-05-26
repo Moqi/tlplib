@@ -34,7 +34,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
 
     // Implementation
 
-    private delegate Option<A> Parser<out A>(JSONNode node);
+    private delegate Option<A> Parser<A>(JSONNode node);
 
     private static readonly Parser<JSONClass> jsClassParser = n => F.opt(n.AsObject);
     private static readonly Parser<string> stringParser = n => F.some(n.Value);
@@ -124,78 +124,70 @@ namespace com.tinylabproductions.TLPLib.Configuration {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return get(key, stringParser).
-        fold<string, string, Try<string>>(tryArgEx<string>, F.scs);
+        fold<Try<string>>(tryArgEx<string>, F.scs);
     }
 
     public Try<IList<string>> tryStringList(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return getList(key, stringParser).
-        fold<string, IList<string>, Try<IList<string>>>(
-          tryArgEx<IList<string>>, F.scs
-        );
+        fold<Try<IList<string>>>(tryArgEx<IList<string>>, F.scs);
     }
 
     public Try<int> tryInt(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return get(key, n => n.Value.parseInt()).
-        fold<string, int, Try<int>>(tryArgEx<int>, F.scs);
+        fold<Try<int>>(tryArgEx<int>, F.scs);
     }
 
     public Try<IList<int>> tryIntList(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return getList(key, intParser).
-        fold<string, IList<int>, Try<IList<int>>>(tryArgEx<IList<int>>, F.scs);
+        fold<Try<IList<int>>>(tryArgEx<IList<int>>, F.scs);
     }
 
     public Try<float> tryFloat(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return get(key, n => n.Value.parseFloat()).
-        fold<string, float, Try<float>>(tryArgEx<float>, F.scs);
+        fold<Try<float>>(tryArgEx<float>, F.scs);
     }
 
     public Try<IList<float>> tryFloatList(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return getList(key, floatParser).
-        fold<string, IList<float>, Try<IList<float>>>(
-          tryArgEx<IList<float>>, F.scs
-        );
+        fold<Try<IList<float>>>(tryArgEx<IList<float>>, F.scs);
     }
 
     public Try<bool> tryBool(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return get(key, n => n.Value.parseBool()).
-        fold<string, bool, Try<bool>>(tryArgEx<bool>, F.scs);
+        fold<Try<bool>>(tryArgEx<bool>, F.scs);
     }
 
     public Try<IList<bool>> tryBoolList(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return getList(key, boolParser).
-        fold<string, IList<bool>, Try<IList<bool>>>(
-          tryArgEx<IList<bool>>, F.scs
-        );
+        fold<Try<IList<bool>>>(tryArgEx<IList<bool>>, F.scs);
     }
 
     public Try<Config> trySubConfig(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return fetchSubConfig(key).
-        fold<string, Config, Try<Config>>(tryArgEx<Config>, F.scs);
+        fold<Try<Config>>(tryArgEx<Config>, F.scs);
     }
 
     public Try<IList<Config>> trySubConfigList(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return fetchSubConfigList(key).
-        fold<string, IList<Config>, Try<IList<Config>>>(
-          tryArgEx<IList<Config>>, F.scs
-        );
+        fold<Try<IList<Config>>>(tryArgEx<IList<Config>>, F.scs);
     }
 
     private static Try<A> tryArgEx<A>(string msg) {
@@ -292,8 +284,8 @@ namespace com.tinylabproductions.TLPLib.Configuration {
       var node = current[part];
       return parser(node).fold(
         () => F.left<string, A>(string.Format(
-          "Cannot convert part '{0}' from key '{1}' to {2}. Contents: {3}",
-          part, key, typeof(A), current
+          "Cannot convert part '{0}' from key '{1}' to {2}. {3} Contents: {4}",
+          part, key, typeof(A), node.GetType(), node
         )), F.right<string, A>
       );
     }

@@ -15,16 +15,11 @@ public static class Option {
     #if UNITY_IOS
     Log.debug(
       "iOS AOT type hints: " +
-
-      new Some<byte>(0) + new Some<short>(0) + new Some<int>(0) +
-      new Some<long>(0) + new Some<float>(0) + new Some<double>(0) +
-      new Some<decimal>(0) + new Some<bool>(true) + new Some<DateTime>(DateTime.MinValue) +
-      new Some<char>('0') +
         
-      None<byte>.instance + None<short>.instance + None<int>.instance + 
-      None<long>.instance + None<float>.instance + None<double>.instance +
-      None<decimal>.instance + None<bool>.instance + None<DateTime>.instance +
-      None<char>.instance
+      new Option<byte>() + new Option<short>() + new Option<int>() + 
+      new Option<long>() + new Option<float>() + new Option<double>() +
+      new Option<decimal>() + new Option<bool>() + new Option<DateTime>() +
+      new Option<char>()
     );
     #endif
   }
@@ -53,7 +48,7 @@ public static class Option {
   public static Option<A> createOrTap<A, B>(
     this Option<A> opt, Fn<B> ifEmpty, Act<A> ifNonEmpty
   ) where B : A {
-    if (opt.isEmpty) return new Some<A>(ifEmpty());
+    if (opt.isEmpty) return new Option<A>(ifEmpty());
 
     ifNonEmpty(opt.get);
     return opt;
@@ -62,11 +57,16 @@ public static class Option {
   public static Option<A> orElse<A, B>(
     this Option<A> opt, Fn<Option<B>> other
   ) where B : A {
-    return opt.isDefined ? opt : (Option<A>) other();
+    return opt.isDefined ? opt : other().to<B, A>();
   }
 
   public static A orNull<A>(this Option<A> opt) where A : class {
     return opt.fold(() => null, _ => _);
+  }
+
+  // Downcast an option.
+  public static Option<B> to<A, B>(this Option<A> opt) where A : B {
+    return opt.map(_ => (B) _);
   }
 
   public static Option<B> map<A, B>(this Option<A> opt, Fn<A, B> func) {
@@ -94,71 +94,40 @@ public static class Option {
   }
 }
 
-public interface Option<out A> {
-  bool isDefined { get; }
-  bool isEmpty { get; }
-  A get { get; }
-  A getOrThrow(Fn<Exception> orElse);
-  void each(Act<A> action);
-  void voidFold(Action ifEmpty, Act<A> ifNonEmpty);
-  Option<A> tap(Act<A> action);
-  Option<A> filter(Fn<A, bool> predicate);
-}
+public struct Option<A> {
+  private readonly A value;
+  private readonly bool isSome;
 
-public struct Some<A> : Option<A> {
-  public Some(A value) : this() { get = value; }
+  public Option(A value) : this() {
+    this.value = value;
+    isSome = true;
+  }
 
-  public A getOrThrow(Fn<Exception> orElse) { return get; }
+  public A getOrThrow(Fn<Exception> orElse) 
+    { return isSome ? value : F.throws<A>(orElse()); }
 
-  public void each(Act<A> action) { action(get); }
+  public void each(Act<A> action) { if (isSome) action(value); }
 
   public Option<A> tap(Act<A> action) {
-    action(get);
+    if (isSome) action(value);
     return this;
   }
 
   public void voidFold(Action ifEmpty, Act<A> ifNonEmpty) {
-    ifNonEmpty(get);
+    if (isSome) ifNonEmpty(value);
+    else ifEmpty();
   }
 
   public Option<A> filter(Fn<A, bool> predicate) {
-    return predicate(get) ? this : F.none<A>();
+    return (isSome ? (predicate(value) ? this : F.none<A>()) : this);
   }
 
-  public bool isDefined { get { return true; } }
-  public bool isEmpty { get { return false; } }
-  public A get { get; private set; }
+  public bool isDefined { get { return isSome; } }
+  public bool isEmpty { get { return ! isSome; } }
+  public A get { get { return value; } }
 
   public override string ToString() {
-    return string.Format("Some({0})", get);
-  }
-}
-
-public struct None<A> : Option<A> {
-  public static readonly None<A> instance = new None<A>();
-
-  public A getOrThrow(Fn<Exception> orElse) { throw orElse(); }
-
-  public void each(Act<A> action) {}
-
-  public Option<A> tap(Act<A> action) {
-    return this;
-  }
-
-  public void voidFold(Action ifEmpty, Act<A> ifNonEmpty) {
-    ifEmpty();
-  }
-
-  public Option<A> filter(Fn<A, bool> predicate) {
-    return this;
-  }
-
-  public bool isDefined { get { return false; } }
-  public bool isEmpty { get { return true; } }
-  public A get { get { throw new Exception("#get on None!"); } }
-
-  public override string ToString() {
-    return "None";
+    return isSome ? "Some(" + value + ")" : "None";
   }
 }
 }

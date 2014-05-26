@@ -1,76 +1,74 @@
 ﻿using System;
+using com.tinylabproductions.TLPLib.Extensions;
 
 namespace com.tinylabproductions.TLPLib.Functional {
-  /** 
-  * Hack to not lose covariance of Either.
-  **/
-  public static class Either {
-    public static Either<C, B> flatMapLeft<A, B, C>(
-      this Either<A, B> either, Fn<A, Either<C, B>> mapper
-    ) { return either.fold(mapper, F.right<C, B>); }
+  public struct Either<A, B> {
+    private readonly A _leftValue;
+    private readonly B _rightValue;
+    private readonly bool _isLeft;
 
-    public static Either<A, C> flatMapRight<A, B, C>(
-      this Either<A, B> either, Fn<B, Either<A, C>> mapper
-    ) { return either.fold(F.left<A, C>, mapper); }
-
-    public static Either<C, B> mapLeft<A, B, C>(
-      this Either<A, B> either, Fn<A, C> mapper
-    ) {
-      return either.fold(v => F.left<C, B>(mapper(v)), F.right<C, B>);
+    public Either(A value) {
+      _leftValue = value;
+      _rightValue = default(B);
+      _isLeft = true;
+    }
+    public Either(B value) {
+      _leftValue = default(A);
+      _rightValue = value;
+      _isLeft = false;
     }
 
-    public static Either<A, C> mapRight<A, B, C>(
-      this Either<A, B> either, Fn<B, C> mapper
-    ) {
-      return either.fold(F.left<A, C>, v => F.right<A, C>(mapper(v)));
-    }
-
-    public static C fold<A, B, C>(
-      this Either<A, B> either, Fn<A, C> onLeft, Fn<B, C> onRight
-    ) {
-      return either.rightValue.
-        fold(() => onLeft(either.leftValue.get), onRight);
-    }
-  }
-
-  public interface Either<out A, out B> {
-    bool isLeft { get; }
-    bool isRight { get; }
-    Option<A> leftValue { get; }
-    Option<B> rightValue { get; }
-  }
-
-  class Left<A, B> : Either<A, B> {
-    private readonly A value;
-
-    public Left(A value) {
-      this.value = value;
-    }
-
-    public bool isLeft { get { return true; } }
-    public bool isRight { get { return false; } }
-    public Option<A> leftValue { get { return F.some(value); } }
-    public Option<B> rightValue { get { return F.none<B>(); } }
+    public bool isLeft { get { return _isLeft; } }
+    public bool isRight { get { return ! _isLeft; } }
+    public Option<A> leftValue { get { return isLeft.opt(_leftValue); } }
+    public Option<B> rightValue { get { return (! isLeft).opt(_rightValue); } }
 
     public override string ToString() {
-      return string.Format("Left({0})", value);
+      return isLeft ? "Left(" + _leftValue + ")" : "Right(" + _rightValue + ")";
+    }
+
+    public Either<C, B> flatMapLeft<C>(Fn<A, Either<C, B>> mapper) 
+      { return fold(mapper, F.right<C, B>); }
+
+    public Either<A, C> flatMapRight<C>(Fn<B, Either<A, C>> mapper) 
+      { return fold(F.left<A, C>, mapper); }
+
+    public Either<C, B> mapLeft<C>(Fn<A, C> mapper) 
+      { return fold(v => F.left<C, B>(mapper(v)), F.right<C, B>); }
+
+    public Either<A, C> mapRight<C>(Fn<B, C> mapper) 
+      { return fold(F.left<A, C>, v => F.right<A, C>(mapper(v))); }
+
+    public C fold<C>(Fn<A, C> onLeft, Fn<B, C> onRight) 
+      { return isLeft ? onLeft(_leftValue) : onRight(_rightValue); }
+  }
+
+  public static class EitherBuilderExts {
+    public static LeftEitherBuilder<A> left<A>(this A value) {
+      return new LeftEitherBuilder<A>(value);
+    }
+    public static RightEitherBuilder<B> right<B>(this B value) {
+      return new RightEitherBuilder<B>(value);
     }
   }
 
-  class Right<A, B> : Either<A, B> {
-    private readonly B value;
+  public struct LeftEitherBuilder<A> {
+    public readonly A leftValue;
 
-    public Right(B value) {
-      this.value = value;
+    public LeftEitherBuilder(A leftValue) {
+      this.leftValue = leftValue;
     }
 
-    public bool isLeft { get { return false; } }
-    public bool isRight { get { return true; } }
-    public Option<A> leftValue { get { return F.none<A>(); } }
-    public Option<B> rightValue { get { return F.some(value); } }
+    public Either<A, B> r<B>() { return new Either<A, B>(leftValue); }
+  }
 
-    public override string ToString() {
-      return string.Format("Right({0})", value);
+  public struct RightEitherBuilder<B> {
+    public readonly B rightValue;
+
+    public RightEitherBuilder(B rightValue) {
+      this.rightValue = rightValue;
     }
+
+    public Either<A, B> l<A>() { return new Either<A, B>(rightValue); }
   }
 }

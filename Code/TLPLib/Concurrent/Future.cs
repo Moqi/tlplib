@@ -36,7 +36,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
   }
 
   /** Coroutine based future **/
-  public interface Future<out A> {
+  public interface Future<A> {
     Option<Try<A>> value { get; }
     CancellationToken onComplete(Act<Try<A>> action);
     CancellationToken onSuccess(Act<A> action);
@@ -53,7 +53,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
   }
 
   /** Couroutine based promise **/
-  public interface Promise<in A> {
+  public interface Promise<A> {
     /** Complete with value, exception if already completed. **/
     void complete(Try<A> v);
     void completeSuccess(A v);
