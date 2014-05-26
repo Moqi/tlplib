@@ -24,9 +24,17 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     IObservable<A> filter(Fn<A, bool> predicate);
     /**
      * Buffers values into a linked list of specified size. Oldest values 
-     * are at the front of the buffer.
+     * are at the front of the buffer. Only emits `size` items at a time. When
+     * new item arrives to the buffer, oldest one is removed.
      **/
     IObservable<ILinkedList<A>> buffer(int size);
+    /**
+     * Buffers values into a linked list for specified time period. Oldest values 
+     * are at the front of the buffer. Emits tuples of (element, time), where time
+     * is `Time.time`. Only emits items if `seconds` has passed. When
+     * new item arrives to the buffer, oldest one is removed.
+     **/
+    IObservable<ILinkedList<Tpl<A, float>>> timeBuffer(float seconds);
     /**
      * Joins events of two observables returning an observable which emits
      * events when either observable emits them.
@@ -223,6 +231,28 @@ namespace com.tinylabproductions.TLPLib.Reactive {
           buffer.AddLast(val);
           if (buffer.Count > size) buffer.RemoveFirst();
           obs.push(roFacade);
+        });
+      });
+    }
+
+    public IObservable<ILinkedList<Tpl<A, float>>> timeBuffer(float seconds) {
+      return timeBufferImpl(seconds, builder<ILinkedList<Tpl<A, float>>>());
+    }
+
+    protected O timeBufferImpl<O>
+    (float seconds, ObserverBuilder<ILinkedList<Tpl<A, float>>, O> builder) {
+      return builder(obs => {
+        var buffer = new LinkedList<Tpl<A, float>>();
+        var roFacade = ReadOnlyLinkedList.a(buffer);
+        subscribe(val => {
+          buffer.AddLast(F.t(val, Time.time));
+          var lastTime = buffer.Last.Value._2;
+          if (buffer.First.Value._2 + seconds <= lastTime) {
+            // Remove items which are too old.
+            while (buffer.First.Value._2 + seconds < lastTime) 
+              buffer.RemoveFirst(); 
+            obs.push(roFacade);
+          }
         });
       });
     }
