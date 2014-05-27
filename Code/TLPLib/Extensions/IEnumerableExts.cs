@@ -3,11 +3,92 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class IEnumerableExts {
+    public static Option<B> findWithIndex<A, B>(
+      this IEnumerable<A> enumerable, Fn<A, int, Option<B>> finder
+    ) {
+      var idx = 0;
+      var list = enumerable as IList<A>;
+      if (list != null) {
+        for (idx = 0; idx < list.Count; idx++) {
+          var opt = finder(list[idx], idx);
+          if (opt.isDefined) return opt;
+        }
+        return F.none<B>();
+      }
+
+      var linkedList = enumerable as LinkedList<A>;
+      if (linkedList != null) {
+        var current = linkedList.First;
+        while (current != null) {
+          var opt = finder(current.Value, idx);
+          if (opt.isDefined) return opt;
+          current = current.Next;
+          idx++;
+        }
+        return F.none<B>();
+      }
+
+      foreach (var a in enumerable) {
+        var opt = finder(a, idx);
+        if (opt.isDefined) return opt;
+        idx++;
+      }
+      return F.none<B>();
+    }
+
+    public static Option<Tpl<A, int>> findWithIndex<A>(
+      this IEnumerable<A> enumerable, Fn<A, int, bool> predicate
+    ) {
+      return enumerable.findWithIndex((a, i) =>
+        predicate(a, i) ? F.some(F.t(a, i)) : F.none<Tpl<A, int>>()
+      );
+    }
+
+    public static Option<Tpl<A, int>> findWithIndex<A>(
+      this IEnumerable<A> enumerable, Fn<A, bool> predicate
+    ) {
+      return enumerable.findWithIndex((a, i) => predicate(a));
+    }
+
+    public static void each<A>(this IEnumerable<A> enumerable, Act<A> element) {
+      enumerable.eachWithIndex((e, i) => element(e));
+    }
+
+    public static void eachWithIndex<A>(
+      this IEnumerable<A> enumerable, Act<A, int> element
+    ) {
+      var none = F.none<A>();
+      enumerable.findWithIndex((e, i) => {
+        element(e, i);
+        return none;
+      });
+    }
+
+    public static bool exists<A>(
+      this IEnumerable<A> enumerable, Fn<A, bool> predicate
+    ) {
+      return enumerable.findOpt(predicate).isDefined;
+    }
+
+    public static bool forall<A>(
+      this IEnumerable<A> enumerable, Fn<A, bool> predicate
+    ) {
+      return enumerable.findOpt(a => ! predicate(a)).isEmpty;
+    }
+
+    public static Option<float> avg<A>(
+      this IEnumerable<A> enumerable, Fn<A, float> extractor
+    ) {
+      return enumerable.reduceLeft(
+        e => F.t(extractor(e), 1),
+        (s, e) => F.t(s._1 + extractor(e), s._2 + 1)
+      ).map(t => t._1 / t._2);
+    }
+
     public static String asString(
       this IEnumerable enumerable, 
       bool newlines=true, bool fullClasses=false
@@ -29,41 +110,37 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       );
     }
 
-    public static string mkString(
-      this IEnumerable enumerable, string sep, string start=null, string end=null
+    public static string mkString<A>(
+      this IEnumerable<A> enumerable, string sep, string start=null, string end=null
     ) {
       var b = new StringBuilder();
-      var first = true;
       b.Append(start ?? "");
-      foreach (var x in enumerable) {
-        if (first) {
-          b.Append(x);
-          first = false;
-        }
+      enumerable.eachWithIndex((elem, idx) => {
+        if (idx == 0) b.Append(elem);
         else {
           b.Append(sep);
-          b.Append(x);
+          b.Append(elem);
         }
-      }
+      });
       b.Append(end ?? "");
 
       return b.ToString();
     }
 
-    public static Option<Tpl<T, int>> FindWithIndex<T>(
-      this IEnumerable<T> enumerable, Fn<T, bool> predicate
-    ) {
-      var index = 0;
-      foreach (var item in enumerable) {
-        if (predicate(item)) return F.some(F.t(item, index));
-        index += 1;
-      }
-      return F.none<Tpl<T, int>>();
+    public static Option<A> headOpt<A>(this IEnumerable<A> enumerable) {
+      return enumerable.findWithIndex((a, i) => F.some(a));
     }
 
-    public static Option<A> headOpt<A>(this IEnumerable<A> enumerable) {
-      foreach (var e in enumerable) return F.some(e);
-      return F.none<A>();
+    public static Option<A> lastOpt<A>(this IEnumerable<A> enumerable) {
+      var list = enumerable as IList<A>;
+      if (list != null)
+        return list.Count == 0 ? F.none<A>() : F.some(list[list.Count - 1]);
+
+      var linkedList = enumerable as LinkedList<A>;
+      if (linkedList != null)
+        return F.opt(linkedList.Last).map(_ => _.Value);
+
+      return enumerable.findOrLast(a => false);
     }
 
     /**
@@ -76,43 +153,64 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       this IEnumerable<A> enumerable, Fn<A, bool> predicate
     ) {
       var last = F.none<A>();
-      foreach (var a in enumerable) {
-        var current = F.some(a);
-        if (predicate(a)) return current;
-        last = current;
-      }
-      return last;
+      return enumerable.findWithIndex((a, i) => {
+        if (predicate(a)) return F.some(a);
+        last = F.some(a);
+        return F.none<A>();
+      }).orElse(() => last);
     }
+
+    public static B foldLeft<A, B>(
+      this IEnumerable<A> enumerable, B initialState,
+      Fn<B, A, B> folder
+    ) {
+      var state = initialState;
+      enumerable.each(e => state = folder(state, e));
+      return state;
+    }
+
+    public static Option<B> reduceLeft<A, B>(
+      this IEnumerable<A> enumerable, Fn<A, B> initialStateExtractor, 
+      Fn<B, A, B> folder
+    ) {
+      var state = F.none<B>();
+      enumerable.each(e => state = state.fold(
+        () => F.some(initialStateExtractor(e)),
+        s => F.some(folder(s, e))
+      ));
+      return state;
+    }
+
+    public static Option<A> reduceLeft<A>(
+      this IEnumerable<A> enumerable, Fn<A, A, A> folder
+    ) { return enumerable.reduceLeft(_ => _, folder); }
 
     // AOT safe version of Min and Max.
     public static Option<A> minMax<A>(
       this IEnumerable<A> enumerable, Fn<A, A, bool> keepLeft
     ) {
-      return enumerable.Aggregate(F.none<A>(), (maxOpt, a) =>
+      return enumerable.foldLeft(F.none<A>(), (maxOpt, a) =>
         maxOpt.map(max => keepLeft(max, a) ? a : max).orElse(() => F.some(a))
       );
     }
 
-    public static Option<T> FindOpt<T>(
+    public static Option<T> findOpt<T>(
       this IEnumerable<T> enumerable, Fn<T, bool> predicate
     ) {
-      return enumerable.FindWithIndex(predicate).map(t => t._1);
+      return enumerable.findWithIndex((e, i) => predicate(e)).map(t => t._1);
     }
 
-    public static Option<B> FindFlatMap<A, B>(
+    // Deprecated: use #findWithIndex instead.
+    public static Option<B> findFlatMap<A, B>(
       this IEnumerable<A> enumerable, Fn<A, Option<B>> predicate
     ) {
-      foreach (var item in enumerable) {
-        var opt = predicate(item);
-        if (opt.isDefined) return opt;
-      }
-      return F.none<B>();
+      return enumerable.findWithIndex((a, i) => predicate(a));
     }
-
-    public static Option<int> IndexWhere<T>(
+    
+    public static Option<int> indexWhere<T>(
       this IEnumerable<T> enumerable, Fn<T, bool> predicate
     ) {
-      return enumerable.FindWithIndex(predicate).map(t => t._2);
+      return enumerable.findWithIndex(predicate).map(t => t._2);
     }
 
     /** Create enumerable with 1 element **/
@@ -120,7 +218,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       yield return obj;
     }
 
-    public static IEnumerable<Tpl<A, B>> Zip<A, B>(
+    public static IEnumerable<Tpl<A, B>> zip<A, B>(
       this IEnumerable<A> enum1, IEnumerable<B> enum2, bool strict=true
     ) {
       var e1 = enum1.GetEnumerator();
@@ -143,7 +241,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       } while (hasMore);
     }
 
-    public static IEnumerable<Tpl<A, int>> ZipWithIndex<A>(
+    public static IEnumerable<Tpl<A, int>> zipWithIndex<A>(
       this IEnumerable<A> enumerable
     ) {
       var idx = -1;
@@ -153,40 +251,23 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       });
     }
 
-    public static A RandomElementByWeight<A>(
-      this IEnumerable<A> sequence, Func<A, float> weightSelector
+    public static A randomElementByWeight<A>(
+      this IEnumerable<A> sequence, 
+      // If we change to Func here, Unity crashes. So fun.
+      Fn<A, float> weightSelector
     ) {
-      var totalWeight = sequence.Sum(weightSelector);
+      var totalWeight = sequence.Sum(i => weightSelector(i));
       // The weight we are after...
       var itemWeightIndex = (float) (new Random().NextDouble() * totalWeight);
       var currentWeightIndex = 0f;
 
-      foreach (
-        var item in 
-          from weightedItem in sequence 
-          select new { Value = weightedItem, Weight = weightSelector(weightedItem) }
-      ) {
-        currentWeightIndex += item.Weight;
-
+      foreach (var item in sequence) {
+        currentWeightIndex += weightSelector(item);
         // If we've hit or passed the weight we are after for this item then it's the one we want....
-        if (currentWeightIndex >= itemWeightIndex)
-          return item.Value;
+        if (currentWeightIndex >= itemWeightIndex) return item;
       }
 
       throw new IllegalStateException();
-    }
-
-    public static void each<A>(this IEnumerable<A> enumerable, Act<A> action) {
-      foreach (var a in enumerable) action(a);
-    }
-
-    public static void eachWithIndex<A>
-    (this IEnumerable<A> enumerable, Act<A, uint> action) {
-      var index = 0u;
-      foreach (var a in enumerable) {
-        action(a, index);
-        index++;
-      }
     }
 
     /**
@@ -198,10 +279,10 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     ) {
       var trues = new LinkedList<A>();
       var falses = new LinkedList<A>();
-      foreach (var a in enumerable) {
+      enumerable.each(a => {
         if (predicate(a)) trues.AddLast(a);
         else falses.AddLast(a);
-      }
+      });
       return F.t(trues, falses);
     }
   }

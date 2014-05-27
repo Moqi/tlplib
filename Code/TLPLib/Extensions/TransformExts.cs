@@ -15,6 +15,18 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       t.localScale = scale;
     }
 
+    public static void setPosition(
+      this Transform t, float? x=null, float? y=null, float? z=null
+    ) {
+      t.position = t.position.with3(x, y, z);
+    }
+
+    public static void setScale(
+      this Transform t, float? x=null, float? y=null, float? z=null
+    ) {
+      t.localScale = t.localScale.with3(x, y, z);
+    }
+
     public static IEnumerable<Transform> children(this Transform parent) {
       for (var idx = 0; idx < parent.childCount; idx++)
         yield return parent.GetChild(idx);

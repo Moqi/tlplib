@@ -127,9 +127,17 @@ On Windows:
 
 * mklink /j Assets\Vendor\TLPLib vendor\tlplib\Code\TLPLib\
 
+(If building for Android)
+
+* mklink /h Assets\Plugins\Android\tlplib.jar vendor\tlplib\android\out\artifacts\android\android.jar
+
 On Mac OS X / Linux:
 
 * ln -s ../../vendor/tlplib/Code/TLPLib Assets/Vendor/TLPLib
+
+(If building for Android)
+
+* ln -s Assets/Plugins/Android/tlplib.jar ../../../vendor/tlplib/android/out/artifacts/android/android.jar
 
 And you should be good to go.
 
