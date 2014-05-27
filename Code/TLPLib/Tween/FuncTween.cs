@@ -26,6 +26,7 @@ namespace com.tinylabproductions.TLPLib.Tween {
     }
   }
 
+#if GOTWEEN
   public static class TweenCfg {
     public static TweenCfg<A> a<A>(TweenFacade<A> facade, GoTweenConfig config) {
       return new TweenCfg<A>(facade, config);
@@ -41,4 +42,5 @@ namespace com.tinylabproductions.TLPLib.Tween {
       this.config = config;
     }
   }
+#endif
 }
