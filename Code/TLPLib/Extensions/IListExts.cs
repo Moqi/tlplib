@@ -77,8 +77,9 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return nList;
     }
 
-    public static A random<A>(this IList<A> list) {
-      return list[UnityEngine.Random.Range(0, list.Count)];
+    public static Option<A> random<A>(this IList<A> list) {
+      return list.Count == 0 
+        ? F.none<A>() : F.some(list[UnityEngine.Random.Range(0, list.Count)]);
     }
 
     public static void swap<A>(this IList<A> list, int aIndex, int bIndex) {
