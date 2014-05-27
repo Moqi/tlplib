@@ -32,28 +32,6 @@ namespace com.tinylabproductions.TLPLib.Functional {
       return new KeyValuePair<K, V>(key, value);
     }
 
-    public static Either<A, B> left<A, B>(A value) { return new Left<A, B>(value); }
-    public static Either<A, B> right<A, B>(B value) { return new Right<A, B>(value); }
-
-    // Exception thrower which "returns" a value for use in expressions.
-    public static A throws<A>(Exception ex) { throw ex; }
-    // Function that can be used to throw exceptions.
-    public static void doThrow(Exception ex) { throw ex; }
-
-    public static Try<A> doTry<A>(Fn<A> f) {
-      try { return scs(f()); }
-      catch (Exception e) { return err<A>(e); }
-    }
-    public static Try<Unit> doTry(Act action) {
-      return doTry(() => { action(); return unit; });
-    }
-    public static Try<A> scs<A>(A value) { return new Success<A>(value); }
-    public static Try<A> err<A>(Exception ex) { return new Error<A>(ex); }
-
-    public static KeyValuePair<K, V> kv<K, V>(K key, V value) {
-      return new KeyValuePair<K, V>(key, value);
-    }
-
     public static List<A> list<A>(params A[] args) {
       return new List<A>(args);
     }
