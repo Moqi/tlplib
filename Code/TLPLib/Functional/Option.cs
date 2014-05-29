@@ -60,6 +60,12 @@ public static class Option {
     return opt.isDefined ? opt : other().to<B, A>();
   }
 
+  public static Option<A> orElse<A, B>(
+    this Option<A> opt, Option<B> other
+  ) where B : A {
+    return opt.isDefined ? opt : other.to<B, A>();
+  }
+
   public static A orNull<A>(this Option<A> opt) where A : class {
     return opt.fold(() => null, _ => _);
   }
@@ -103,8 +109,8 @@ public struct Option<A> {
     isSome = true;
   }
 
-  public A getOrThrow(Fn<Exception> orElse) 
-    { return isSome ? value : F.throws<A>(orElse()); }
+  public A getOrThrow(Fn<Exception> getEx) 
+    { return isSome ? value : F.throws<A>(getEx()); }
 
   public void each(Act<A> action) { if (isSome) action(value); }
 
