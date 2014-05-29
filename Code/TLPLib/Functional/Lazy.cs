@@ -10,6 +10,8 @@ namespace com.tinylabproductions.TLPLib.Functional {
   public interface Lazy<out A> {
     bool initialized { get; }
     A get { get; }
+    // For those cases where we want it happen as a side effect.
+    A getM();
   }
 
   public class LazyImpl<A> : Lazy<A> {
@@ -28,5 +30,7 @@ namespace com.tinylabproductions.TLPLib.Functional {
       }
       return obj;
     } }
+
+    public A getM() { return get; }
   }
 }
