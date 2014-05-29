@@ -94,6 +94,12 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       ).map(t => t._1 / t._2);
     }
 
+    public static Option<int> sum<A>(
+      this IEnumerable<A> enumerable, Fn<A, int> extractor
+    ) {
+      return enumerable.reduceLeft(extractor, (sum, e) => sum + extractor(e));
+    }
+
     public static String asString(
       this IEnumerable enumerable, 
       bool newlines=true, bool fullClasses=false
