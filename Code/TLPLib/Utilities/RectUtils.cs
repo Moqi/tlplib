@@ -20,7 +20,7 @@ namespace com.tinylabproductions.TLPLib.Utilities {
 
     /** Create rect that has values from percentages of screen. **/
     public static Rect relPercent(float left, float leftEnd, float top, float topEnd) {
-      return percent(left, leftEnd - left, top, topEnd - top);
+      return percent(left, top, leftEnd - left, topEnd - top);
     }
 
     public static Rect with(
