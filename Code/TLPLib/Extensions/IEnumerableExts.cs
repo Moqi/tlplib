@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -20,7 +21,11 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         return F.none<B>();
       }
 
-      var linkedList = enumerable as LinkedList<A>;
+      var linkedList = enumerable as ILinkedList<A>;
+      if (linkedList == null) {
+        var mutLL = enumerable as LinkedList<A>;
+        if (mutLL != null) linkedList = new ReadOnlyLinkedList<A>(mutLL);
+      }
       if (linkedList != null) {
         var current = linkedList.First;
         while (current != null) {
@@ -189,8 +194,8 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static Option<A> minMax<A>(
       this IEnumerable<A> enumerable, Fn<A, A, bool> keepLeft
     ) {
-      return enumerable.foldLeft(F.none<A>(), (maxOpt, a) =>
-        maxOpt.map(max => keepLeft(max, a) ? a : max).orElse(() => F.some(a))
+      return enumerable.foldLeft(F.none<A>(), (currentOpt, a) =>
+        currentOpt.map(c => keepLeft(c, a) ? c : a).orElse(F.some(a))
       );
     }
 
