@@ -36,6 +36,12 @@ namespace com.tinylabproductions.TLPLib.Functional {
       return new List<A>(args);
     }
 
+    public static A[] arrayFill<A>(int size, Fn<int, A> creator) {
+      var arr = new A[size];
+      for (var idx = 0; idx < size; idx++) arr[idx] = creator(idx);
+      return arr;
+    }
+
     public static List<A> listFill<A>(int size, Fn<int, A> creator) {
       var list = new List<A>(size);
       for (var idx = 0; idx < size; idx++) list.Add(creator(idx));
