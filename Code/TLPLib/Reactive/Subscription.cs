@@ -14,6 +14,10 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     private readonly Act onUnsubscribe;
     private bool _isSubscribed = true;
 
+    public static ISubscription a(Act onUnsubscribe) {
+      return new Subscription(onUnsubscribe);
+    }
+
     public Subscription(Act onUnsubscribe) {
       this.onUnsubscribe = onUnsubscribe;
     }
