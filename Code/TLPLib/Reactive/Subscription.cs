@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using com.tinylabproductions.TLPLib.Extensions;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
   public interface ISubscription {
     bool isSubscribed { get; }
     bool unsubscribe();
     ISubscription andThen(Act action);
+    ISubscription join(params ISubscription[] other);
   }
 
   public class Subscription : ISubscription {
-    private readonly Action onUnsubscribe;
+    private readonly Act onUnsubscribe;
     private bool _isSubscribed = true;
 
-    public Subscription(Action onUnsubscribe) {
+    public Subscription(Act onUnsubscribe) {
       this.onUnsubscribe = onUnsubscribe;
     }
 
@@ -29,6 +31,13 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return new Subscription(() => {
         unsubscribe();
         action();
+      });
+    }
+
+    public ISubscription join(params ISubscription[] other) {
+      return new Subscription(() => {
+        unsubscribe();
+        other.each(_ => _.unsubscribe());
       });
     }
   }

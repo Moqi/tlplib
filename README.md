@@ -17,6 +17,11 @@ It contains various things, including but not limited to:
 * Tween utilities: mainly to make tweens type-safe.
 * Various other misc utilities.
 
+Requirements
+------------
+
+This library requires at least Unity 4.5.
+
 Disclaimer
 ----------
 

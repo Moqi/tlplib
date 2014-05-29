@@ -28,15 +28,25 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     }
 
     public static Coroutine StartCoroutine(IEnumerator coroutine) {
-      return behaviour.StartCoroutine(coroutine);
+      return new Coroutine(behaviour.StartCoroutine(coroutine), coroutine);
+    }
+
+    public static void StopCoroutine(IEnumerator enumerator) {
+      behaviour.StopCoroutine(enumerator);
+    }
+
+    public static void StopCoroutine(Coroutine coroutine) {
+      behaviour.StopCoroutine(coroutine.enumerator);
     }
 
     public static Coroutine WithDelay(float seconds, Action action) {
-      return behaviour.StartCoroutine(WithDelayEnumerator(seconds, action));
+      var enumerator = WithDelayEnumerator(seconds, action);
+      return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
     }
 
     public static Coroutine NextFrame(Action action) {
-      return behaviour.StartCoroutine(NextFrameEnumerator(action));
+      var enumerator = NextFrameEnumerator(action);
+      return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
     }
 
     private static IEnumerator WithDelayEnumerator(

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Extensions;
@@ -10,6 +11,7 @@ using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
   public interface IObservable<A> {
+    int subscribers { get; }
     ISubscription subscribe(Act<A> onChange);
     /** Emits first value to the future and unsubscribes. **/
     Future<A> toFuture();
@@ -82,24 +84,36 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
   public static class Observable {
     public static Tpl<A, IObservable<Evt>> a<A, Evt>
-    (Fn<IObserver<Evt>, A> creator) {
+    (Fn<IObserver<Evt>, Tpl<A, ISubscription>> creator) {
       IObserver<Evt> observer = null;
-      var observable = new Observable<Evt>(obs => observer = obs);
-      var obj = creator(observer);
+      ISubscription subscription = null;
+      var observable = new Observable<Evt>(obs => {
+        observer = obs;
+        return subscription;
+      });
+      var t = creator(observer);
+      var obj = t._1;
+      subscription = t._2;
       return F.t(obj, (IObservable<Evt>) observable);
     }
 
-    public static IObservable<A> fromEvent<A>(Act<Act<A>> registerCallback) {
-      return new Observable<A>(obs => registerCallback(obs.push));
+    public static IObservable<A> fromEvent<A>(
+      Act<Act<A>> registerCallback, Act unregisterCallback
+    ) {
+      return new Observable<A>(obs => {
+        registerCallback(obs.push);
+        return new Subscription(unregisterCallback);
+      });
     }
 
     private static IObservable<Unit> everyFrameInstance;
 
     public static IObservable<Unit> everyFrame { get {
       return everyFrameInstance ?? (
-        everyFrameInstance = new Observable<Unit>(observer =>
-          Concurrent.ASync.StartCoroutine(everyFrameCR(observer))
-        )
+        everyFrameInstance = new Observable<Unit>(observer => {
+          var cr = ASync.StartCoroutine(everyFrameCR(observer));
+          return new Subscription(() => ASync.StopCoroutine(cr));
+        })
       );
     } }
 
@@ -118,11 +132,14 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public static IObservable<DateTime> interval(
       float intervalS, Option<float> delayS
     ) {
-      return new Observable<DateTime>(observer =>
-        Concurrent.ASync.StartCoroutine(
-          interval(observer, intervalS, delayS)
-        )
-      );
+      return new Observable<DateTime>(observer => {
+        var cr = ASync.StartCoroutine(interval(observer, intervalS, delayS));
+        return new Subscription(() => ASync.StopCoroutine(cr));
+      });
+    }
+
+    public static IObservable<DateTime> interval(float intervalS) {
+      return interval(intervalS, F.none<float>());
     }
 
     public static IObservable<Tpl<P1, P2, P3, P4>> tuple<P1, P2, P3, P4>(
@@ -153,9 +170,44 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
   public delegate ObservableImplementation ObserverBuilder<
     in Elem, out ObservableImplementation
-  >(Act<IObserver<Elem>> submitValue);
+  >(Fn<IObserver<Elem>, ISubscription> subscriptionFn);
 
   public class Observable<A> : IObservable<A> {
+    /** Properties if this observable was created from other source. **/
+    private class SourceProperties {
+      private readonly IObserver<A> observer;
+      private readonly Fn<IObserver<A>, ISubscription> subscribeFn;
+
+      private Option<ISubscription> subscription = F.none<ISubscription>();
+
+      public SourceProperties(
+        IObserver<A> observer, Fn<IObserver<A>, ISubscription> subscribeFn
+      ) {
+        this.observer = observer;
+        this.subscribeFn = subscribeFn;
+      }
+
+      public bool trySubscribe() {
+        return subscription.fold(
+          () => {
+            subscription = F.some(subscribeFn(observer));
+            return true;
+          },
+          _ => false
+        );
+      }
+
+      public bool tryUnsubscribe() {
+        return subscription.fold(
+          () => false, 
+          s => {
+            subscription = F.none<ISubscription>();
+            return s.unsubscribe();
+          }
+        );
+      }
+    }
+
     private static ObserverBuilder<Elem, IObservable<Elem>> builder<Elem>() {
       return builder => new Observable<Elem>(builder);
     }
@@ -163,23 +215,33 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     private readonly IList<Tpl<Subscription, Act<A>>> subscriptions =
       new List<Tpl<Subscription, Act<A>>>();
 
-    protected Observable() {}
+    private readonly Option<SourceProperties> sourceProps;
 
-    public Observable(Act<IObserver<A>> onSubmit) {
-      onSubmit(new Observer<A>(submit));
+    protected Observable() {
+      sourceProps = F.none<SourceProperties>();
+    }
+
+    public Observable(Fn<IObserver<A>, ISubscription> subscribeFn) {
+      sourceProps = F.some(new SourceProperties(
+        new Observer<A>(submit), subscribeFn
+      ));
     }
 
     protected virtual void submit(A value) {
       // Make a copy of subscriptions to prevent concurrent modification of it.
       var localSubscription = subscriptions.ToArray();
-      foreach (var t in localSubscription) t._2(value);
+      localSubscription.each(t => t._2(value));
     }
+
+    public int subscribers { get { return subscriptions.Count; } }
 
     public virtual ISubscription subscribe(Act<A> onChange) {
       Subscription subscription = null;
       // ReSharper disable once AccessToModifiedClosure
       subscription = new Subscription(() => unsubscribe(subscription));
       subscriptions.Add(F.t(subscription, onChange));
+      // Subscribe to source if we have a first subscriber.
+      sourceProps.each(_ => _.trySubscribe());
       return subscription;
     }
 
@@ -227,7 +289,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return builder(obs => {
         var buffer = new LinkedList<A>();
         var roFacade = new ReadOnlyLinkedList<A>(buffer);
-        subscribe(val => {
+        return subscribe(val => {
           buffer.AddLast(val);
           if (buffer.Count > size) buffer.RemoveFirst();
           obs.push(roFacade);
@@ -244,7 +306,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return builder(obs => {
         var buffer = new LinkedList<Tpl<A, float>>();
         var roFacade = ReadOnlyLinkedList.a(buffer);
-        subscribe(val => {
+        return subscribe(val => {
           buffer.AddLast(F.t(val, Time.time));
           var lastTime = buffer.Last.Value._2;
           if (buffer.First.Value._2 + seconds <= lastTime) {
@@ -263,10 +325,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     protected O joinImpl<B, O>
     (IObservable<B> other, ObserverBuilder<A, O> builder) where B : A {
-      return builder(obs => {
-        subscribe(obs.push);
-        other.subscribe(v => obs.push(v));
-      });
+      return builder(obs =>
+        subscribe(obs.push).join(other.subscribe(v => obs.push(v)))
+      );
     }
 
     public IObservable<A> onceEvery(float seconds) {
@@ -277,7 +338,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     (float seconds, ObserverBuilder<A, O> builder) {
       return builder(obs => {
         var lastEmit = float.NegativeInfinity;
-        subscribe(value => {
+        return subscribe(value => {
           if (lastEmit + seconds > Time.time) return;
           lastEmit = Time.time;
           obs.push(value);
@@ -331,14 +392,15 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         Action notify = () => lastSelf.each(aVal => lastOther.each(bVal =>
           obs.push(F.t(aVal, bVal))
         ));
-        subscribe(val => {
+        var s1 = subscribe(val => {
           lastSelf = F.some(val);
           notify();
         });
-        other.subscribe(val => {
+        var s2 = other.subscribe(val => {
           lastOther = F.some(val);
           notify();
         });
+        return s1.join(s2);
       });
     }
 
@@ -351,7 +413,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     ) {
       return builder(obs => {
         var lastValue = F.none<A>();
-        subscribe(val => {
+        return subscribe(val => {
           action(obs, lastValue, val);
           lastValue = F.some(val);
         });
@@ -395,6 +457,12 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     private void unsubscribe(Subscription s) {
       subscriptions.indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
+
+      // Unsubscribe from source if we don't have any subscribers that are
+      // subscribed to us.
+      if (subscribers == 0) {
+        sourceProps.each(_ => _.tryUnsubscribe());
+      }
     }
   }
 }
