@@ -66,5 +66,40 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       Enumerable.Range(0, 5).each(subj.push);
       Assert.AreEqual(F.list(0, 2, 4), list);
     }
+
+    [Test]
+    public void Zip2() {
+      var subj1 = new Subject<int>();
+      var subj2 = new Subject<int>();
+      var list = F.list<Tpl<int, int>>();
+      subj1.zip(subj2).subscribe(list.Add);
+      subj1.push(1);
+      Assert.AreEqual(0, list.Count);
+      subj2.push(1);
+      Assert.AreEqual(F.list(F.t(1, 1)), list);
+      subj2.push(2);
+      Assert.AreEqual(F.list(F.t(1, 1), F.t(1, 2)), list);
+      subj1.push(0);
+      Assert.AreEqual(F.list(F.t(1, 1), F.t(1, 2), F.t(0, 2)), list);
+    }
+
+    [Test]
+    public void Zip3() {
+      var subj1 = new Subject<int>();
+      var subj2 = new Subject<int>();
+      var subj3 = new Subject<int>();
+      var list = F.list<Tpl<int, int, int>>();
+      subj1.zip(subj2, subj3).subscribe(list.Add);
+      subj1.push(1);
+      Assert.AreEqual(0, list.Count);
+      subj2.push(1);
+      Assert.AreEqual(0, list.Count);
+      subj3.push(1);
+      Assert.AreEqual(F.list(F.t(1, 1, 1)), list);
+      subj2.push(2);
+      Assert.AreEqual(F.list(F.t(1, 1, 1), F.t(1, 2, 1)), list);
+      subj3.push(0);
+      Assert.AreEqual(F.list(F.t(1, 1, 1), F.t(1, 2, 1), F.t(1, 2, 0)), list);
+    }
   }
 }

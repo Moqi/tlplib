@@ -57,6 +57,13 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     /** Delays each event X seconds. **/
     IObservable<A> delayed(float seconds);
     IObservable<Tpl<A, B>> zip<B>(IObservable<B> other);
+    IObservable<Tpl<A, B, C>> zip<B, C>(IObservable<B> o1, IObservable<C> o2);
+    IObservable<Tpl<A, B, C, D>> zip<B, C, D>(
+      IObservable<B> o1, IObservable<C> o2, IObservable<D> o3
+    );
+    IObservable<Tpl<A, B, C, D, E>> zip<B, C, D, E>(
+      IObservable<B> o1, IObservable<C> o2, IObservable<D> o3, IObservable<E> o4
+    );
     // Returns pairs of (old, new) values when they are changing.
     // If there was no events before, old may be None.
     IObservable<Tpl<Option<A>, A>> changesOpt();
@@ -140,13 +147,6 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public static IObservable<DateTime> interval(float intervalS) {
       return interval(intervalS, F.none<float>());
-    }
-
-    public static IObservable<Tpl<P1, P2, P3, P4>> tuple<P1, P2, P3, P4>(
-      IObservable<P1> o1, IObservable<P2> o2, IObservable<P3> o3, IObservable<P4> o4
-    ) {
-      return o1.zip<P2>(o2).zip<P3>(o3).zip<P4>(o4).
-        map<Tpl<P1, P2, P3, P4>>(t => F.t(t._1._1._1, t._1._1._2, t._1._2, t._2));
     }
 
     private static IEnumerator everyFrameCR(IObserver<Unit> observer) {
@@ -382,6 +382,32 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public IObservable<Tpl<A, B>> zip<B>(IObservable<B> other) {
       return zipImpl(other, builder<Tpl<A, B>>());
+    }
+
+    public IObservable<Tpl<A, B, C>> zip<B, C>(IObservable<B> o1, IObservable<C> o2) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug.
+      return zip<B>(o1).zip<C>(o2).
+        map<Tpl<A, B, C>>(t => F.t(t._1._1, t._1._2, t._2));
+    }
+
+    public IObservable<Tpl<A, B, C, D>> zip<B, C, D>(
+      IObservable<B> o1, IObservable<C> o2, IObservable<D> o3
+    ) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug.
+      return zip<B, C>(o1, o2).zip<D>(o3).
+        map<Tpl<A, B, C, D>>(t => F.t(t._1._1, t._1._2, t._1._3, t._2));
+    }
+
+    public IObservable<Tpl<A, B, C, D, E>> zip<B, C, D, E>(
+      IObservable<B> o1, IObservable<C> o2, IObservable<D> o3, IObservable<E> o4
+    ) {
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug.
+      return zip<B, C, D>(o1, o2, o3).zip<E>(o4).map<Tpl<A, B, C, D, E>>(t => 
+        F.t(t._1._1, t._1._2, t._1._3, t._1._4, t._2)
+      );
     }
 
     protected O zipImpl<B, O>
