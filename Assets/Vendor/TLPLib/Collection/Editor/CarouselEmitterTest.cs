@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿#if UNITY_TEST
+using System.Linq;
 using com.tinylabproductions.TLPLib.Functional;
 using NUnit.Framework;
 
@@ -73,3 +74,4 @@ namespace com.tinylabproductions.TLPLib.Collection {
     }
   }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿#if UNITY_TEST
+using NUnit.Framework;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   [TestFixture]
@@ -21,3 +22,4 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     }
   }
 }
+#endif

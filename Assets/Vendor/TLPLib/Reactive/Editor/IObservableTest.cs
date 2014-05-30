@@ -1,6 +1,6 @@
-﻿using System;
+﻿#if UNITY_TEST
+using System;
 using System.Linq;
-using System.Threading;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 using NUnit.Framework;
@@ -103,3 +103,4 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
   }
 }
+#endif

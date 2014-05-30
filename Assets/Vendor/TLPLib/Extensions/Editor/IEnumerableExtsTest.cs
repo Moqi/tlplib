@@ -1,4 +1,5 @@
-﻿using com.tinylabproductions.TLPLib.Functional;
+﻿#if UNITY_TEST
+using com.tinylabproductions.TLPLib.Functional;
 using NUnit.Framework;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -41,3 +42,4 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     }
   }
 }
+#endif
