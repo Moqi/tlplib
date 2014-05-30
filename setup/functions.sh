@@ -23,7 +23,8 @@ dirlink() {
   
   if [[ "$OS" == *Windows* ]]; then
     junction -d "$name"
-    sleep 1 # Really nice: process exits defore it has finished.
+    # Really nice: process exits defore it has finished.
+    sleep 3
     test -e "$name" && {
       ls -la "$name"
       notif "Going to remove '$name'"
