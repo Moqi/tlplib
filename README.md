@@ -17,6 +17,11 @@ It contains various things, including but not limited to:
 * Tween utilities: mainly to make tweens type-safe.
 * Various other misc utilities.
 
+Requirements
+------------
+
+This library requires at least Unity 4.5.
+
 Disclaimer
 ----------
 
@@ -117,32 +122,20 @@ Add remote repository reference:
 
 Merge the subtree:
 
-* git subtree add -P vendor\tlplib --squash tlplib master
+* git subtree add -P vendor/tlplib --squash tlplib master
 
 Link the code into your assets:
 
-* mkdir Assets\Vendor
+(from git bash)
 
-On Windows:
-
-* mklink /j Assets\Vendor\TLPLib vendor\tlplib\Code\TLPLib\
-
-(If building for Android)
-
-* mklink /h Assets\Plugins\Android\tlplib.jar vendor\tlplib\android\out\artifacts\android\android.jar
-
-On Mac OS X / Linux:
-
-* ln -s ../../vendor/tlplib/Code/TLPLib Assets/Vendor/TLPLib
-
-(If building for Android)
-
-* ln -s Assets/Plugins/Android/tlplib.jar ../../../vendor/tlplib/android/out/artifacts/android/android.jar
+* vendor/tlplib/setup/setup.sh
 
 And you should be good to go.
 
 Don't forget that when you clone your git repository to a new place, your 
 ```tlplib``` remote will be lost so you will need to readd it.
+
+Alternatively you can just copy the whole Assets folder to your project and be done with it.
 
 ### Defining compiler constants ###
 
@@ -154,6 +147,7 @@ If you wish to use them, you need to define the constants in Unity3D (Menu Bar >
 
 * GOTWEEN - if you are using [GoKit](https://github.com/prime31/GoKit).
 * DFGUI - if you are using [Daikon Forge GUI](http://www.daikonforge.com/dfgui/). Beware that this also uses GOTWEEN as well.
+* UNITY_TEST - to enable unit tests.
 
 Getting latest updates
 ----------------------
