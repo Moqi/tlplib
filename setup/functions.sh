@@ -28,7 +28,7 @@ dirlink() {
     test -e "$name" && {
       ls -la "$name"
       notif "Going to remove '$name'"
-      rm -fv "$name"
+      rm -rfv "$name"
     }
 
     junction "$name" "$ld/$name"
