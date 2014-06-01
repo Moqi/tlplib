@@ -30,7 +30,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     IObservable<ILinkedList<A>> buffer(int size);
     /**
      * Buffers values into a linked list for specified time period. Oldest values 
-     * are at the front of the buffer. Emits tuples of (element, time), where time
+     * are at the front of the buffer. Emits Tpls of (element, time), where time
      * is `Time.time`. Only emits items if `seconds` has passed. When
      * new item arrives to the buffer, oldest one is removed.
      **/
@@ -48,7 +48,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     /**
      * Waits until `count` events are emmited within a single `timeframe` 
      * seconds window and emits a read only linked list of 
-     * (element, emmision time) tuples with emmission time taken from 
+     * (element, emmision time) Tpls with emmission time taken from 
      * `Time.time`.
      **/
     IObservable<ILinkedList<Tpl<A, float>>> withinTimeframe(int count, float timeframe);
@@ -125,7 +125,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       );
     }
 
-    public static IObservable<Tpl<P1, P2, P3, P4>> tuple<P1, P2, P3, P4>(
+    public static IObservable<Tpl<P1, P2, P3, P4>> Tpl<P1, P2, P3, P4>(
       IObservable<P1> o1, IObservable<P2> o2, IObservable<P3> o3, IObservable<P4> o4
     ) {
       return o1.zip<P2>(o2).zip<P3>(o3).zip<P4>(o4).
@@ -160,8 +160,15 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return builder => new Observable<Elem>(builder);
     }
 
-    private readonly IList<Tpl<Subscription, Act<A>>> subscriptions =
+    private readonly List<Tpl<Subscription, Act<A>>> subscriptions =
       new List<Tpl<Subscription, Act<A>>>();
+    private readonly List<Tpl<Subscription, Act<A>>> pendingSubscriptions =
+      new List<Tpl<Subscription, Act<A>>>();
+    private readonly List<Subscription> pendingRemovals =
+      new List<Subscription>();
+
+    // Are we currently iterating through subscriptions?
+    private bool iterating;
 
     protected Observable() {}
 
@@ -170,16 +177,25 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     protected virtual void submit(A value) {
-      // Make a copy of subscriptions to prevent concurrent modification of it.
-      var localSubscription = subscriptions.ToArray();
-      foreach (var t in localSubscription) t._2(value);
+      // Mark a flag to prevent concurrent modification of subscriptions array.
+      iterating = true;
+      try {
+        subscriptions.each(t => t._2(value));
+      }
+      finally {
+        iterating = false;
+        subscriptions.AddRange(pendingSubscriptions);
+        pendingSubscriptions.Clear();
+        pendingRemovals.each(unsubscribe);
+        pendingRemovals.Clear();
+      }
     }
 
     public virtual ISubscription subscribe(Act<A> onChange) {
       Subscription subscription = null;
       // ReSharper disable once AccessToModifiedClosure
       subscription = new Subscription(() => unsubscribe(subscription));
-      subscriptions.Add(F.t(subscription, onChange));
+      (iterating ? pendingSubscriptions : subscriptions).Add(F.t(subscription, onChange));
       return subscription;
     }
 
@@ -394,7 +410,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     private void unsubscribe(Subscription s) {
-      subscriptions.indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
+      if (iterating) pendingRemovals.Add(s);
+      else subscriptions.indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
     }
   }
 }

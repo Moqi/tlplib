@@ -32,8 +32,9 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         return F.none<B>();
       }
 
-      foreach (var a in enumerable) {
-        var opt = finder(a, idx);
+      var enumerator = enumerable.GetEnumerator();
+      while (enumerator.MoveNext()) {
+        var opt = finder(enumerator.Current, idx);
         if (opt.isDefined) return opt;
         idx++;
       }
@@ -69,7 +70,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     }
 
     public static bool exists<A>(
-      this IEnumerable<A> enumerable, Fn<A, bool> predicate
+      this IEnumerable<A> enumerable, Fn<A, int, bool> predicate
     ) {
       return enumerable.findOpt(predicate).isDefined;
     }
@@ -77,7 +78,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static bool forall<A>(
       this IEnumerable<A> enumerable, Fn<A, bool> predicate
     ) {
-      return enumerable.findOpt(a => ! predicate(a)).isEmpty;
+      return enumerable.findOpt((a, i) => ! predicate(a)).isEmpty;
     }
 
     public static Option<float> avg<A>(
@@ -174,7 +175,9 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       Fn<B, A, B> folder
     ) {
       var state = F.none<B>();
-      enumerable.each(e => state = state.fold(
+      // ReSharper disable once RedundantTypeArgumentsOfMethod
+      // Mono compiler bug.
+      enumerable.each(e => state = state.fold<B, Option<B>>(
         () => F.some(initialStateExtractor(e)),
         s => F.some(folder(s, e))
       ));
@@ -195,9 +198,9 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     }
 
     public static Option<T> findOpt<T>(
-      this IEnumerable<T> enumerable, Fn<T, bool> predicate
+      this IEnumerable<T> enumerable, Fn<T, int, bool> predicate
     ) {
-      return enumerable.findWithIndex((e, i) => predicate(e)).map(t => t._1);
+      return enumerable.findWithIndex(predicate).map(t => t._1);
     }
 
     // Deprecated: use #findWithIndex instead.
@@ -271,7 +274,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     }
 
     /**
-     * Returns tuple of linked lists where first one contains all the items
+     * Returns Tpl of linked lists where first one contains all the items
      * that matched the predicate and second - those who didn't.
      **/
     public static Tpl<LinkedList<A>, LinkedList<A>> partition<A>(

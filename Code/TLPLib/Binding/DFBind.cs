@@ -166,7 +166,7 @@ namespace com.tinylabproductions.TLPLib.Binding {
         foreach (var cb in checkboxes) cb.IsChecked = false;
       };
       Act<Option<T>, string> check = (v, name) => 
-        checkboxes.findOpt(cb => cb.name == name).voidFold(
+        checkboxes.findOpt((cb, idx) => cb.name == name).voidFold(
           () => {
             throw new Exception(String.Format(
               "Can't find checkbox with name {0} which was mapped from {1}",

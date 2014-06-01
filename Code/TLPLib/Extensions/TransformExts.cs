@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using com.tinylabproductions.TLPLib.Functional;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -15,14 +16,26 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       t.localScale = scale;
     }
 
+    public static void setPositionX(
+      this Transform t, Option<float> x
+    ) {
+      t.position = t.position.with3(x, new Option<float>(), new Option<float>());
+    }
+
     public static void setPosition(
-      this Transform t, float? x=null, float? y=null, float? z=null
+      this Transform t, 
+      Option<float> x=new Option<float>(), 
+      Option<float> y=new Option<float>(), 
+      Option<float> z=new Option<float>()
     ) {
       t.position = t.position.with3(x, y, z);
     }
 
     public static void setScale(
-      this Transform t, float? x=null, float? y=null, float? z=null
+      this Transform t, 
+      Option<float> x=new Option<float>(), 
+      Option<float> y=new Option<float>(), 
+      Option<float> z=new Option<float>()
     ) {
       t.localScale = t.localScale.with3(x, y, z);
     }
