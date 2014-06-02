@@ -15,6 +15,7 @@ val tName = "Tpl";
   val sTypes = genPNames.mkString(", ")
   val args = r.map(n => s"P$n p$n").mkString(", ")
   val argsNoTypes = r.map(n => s"p$n").mkString(", ")
+  val propsNoTypes = r.map(n => s"_$n").mkString(", ")
   val setters = r.map(n => s"_$n = p$n").mkString("; ")
   val props = r.map(n => s"P$n _$n { get; }").mkString(" ")
   val propsImpl = r.map(n => s"public P$n _$n { get; private set; }").mkString(" ")
@@ -33,6 +34,12 @@ s"""  [System.Serializable]
   
     public $iName($args)$baseConstructor { $setters; }
   
+    // Unapply.
+    public void ua(Act<$sTypes> f) { f($propsNoTypes); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<$sTypes, R> f) { return f($propsNoTypes); } 
+ 
     public override string ToString() {
       return string.Format("($toStringFmt)", $toStringArgs);
     }
@@ -109,13 +116,20 @@ fCs.close()
  * 
  **/
 
-namespace System {  [System.Serializable]
+namespace System {
+    [System.Serializable]
   public struct Tpl<P1, P2> : 
   IComparable<Tpl<P1, P2>>, IEquatable<Tpl<P1, P2>> {
     public P1 _1 { get; private set; } public P2 _2 { get; private set; }
   
     public Tpl(P1 p1, P2 p2) : this() { _1 = p1; _2 = p2; }
   
+    // Unapply.
+    public void ua(Act<P1, P2> f) { f(_1, _2); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, R> f) { return f(_1, _2); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1})", _1, _2);
     }
@@ -179,6 +193,12 @@ c = Smooth.Collections.Comparer<P2>.Default.Compare(_2, other._2);
   
     public Tpl(P1 p1, P2 p2, P3 p3) : this() { _1 = p1; _2 = p2; _3 = p3; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3> f) { f(_1, _2, _3); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, R> f) { return f(_1, _2, _3); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2})", _1, _2, _3);
     }
@@ -245,6 +265,12 @@ c = Smooth.Collections.Comparer<P3>.Default.Compare(_3, other._3);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4> f) { f(_1, _2, _3, _4); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, R> f) { return f(_1, _2, _3, _4); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3})", _1, _2, _3, _4);
     }
@@ -314,6 +340,12 @@ c = Smooth.Collections.Comparer<P4>.Default.Compare(_4, other._4);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5> f) { f(_1, _2, _3, _4, _5); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, R> f) { return f(_1, _2, _3, _4, _5); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4})", _1, _2, _3, _4, _5);
     }
@@ -386,6 +418,12 @@ c = Smooth.Collections.Comparer<P5>.Default.Compare(_5, other._5);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6> f) { f(_1, _2, _3, _4, _5, _6); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, R> f) { return f(_1, _2, _3, _4, _5, _6); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5})", _1, _2, _3, _4, _5, _6);
     }
@@ -461,6 +499,12 @@ c = Smooth.Collections.Comparer<P6>.Default.Compare(_6, other._6);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7> f) { f(_1, _2, _3, _4, _5, _6, _7); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, R> f) { return f(_1, _2, _3, _4, _5, _6, _7); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6})", _1, _2, _3, _4, _5, _6, _7);
     }
@@ -539,6 +583,12 @@ c = Smooth.Collections.Comparer<P7>.Default.Compare(_7, other._7);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8> f) { f(_1, _2, _3, _4, _5, _6, _7, _8); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7})", _1, _2, _3, _4, _5, _6, _7, _8);
     }
@@ -620,6 +670,12 @@ c = Smooth.Collections.Comparer<P8>.Default.Compare(_8, other._8);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8})", _1, _2, _3, _4, _5, _6, _7, _8, _9);
     }
@@ -704,6 +760,12 @@ c = Smooth.Collections.Comparer<P9>.Default.Compare(_9, other._9);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10);
     }
@@ -791,6 +853,12 @@ c = Smooth.Collections.Comparer<P10>.Default.Compare(_10, other._10);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11);
     }
@@ -881,6 +949,12 @@ c = Smooth.Collections.Comparer<P11>.Default.Compare(_11, other._11);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12);
     }
@@ -974,6 +1048,12 @@ c = Smooth.Collections.Comparer<P12>.Default.Compare(_12, other._12);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13);
     }
@@ -1070,6 +1150,12 @@ c = Smooth.Collections.Comparer<P13>.Default.Compare(_13, other._13);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14);
     }
@@ -1169,6 +1255,12 @@ c = Smooth.Collections.Comparer<P14>.Default.Compare(_14, other._14);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14, P15 p15) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; _15 = p15; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15);
     }
@@ -1271,6 +1363,12 @@ c = Smooth.Collections.Comparer<P15>.Default.Compare(_15, other._15);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14, P15 p15, P16 p16) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; _15 = p15; _16 = p16; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16);
     }
@@ -1376,6 +1474,12 @@ c = Smooth.Collections.Comparer<P16>.Default.Compare(_16, other._16);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14, P15 p15, P16 p16, P17 p17) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; _15 = p15; _16 = p16; _17 = p17; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17);
     }
@@ -1484,6 +1588,12 @@ c = Smooth.Collections.Comparer<P17>.Default.Compare(_17, other._17);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14, P15 p15, P16 p16, P17 p17, P18 p18) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; _15 = p15; _16 = p16; _17 = p17; _18 = p18; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18);
     }
@@ -1595,6 +1705,12 @@ c = Smooth.Collections.Comparer<P18>.Default.Compare(_18, other._18);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14, P15 p15, P16 p16, P17 p17, P18 p18, P19 p19) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; _15 = p15; _16 = p16; _17 = p17; _18 = p18; _19 = p19; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19);
     }
@@ -1709,6 +1825,12 @@ c = Smooth.Collections.Comparer<P19>.Default.Compare(_19, other._19);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14, P15 p15, P16 p16, P17 p17, P18 p18, P19 p19, P20 p20) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; _15 = p15; _16 = p16; _17 = p17; _18 = p18; _19 = p19; _20 = p20; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20);
     }
@@ -1826,6 +1948,12 @@ c = Smooth.Collections.Comparer<P20>.Default.Compare(_20, other._20);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14, P15 p15, P16 p16, P17 p17, P18 p18, P19 p19, P20 p20, P21 p21) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; _15 = p15; _16 = p16; _17 = p17; _18 = p18; _19 = p19; _20 = p20; _21 = p21; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21);
     }
@@ -1946,6 +2074,12 @@ c = Smooth.Collections.Comparer<P21>.Default.Compare(_21, other._21);
   
     public Tpl(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10, P11 p11, P12 p12, P13 p13, P14 p14, P15 p15, P16 p16, P17 p17, P18 p18, P19 p19, P20 p20, P21 p21, P22 p22) : this() { _1 = p1; _2 = p2; _3 = p3; _4 = p4; _5 = p5; _6 = p6; _7 = p7; _8 = p8; _9 = p9; _10 = p10; _11 = p11; _12 = p12; _13 = p13; _14 = p14; _15 = p15; _16 = p16; _17 = p17; _18 = p18; _19 = p19; _20 = p20; _21 = p21; _22 = p22; }
   
+    // Unapply.
+    public void ua(Act<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22> f) { f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22); }
+ 
+    // Unapply with function.
+    public R ua<R>(Fn<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22, R> f) { return f(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22); } 
+ 
     public override string ToString() {
       return string.Format("({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21})", _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22);
     }
@@ -2060,6 +2194,7 @@ c = Smooth.Collections.Comparer<P22>.Default.Compare(_22, other._22);
     public static bool operator <= (Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22> lhs, Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22> rhs) {
       return lhs.CompareTo(rhs) <= 0;
     } 
+
   }
 
 }

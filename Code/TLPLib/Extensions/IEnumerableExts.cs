@@ -7,14 +7,15 @@ using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class IEnumerableExts {
-    public static Option<B> findWithIndex<A, B>(
-      this IEnumerable<A> enumerable, Fn<A, int, Option<B>> finder
+    public static Option<B> findWithIndex<A, B, Ctx>(
+      this IEnumerable<A> enumerable, Ctx context, 
+      Fn<A, int, Ctx, Option<B>> finder
     ) {
       var idx = 0;
       var list = enumerable as IList<A>;
       if (list != null) {
         for (idx = 0; idx < list.Count; idx++) {
-          var opt = finder(list[idx], idx);
+          var opt = finder(list[idx], idx, context);
           if (opt.isDefined) return opt;
         }
         return F.none<B>();
@@ -24,7 +25,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       if (linkedList != null) {
         var current = linkedList.First;
         while (current != null) {
-          var opt = finder(current.Value, idx);
+          var opt = finder(current.Value, idx, context);
           if (opt.isDefined) return opt;
           current = current.Next;
           idx++;
@@ -34,11 +35,18 @@ namespace com.tinylabproductions.TLPLib.Extensions {
 
       var enumerator = enumerable.GetEnumerator();
       while (enumerator.MoveNext()) {
-        var opt = finder(enumerator.Current, idx);
+        var opt = finder(enumerator.Current, idx, context);
         if (opt.isDefined) return opt;
         idx++;
       }
       return F.none<B>();
+    }
+
+    public static Option<B> findWithIndex<A, B>(
+      this IEnumerable<A> enumerable,
+      Fn<A, int, Option<B>> finder
+    ) {
+      return enumerable.findWithIndex(finder, (a, idx, f) => f(a, idx));
     }
 
     public static Option<Tpl<A, int>> findWithIndex<A>(
@@ -55,19 +63,31 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return enumerable.findWithIndex((a, i) => predicate(a));
     }
 
+    public static void each<A, Ctx>(
+      this IEnumerable<A> enumerable, Ctx context, Act<A, Ctx> element
+    ) {
+      enumerable.eachWithIndex(
+        F.t(context, element), 
+        (e, i, ctxT) => ctxT._2(e, ctxT._1)
+      );
+    }
+
     public static void each<A>(this IEnumerable<A> enumerable, Act<A> element) {
-      enumerable.eachWithIndex((e, i) => element(e));
+      enumerable.each(element, (e, f) => f(e));
+    }
+
+    public static void eachWithIndex<A, Ctx>(
+      this IEnumerable<A> enumerable, Ctx context, Act<A, int, Ctx> element
+    ) {
+      enumerable.findWithIndex(F.t(context, element), (e, i, ctxT) => {
+        ctxT._2(e, i, ctxT._1);
+        return F.none<A>();
+      });
     }
 
     public static void eachWithIndex<A>(
       this IEnumerable<A> enumerable, Act<A, int> element
-    ) {
-      var none = F.none<A>();
-      enumerable.findWithIndex((e, i) => {
-        element(e, i);
-        return none;
-      });
-    }
+    ) { enumerable.eachWithIndex(element, (e, i, f) => f(e, i)); }
 
     public static bool exists<A>(
       this IEnumerable<A> enumerable, Fn<A, int, bool> predicate

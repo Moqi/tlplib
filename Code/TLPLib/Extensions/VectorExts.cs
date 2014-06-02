@@ -12,12 +12,6 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return new Vector3(x.getOrElse(v.x), y.getOrElse(v.y));
     }
 
-    public static Vector3 with3X(
-      this Vector3 v, Option<float> x
-    ) {
-      return new Vector3(x.getOrElse(v.x), v.y, v.z);
-    }
-
     public static Vector3 with3(
       this Vector3 v, 
       Option<float> x = new Option<float>(),

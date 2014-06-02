@@ -16,12 +16,6 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       t.localScale = scale;
     }
 
-    public static void setPositionX(
-      this Transform t, Option<float> x
-    ) {
-      t.position = t.position.with3(x, new Option<float>(), new Option<float>());
-    }
-
     public static void setPosition(
       this Transform t, 
       Option<float> x=new Option<float>(), 
