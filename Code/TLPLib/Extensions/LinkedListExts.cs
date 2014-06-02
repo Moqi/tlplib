@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using com.tinylabproductions.TLPLib.Collection;
+using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class LinkedListExts {
@@ -25,5 +26,19 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       list.each(e => { if (predicate(e)) nList.AddLast(e); });
       return nList;
     }
+
+    // Removes and returns the first item.
+    public static Option<LinkedListNode<A>> shiftNode<A>(
+      this LinkedList<A> list
+    ) {
+      var first = F.opt(list.First);
+      if (first.isDefined) list.RemoveFirst();
+      return first;
+    }
+
+    // Removes and returns the first item.
+    public static Option<A> shift<A>(
+      this LinkedList<A> list
+    ) { return list.shiftNode().map(_ => _.Value); }
   }
 }

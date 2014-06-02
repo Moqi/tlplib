@@ -177,7 +177,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       onSubmit(new Observer<A>(submit));
     }
 
-    protected virtual void submit(A value) {
+    protected void submit(A value) {
       // Mark a flag to prevent concurrent modification of subscriptions array.
       iterating = true;
       try {
@@ -187,8 +187,12 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         iterating = false;
         subscriptions.AddRange(pendingSubscriptions);
         pendingSubscriptions.Clear();
-        pendingRemovals.Slinq().ForEach(unsubscribe);
-        pendingRemovals.Clear();
+
+        if (pendingRemovals.Count > 0) {
+          // This causes heap allocations somehow.
+          pendingRemovals.Slinq().ForEach(unsubscribe);
+          pendingRemovals.Clear();
+        }
       }
     }
 
