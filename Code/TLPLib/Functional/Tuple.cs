@@ -44,7 +44,7 @@ s"""  [System.Serializable]
     public bool Equals($fType t) {
       return (
 ${r.map { i => 
-  s"Smooth.Collections.EqualityComparer<P$i>.Default.Equals(_$i, t._$i)"
+  s"Smooth.Collections.EqComparer<P$i>.Default.Equals(_$i, t._$i)"
 }.mkString(" &&\n")}
       );
     }
@@ -53,7 +53,7 @@ ${r.map { i =>
       unchecked {
         int hash = 17;
 ${r.map { i => 
-  s"hash = 29 * hash + Smooth.Collections.EqualityComparer<P$i>.Default.GetHashCode(_$i);"
+  s"hash = 29 * hash + Smooth.Collections.EqComparer<P$i>.Default.GetHashCode(_$i);"
 }.mkString("\n")}
         return hash;
       }
@@ -126,16 +126,16 @@ namespace System {  [System.Serializable]
 
     public bool Equals(Tpl<P1, P2> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
         return hash;
       }
     }
@@ -189,18 +189,18 @@ c = Smooth.Collections.Comparer<P2>.Default.Compare(_2, other._2);
 
     public bool Equals(Tpl<P1, P2, P3> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
         return hash;
       }
     }
@@ -255,20 +255,20 @@ c = Smooth.Collections.Comparer<P3>.Default.Compare(_3, other._3);
 
     public bool Equals(Tpl<P1, P2, P3, P4> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
         return hash;
       }
     }
@@ -324,22 +324,22 @@ c = Smooth.Collections.Comparer<P4>.Default.Compare(_4, other._4);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
         return hash;
       }
     }
@@ -396,24 +396,24 @@ c = Smooth.Collections.Comparer<P5>.Default.Compare(_5, other._5);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
         return hash;
       }
     }
@@ -471,26 +471,26 @@ c = Smooth.Collections.Comparer<P6>.Default.Compare(_6, other._6);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
         return hash;
       }
     }
@@ -549,28 +549,28 @@ c = Smooth.Collections.Comparer<P7>.Default.Compare(_7, other._7);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
         return hash;
       }
     }
@@ -630,30 +630,30 @@ c = Smooth.Collections.Comparer<P8>.Default.Compare(_8, other._8);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
         return hash;
       }
     }
@@ -714,32 +714,32 @@ c = Smooth.Collections.Comparer<P9>.Default.Compare(_9, other._9);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
         return hash;
       }
     }
@@ -801,34 +801,34 @@ c = Smooth.Collections.Comparer<P10>.Default.Compare(_10, other._10);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
         return hash;
       }
     }
@@ -891,36 +891,36 @@ c = Smooth.Collections.Comparer<P11>.Default.Compare(_11, other._11);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
         return hash;
       }
     }
@@ -984,38 +984,38 @@ c = Smooth.Collections.Comparer<P12>.Default.Compare(_12, other._12);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
         return hash;
       }
     }
@@ -1080,40 +1080,40 @@ c = Smooth.Collections.Comparer<P13>.Default.Compare(_13, other._13);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
         return hash;
       }
     }
@@ -1179,42 +1179,42 @@ c = Smooth.Collections.Comparer<P14>.Default.Compare(_14, other._14);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14) &&
-Smooth.Collections.EqualityComparer<P15>.Default.Equals(_15, t._15)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14) &&
+Smooth.Collections.EqComparer<P15>.Default.Equals(_15, t._15)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P15>.Default.GetHashCode(_15);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P15>.Default.GetHashCode(_15);
         return hash;
       }
     }
@@ -1281,44 +1281,44 @@ c = Smooth.Collections.Comparer<P15>.Default.Compare(_15, other._15);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14) &&
-Smooth.Collections.EqualityComparer<P15>.Default.Equals(_15, t._15) &&
-Smooth.Collections.EqualityComparer<P16>.Default.Equals(_16, t._16)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14) &&
+Smooth.Collections.EqComparer<P15>.Default.Equals(_15, t._15) &&
+Smooth.Collections.EqComparer<P16>.Default.Equals(_16, t._16)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P15>.Default.GetHashCode(_15);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P16>.Default.GetHashCode(_16);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P15>.Default.GetHashCode(_15);
+hash = 29 * hash + Smooth.Collections.EqComparer<P16>.Default.GetHashCode(_16);
         return hash;
       }
     }
@@ -1386,46 +1386,46 @@ c = Smooth.Collections.Comparer<P16>.Default.Compare(_16, other._16);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14) &&
-Smooth.Collections.EqualityComparer<P15>.Default.Equals(_15, t._15) &&
-Smooth.Collections.EqualityComparer<P16>.Default.Equals(_16, t._16) &&
-Smooth.Collections.EqualityComparer<P17>.Default.Equals(_17, t._17)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14) &&
+Smooth.Collections.EqComparer<P15>.Default.Equals(_15, t._15) &&
+Smooth.Collections.EqComparer<P16>.Default.Equals(_16, t._16) &&
+Smooth.Collections.EqComparer<P17>.Default.Equals(_17, t._17)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P15>.Default.GetHashCode(_15);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P16>.Default.GetHashCode(_16);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P17>.Default.GetHashCode(_17);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P15>.Default.GetHashCode(_15);
+hash = 29 * hash + Smooth.Collections.EqComparer<P16>.Default.GetHashCode(_16);
+hash = 29 * hash + Smooth.Collections.EqComparer<P17>.Default.GetHashCode(_17);
         return hash;
       }
     }
@@ -1494,48 +1494,48 @@ c = Smooth.Collections.Comparer<P17>.Default.Compare(_17, other._17);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14) &&
-Smooth.Collections.EqualityComparer<P15>.Default.Equals(_15, t._15) &&
-Smooth.Collections.EqualityComparer<P16>.Default.Equals(_16, t._16) &&
-Smooth.Collections.EqualityComparer<P17>.Default.Equals(_17, t._17) &&
-Smooth.Collections.EqualityComparer<P18>.Default.Equals(_18, t._18)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14) &&
+Smooth.Collections.EqComparer<P15>.Default.Equals(_15, t._15) &&
+Smooth.Collections.EqComparer<P16>.Default.Equals(_16, t._16) &&
+Smooth.Collections.EqComparer<P17>.Default.Equals(_17, t._17) &&
+Smooth.Collections.EqComparer<P18>.Default.Equals(_18, t._18)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P15>.Default.GetHashCode(_15);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P16>.Default.GetHashCode(_16);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P17>.Default.GetHashCode(_17);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P18>.Default.GetHashCode(_18);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P15>.Default.GetHashCode(_15);
+hash = 29 * hash + Smooth.Collections.EqComparer<P16>.Default.GetHashCode(_16);
+hash = 29 * hash + Smooth.Collections.EqComparer<P17>.Default.GetHashCode(_17);
+hash = 29 * hash + Smooth.Collections.EqComparer<P18>.Default.GetHashCode(_18);
         return hash;
       }
     }
@@ -1605,50 +1605,50 @@ c = Smooth.Collections.Comparer<P18>.Default.Compare(_18, other._18);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14) &&
-Smooth.Collections.EqualityComparer<P15>.Default.Equals(_15, t._15) &&
-Smooth.Collections.EqualityComparer<P16>.Default.Equals(_16, t._16) &&
-Smooth.Collections.EqualityComparer<P17>.Default.Equals(_17, t._17) &&
-Smooth.Collections.EqualityComparer<P18>.Default.Equals(_18, t._18) &&
-Smooth.Collections.EqualityComparer<P19>.Default.Equals(_19, t._19)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14) &&
+Smooth.Collections.EqComparer<P15>.Default.Equals(_15, t._15) &&
+Smooth.Collections.EqComparer<P16>.Default.Equals(_16, t._16) &&
+Smooth.Collections.EqComparer<P17>.Default.Equals(_17, t._17) &&
+Smooth.Collections.EqComparer<P18>.Default.Equals(_18, t._18) &&
+Smooth.Collections.EqComparer<P19>.Default.Equals(_19, t._19)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P15>.Default.GetHashCode(_15);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P16>.Default.GetHashCode(_16);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P17>.Default.GetHashCode(_17);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P18>.Default.GetHashCode(_18);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P19>.Default.GetHashCode(_19);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P15>.Default.GetHashCode(_15);
+hash = 29 * hash + Smooth.Collections.EqComparer<P16>.Default.GetHashCode(_16);
+hash = 29 * hash + Smooth.Collections.EqComparer<P17>.Default.GetHashCode(_17);
+hash = 29 * hash + Smooth.Collections.EqComparer<P18>.Default.GetHashCode(_18);
+hash = 29 * hash + Smooth.Collections.EqComparer<P19>.Default.GetHashCode(_19);
         return hash;
       }
     }
@@ -1719,52 +1719,52 @@ c = Smooth.Collections.Comparer<P19>.Default.Compare(_19, other._19);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14) &&
-Smooth.Collections.EqualityComparer<P15>.Default.Equals(_15, t._15) &&
-Smooth.Collections.EqualityComparer<P16>.Default.Equals(_16, t._16) &&
-Smooth.Collections.EqualityComparer<P17>.Default.Equals(_17, t._17) &&
-Smooth.Collections.EqualityComparer<P18>.Default.Equals(_18, t._18) &&
-Smooth.Collections.EqualityComparer<P19>.Default.Equals(_19, t._19) &&
-Smooth.Collections.EqualityComparer<P20>.Default.Equals(_20, t._20)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14) &&
+Smooth.Collections.EqComparer<P15>.Default.Equals(_15, t._15) &&
+Smooth.Collections.EqComparer<P16>.Default.Equals(_16, t._16) &&
+Smooth.Collections.EqComparer<P17>.Default.Equals(_17, t._17) &&
+Smooth.Collections.EqComparer<P18>.Default.Equals(_18, t._18) &&
+Smooth.Collections.EqComparer<P19>.Default.Equals(_19, t._19) &&
+Smooth.Collections.EqComparer<P20>.Default.Equals(_20, t._20)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P15>.Default.GetHashCode(_15);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P16>.Default.GetHashCode(_16);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P17>.Default.GetHashCode(_17);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P18>.Default.GetHashCode(_18);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P19>.Default.GetHashCode(_19);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P20>.Default.GetHashCode(_20);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P15>.Default.GetHashCode(_15);
+hash = 29 * hash + Smooth.Collections.EqComparer<P16>.Default.GetHashCode(_16);
+hash = 29 * hash + Smooth.Collections.EqComparer<P17>.Default.GetHashCode(_17);
+hash = 29 * hash + Smooth.Collections.EqComparer<P18>.Default.GetHashCode(_18);
+hash = 29 * hash + Smooth.Collections.EqComparer<P19>.Default.GetHashCode(_19);
+hash = 29 * hash + Smooth.Collections.EqComparer<P20>.Default.GetHashCode(_20);
         return hash;
       }
     }
@@ -1836,54 +1836,54 @@ c = Smooth.Collections.Comparer<P20>.Default.Compare(_20, other._20);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14) &&
-Smooth.Collections.EqualityComparer<P15>.Default.Equals(_15, t._15) &&
-Smooth.Collections.EqualityComparer<P16>.Default.Equals(_16, t._16) &&
-Smooth.Collections.EqualityComparer<P17>.Default.Equals(_17, t._17) &&
-Smooth.Collections.EqualityComparer<P18>.Default.Equals(_18, t._18) &&
-Smooth.Collections.EqualityComparer<P19>.Default.Equals(_19, t._19) &&
-Smooth.Collections.EqualityComparer<P20>.Default.Equals(_20, t._20) &&
-Smooth.Collections.EqualityComparer<P21>.Default.Equals(_21, t._21)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14) &&
+Smooth.Collections.EqComparer<P15>.Default.Equals(_15, t._15) &&
+Smooth.Collections.EqComparer<P16>.Default.Equals(_16, t._16) &&
+Smooth.Collections.EqComparer<P17>.Default.Equals(_17, t._17) &&
+Smooth.Collections.EqComparer<P18>.Default.Equals(_18, t._18) &&
+Smooth.Collections.EqComparer<P19>.Default.Equals(_19, t._19) &&
+Smooth.Collections.EqComparer<P20>.Default.Equals(_20, t._20) &&
+Smooth.Collections.EqComparer<P21>.Default.Equals(_21, t._21)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P15>.Default.GetHashCode(_15);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P16>.Default.GetHashCode(_16);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P17>.Default.GetHashCode(_17);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P18>.Default.GetHashCode(_18);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P19>.Default.GetHashCode(_19);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P20>.Default.GetHashCode(_20);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P21>.Default.GetHashCode(_21);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P15>.Default.GetHashCode(_15);
+hash = 29 * hash + Smooth.Collections.EqComparer<P16>.Default.GetHashCode(_16);
+hash = 29 * hash + Smooth.Collections.EqComparer<P17>.Default.GetHashCode(_17);
+hash = 29 * hash + Smooth.Collections.EqComparer<P18>.Default.GetHashCode(_18);
+hash = 29 * hash + Smooth.Collections.EqComparer<P19>.Default.GetHashCode(_19);
+hash = 29 * hash + Smooth.Collections.EqComparer<P20>.Default.GetHashCode(_20);
+hash = 29 * hash + Smooth.Collections.EqComparer<P21>.Default.GetHashCode(_21);
         return hash;
       }
     }
@@ -1956,56 +1956,56 @@ c = Smooth.Collections.Comparer<P21>.Default.Compare(_21, other._21);
 
     public bool Equals(Tpl<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21, P22> t) {
       return (
-Smooth.Collections.EqualityComparer<P1>.Default.Equals(_1, t._1) &&
-Smooth.Collections.EqualityComparer<P2>.Default.Equals(_2, t._2) &&
-Smooth.Collections.EqualityComparer<P3>.Default.Equals(_3, t._3) &&
-Smooth.Collections.EqualityComparer<P4>.Default.Equals(_4, t._4) &&
-Smooth.Collections.EqualityComparer<P5>.Default.Equals(_5, t._5) &&
-Smooth.Collections.EqualityComparer<P6>.Default.Equals(_6, t._6) &&
-Smooth.Collections.EqualityComparer<P7>.Default.Equals(_7, t._7) &&
-Smooth.Collections.EqualityComparer<P8>.Default.Equals(_8, t._8) &&
-Smooth.Collections.EqualityComparer<P9>.Default.Equals(_9, t._9) &&
-Smooth.Collections.EqualityComparer<P10>.Default.Equals(_10, t._10) &&
-Smooth.Collections.EqualityComparer<P11>.Default.Equals(_11, t._11) &&
-Smooth.Collections.EqualityComparer<P12>.Default.Equals(_12, t._12) &&
-Smooth.Collections.EqualityComparer<P13>.Default.Equals(_13, t._13) &&
-Smooth.Collections.EqualityComparer<P14>.Default.Equals(_14, t._14) &&
-Smooth.Collections.EqualityComparer<P15>.Default.Equals(_15, t._15) &&
-Smooth.Collections.EqualityComparer<P16>.Default.Equals(_16, t._16) &&
-Smooth.Collections.EqualityComparer<P17>.Default.Equals(_17, t._17) &&
-Smooth.Collections.EqualityComparer<P18>.Default.Equals(_18, t._18) &&
-Smooth.Collections.EqualityComparer<P19>.Default.Equals(_19, t._19) &&
-Smooth.Collections.EqualityComparer<P20>.Default.Equals(_20, t._20) &&
-Smooth.Collections.EqualityComparer<P21>.Default.Equals(_21, t._21) &&
-Smooth.Collections.EqualityComparer<P22>.Default.Equals(_22, t._22)
+Smooth.Collections.EqComparer<P1>.Default.Equals(_1, t._1) &&
+Smooth.Collections.EqComparer<P2>.Default.Equals(_2, t._2) &&
+Smooth.Collections.EqComparer<P3>.Default.Equals(_3, t._3) &&
+Smooth.Collections.EqComparer<P4>.Default.Equals(_4, t._4) &&
+Smooth.Collections.EqComparer<P5>.Default.Equals(_5, t._5) &&
+Smooth.Collections.EqComparer<P6>.Default.Equals(_6, t._6) &&
+Smooth.Collections.EqComparer<P7>.Default.Equals(_7, t._7) &&
+Smooth.Collections.EqComparer<P8>.Default.Equals(_8, t._8) &&
+Smooth.Collections.EqComparer<P9>.Default.Equals(_9, t._9) &&
+Smooth.Collections.EqComparer<P10>.Default.Equals(_10, t._10) &&
+Smooth.Collections.EqComparer<P11>.Default.Equals(_11, t._11) &&
+Smooth.Collections.EqComparer<P12>.Default.Equals(_12, t._12) &&
+Smooth.Collections.EqComparer<P13>.Default.Equals(_13, t._13) &&
+Smooth.Collections.EqComparer<P14>.Default.Equals(_14, t._14) &&
+Smooth.Collections.EqComparer<P15>.Default.Equals(_15, t._15) &&
+Smooth.Collections.EqComparer<P16>.Default.Equals(_16, t._16) &&
+Smooth.Collections.EqComparer<P17>.Default.Equals(_17, t._17) &&
+Smooth.Collections.EqComparer<P18>.Default.Equals(_18, t._18) &&
+Smooth.Collections.EqComparer<P19>.Default.Equals(_19, t._19) &&
+Smooth.Collections.EqComparer<P20>.Default.Equals(_20, t._20) &&
+Smooth.Collections.EqComparer<P21>.Default.Equals(_21, t._21) &&
+Smooth.Collections.EqComparer<P22>.Default.Equals(_22, t._22)
       );
     }
 
     public override int GetHashCode() {
       unchecked {
         int hash = 17;
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P1>.Default.GetHashCode(_1);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P2>.Default.GetHashCode(_2);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P3>.Default.GetHashCode(_3);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P4>.Default.GetHashCode(_4);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P5>.Default.GetHashCode(_5);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P6>.Default.GetHashCode(_6);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P7>.Default.GetHashCode(_7);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P8>.Default.GetHashCode(_8);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P9>.Default.GetHashCode(_9);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P10>.Default.GetHashCode(_10);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P11>.Default.GetHashCode(_11);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P12>.Default.GetHashCode(_12);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P13>.Default.GetHashCode(_13);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P14>.Default.GetHashCode(_14);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P15>.Default.GetHashCode(_15);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P16>.Default.GetHashCode(_16);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P17>.Default.GetHashCode(_17);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P18>.Default.GetHashCode(_18);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P19>.Default.GetHashCode(_19);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P20>.Default.GetHashCode(_20);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P21>.Default.GetHashCode(_21);
-hash = 29 * hash + Smooth.Collections.EqualityComparer<P22>.Default.GetHashCode(_22);
+hash = 29 * hash + Smooth.Collections.EqComparer<P1>.Default.GetHashCode(_1);
+hash = 29 * hash + Smooth.Collections.EqComparer<P2>.Default.GetHashCode(_2);
+hash = 29 * hash + Smooth.Collections.EqComparer<P3>.Default.GetHashCode(_3);
+hash = 29 * hash + Smooth.Collections.EqComparer<P4>.Default.GetHashCode(_4);
+hash = 29 * hash + Smooth.Collections.EqComparer<P5>.Default.GetHashCode(_5);
+hash = 29 * hash + Smooth.Collections.EqComparer<P6>.Default.GetHashCode(_6);
+hash = 29 * hash + Smooth.Collections.EqComparer<P7>.Default.GetHashCode(_7);
+hash = 29 * hash + Smooth.Collections.EqComparer<P8>.Default.GetHashCode(_8);
+hash = 29 * hash + Smooth.Collections.EqComparer<P9>.Default.GetHashCode(_9);
+hash = 29 * hash + Smooth.Collections.EqComparer<P10>.Default.GetHashCode(_10);
+hash = 29 * hash + Smooth.Collections.EqComparer<P11>.Default.GetHashCode(_11);
+hash = 29 * hash + Smooth.Collections.EqComparer<P12>.Default.GetHashCode(_12);
+hash = 29 * hash + Smooth.Collections.EqComparer<P13>.Default.GetHashCode(_13);
+hash = 29 * hash + Smooth.Collections.EqComparer<P14>.Default.GetHashCode(_14);
+hash = 29 * hash + Smooth.Collections.EqComparer<P15>.Default.GetHashCode(_15);
+hash = 29 * hash + Smooth.Collections.EqComparer<P16>.Default.GetHashCode(_16);
+hash = 29 * hash + Smooth.Collections.EqComparer<P17>.Default.GetHashCode(_17);
+hash = 29 * hash + Smooth.Collections.EqComparer<P18>.Default.GetHashCode(_18);
+hash = 29 * hash + Smooth.Collections.EqComparer<P19>.Default.GetHashCode(_19);
+hash = 29 * hash + Smooth.Collections.EqComparer<P20>.Default.GetHashCode(_20);
+hash = 29 * hash + Smooth.Collections.EqComparer<P21>.Default.GetHashCode(_21);
+hash = 29 * hash + Smooth.Collections.EqComparer<P22>.Default.GetHashCode(_22);
         return hash;
       }
     }

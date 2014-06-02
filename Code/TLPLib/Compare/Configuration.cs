@@ -176,8 +176,8 @@ namespace Smooth.Compare {
 		/// If you want to write custom equality comparers using reflection, you can do so by overriding this method.
 		/// </summary>
 		/// <returns>An option containing an equality comparer for type T, or None to use the default comparer</returns>
-		public virtual Option<IEqualityComparer<T>> EqualityComparer<T>() {
-			return Factory.EqualityComparer<T>();
+		public virtual Option<IEqualityComparer<T>> EqComparer<T>() {
+			return Factory.EqComparer<T>();
 		}
 
 		/// <summary>

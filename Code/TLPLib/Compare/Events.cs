@@ -4,7 +4,7 @@ namespace Smooth.Compare {
 	public enum ComparerType {
 		None = 0,
 		Comparer,
-		EqualityComparer,
+		EqComparer,
 	}
 
 	public enum EventType {
@@ -25,7 +25,7 @@ namespace Smooth.Compare {
 			switch (comparerType) {
 			case ComparerType.Comparer:
 				return "Sort Order Comparer";
-			case ComparerType.EqualityComparer:
+			case ComparerType.EqComparer:
 				return "Equality Comparer";
 			default:
 				return "Unknown";

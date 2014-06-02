@@ -8,7 +8,7 @@ namespace Smooth.Comparisons {
 	/// 
 	/// Only useful to circumvent potential JIT exceptions on platforms without JIT compilation.
 	/// </summary>
-	public class IEquatableEqualityComparer<T> : Smooth.Collections.EqualityComparer<T> where T : IEquatable<T> {
+	public class EquatableEqComparer<T> : Smooth.Collections.EqComparer<T> where T : IEquatable<T> {
 		public override bool Equals(T l, T r) {
 			return l.Equals(r);
 		}

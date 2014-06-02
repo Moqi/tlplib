@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using com.tinylabproductions.TLPLib.Functional;
+using Smooth.Collections;
 using Smooth.Comparisons;
 using Smooth.Dispose;
 using Smooth.Pools;
@@ -764,7 +765,7 @@ namespace Smooth.Slinq {
 		/// This operation will consume and dispose the Slinq.
 		/// </summary>
 		public bool Contains(T value) {
-			return Contains(value, Smooth.Collections.EqualityComparer<T>.Default);
+			return Contains(value, Smooth.Collections.EqComparer<T>.Default);
 		}
 
 		/// <summary>
@@ -1295,7 +1296,7 @@ namespace Smooth.Slinq {
 		/// This operation will consume and dispose the Slinq.
 		/// </summary>
 		public bool SequenceEqual<C2>(Slinq<T, C2> other) {
-			return SequenceEqual(other, Comparisons<T>.ToPredicate(Smooth.Collections.EqualityComparer<T>.Default));
+			return SequenceEqual(other, Comparisons<T>.ToPredicate(Smooth.Collections.EqComparer<T>.Default));
 		}
 
 		/// <summary>
@@ -1303,8 +1304,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This operation will consume and dispose the Slinq.
 		/// </summary>
-		public bool SequenceEqual<C2>(Slinq<T, C2> other, EqualityComparer<T> equalityComparer) {
-			return SequenceEqual(other, Comparisons<T>.ToPredicate(equalityComparer));
+		public bool SequenceEqual<C2>(Slinq<T, C2> other, EqComparer<T> EqComparer) {
+			return SequenceEqual(other, Comparisons<T>.ToPredicate(EqComparer));
 		}
 		
 		/// <summary>
@@ -1727,7 +1728,7 @@ namespace Smooth.Slinq {
 		/// This operation will consume and dispose the Slinq.
 		/// </summary>
 		public Lookup<K, T> ToLookup<K>(Fn<T, K> selector) {
-			return AddTo(Lookup<K, T>.Borrow(Smooth.Collections.EqualityComparer<K>.Default), selector);
+			return AddTo(Lookup<K, T>.Borrow(Smooth.Collections.EqComparer<K>.Default), selector);
 		}
 		
 		/// <summary>
@@ -1745,7 +1746,7 @@ namespace Smooth.Slinq {
 		/// This operation will consume and dispose the Slinq.
 		/// </summary>
 		public Lookup<K, T> ToLookup<K, P>(Fn<T, P, K> selector, P parameter) {
-			return AddTo(Lookup<K, T>.Borrow(Smooth.Collections.EqualityComparer<K>.Default), selector, parameter);
+			return AddTo(Lookup<K, T>.Borrow(Smooth.Collections.EqComparer<K>.Default), selector, parameter);
 		}
 		
 		/// <summary>
@@ -1922,7 +1923,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.GroupBy().
 		/// </summary>
 		public static Slinq<Grouping<K, T, LinkedContext<T>>, GroupByContext<K, T>> GroupBy<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector) {
-			return slinq.ToLookup(selector, Smooth.Collections.EqualityComparer<K>.Default).SlinqAndDispose();
+			return slinq.ToLookup(selector, Smooth.Collections.EqComparer<K>.Default).SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -1936,7 +1937,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.GroupBy().
 		/// </summary>
 		public static Slinq<Grouping<K, T, LinkedContext<T>>, GroupByContext<K, T>> GroupBy<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter) {
-			return slinq.ToLookup(selector, parameter, Smooth.Collections.EqualityComparer<K>.Default).SlinqAndDispose();
+			return slinq.ToLookup(selector, parameter, Smooth.Collections.EqComparer<K>.Default).SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -1950,7 +1951,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.GroupJoin(), with removal operations chained to the outer Slinq.
 		/// </summary>
 		public static Slinq<U, GroupJoinContext<U, K, T2, T, C>> GroupJoin<U, K, T2, C2, T, C>(this Slinq<T, C> outer, Slinq<T2, C2> inner, Fn<T, K> outerSelector, Fn<T2, K> innerSelector, Fn<T, Slinq<T2, LinkedContext<T2>>, U> resultSelector) {
-			return inner.ToLookup(innerSelector, Smooth.Collections.EqualityComparer<K>.Default).GroupJoinAndDispose(outer, outerSelector, resultSelector);
+			return inner.ToLookup(innerSelector, Smooth.Collections.EqComparer<K>.Default).GroupJoinAndDispose(outer, outerSelector, resultSelector);
 		}
 		
 		/// <summary>
@@ -1964,7 +1965,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.GroupJoin(), with removal operations chained to the outer Slinq.
 		/// </summary>
 		public static Slinq<U, GroupJoinContext<U, K, T2, T, C, P>> GroupJoin<U, K, T2, C2, T, C, P>(this Slinq<T, C> outer, Slinq<T2, C2> inner, Fn<T, P, K> outerSelector, Fn<T2, P, K> innerSelector, Fn<T, Slinq<T2, LinkedContext<T2>>, P, U> resultSelector, P parameter) {
-			return inner.ToLookup(innerSelector, parameter, Smooth.Collections.EqualityComparer<K>.Default).GroupJoinAndDispose(outer, outerSelector, resultSelector, parameter);
+			return inner.ToLookup(innerSelector, parameter, Smooth.Collections.EqComparer<K>.Default).GroupJoinAndDispose(outer, outerSelector, resultSelector, parameter);
 		}
 		
 		/// <summary>
@@ -2020,7 +2021,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.Join(), with removal operations chained to the outer Slinq.
 		/// </summary>
 		public static Slinq<U, JoinContext<U, K, T2, T, C>> Join<U, K, T2, C2, T, C>(this Slinq<T, C> outer, Slinq<T2, C2> inner, Fn<T, K> outerSelector, Fn<T2, K> innerSelector, Fn<T, T2, U> resultSelector) {
-			return inner.ToLookup(innerSelector, Smooth.Collections.EqualityComparer<K>.Default).JoinAndDispose(outer, outerSelector, resultSelector);
+			return inner.ToLookup(innerSelector, Smooth.Collections.EqComparer<K>.Default).JoinAndDispose(outer, outerSelector, resultSelector);
 		}
 		
 		/// <summary>
@@ -2034,7 +2035,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.Join(), with removal operations chained to the outer Slinq.
 		/// </summary>
 		public static Slinq<U, JoinContext<U, K, T2, T, C, P>> Join<U, K, T2, C2, T, C, P>(this Slinq<T, C> outer, Slinq<T2, C2> inner, Fn<T, P, K> outerSelector, Fn<T2, P, K> innerSelector, Fn<T, T2, P, U> resultSelector, P parameter) {
-			return inner.ToLookup(innerSelector, parameter, Smooth.Collections.EqualityComparer<K>.Default).JoinAndDispose(outer, outerSelector, resultSelector, parameter);
+			return inner.ToLookup(innerSelector, parameter, Smooth.Collections.EqComparer<K>.Default).JoinAndDispose(outer, outerSelector, resultSelector, parameter);
 		}
 		
 		/// <summary>
@@ -2287,7 +2288,7 @@ namespace Smooth.Slinq {
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
 		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector) {
-			return slinq.ToLookup(selector, Smooth.Collections.EqualityComparer<K>.Default).SortKeys(Comparisons<K>.Default, true).FlattenAndDispose().SlinqAndDispose();
+			return slinq.ToLookup(selector, Smooth.Collections.EqComparer<K>.Default).SortKeys(Comparisons<K>.Default, true).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2295,8 +2296,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
-		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector, IEqualityComparer<K> equalityComparer, IComparer<K> comparer) {
-			return slinq.ToLookup(selector, equalityComparer).SortKeys(Comparisons<K>.ToComparison(comparer), true).FlattenAndDispose().SlinqAndDispose();
+		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector, IEqualityComparer<K> EqComparer, IComparer<K> comparer) {
+			return slinq.ToLookup(selector, EqComparer).SortKeys(Comparisons<K>.ToComparison(comparer), true).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2304,8 +2305,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
-		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector, IEqualityComparer<K> equalityComparer, Comparison<K> comparison) {
-			return slinq.ToLookup(selector, equalityComparer).SortKeys(comparison, true).FlattenAndDispose().SlinqAndDispose();
+		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector, IEqualityComparer<K> EqComparer, Comparison<K> comparison) {
+			return slinq.ToLookup(selector, EqComparer).SortKeys(comparison, true).FlattenAndDispose().SlinqAndDispose();
 		}
 
 		/// <summary>
@@ -2314,7 +2315,7 @@ namespace Smooth.Slinq {
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
 		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector) {
-			return slinq.ToLookup(selector, Smooth.Collections.EqualityComparer<K>.Default).SortKeys(Comparisons<K>.Default, false).FlattenAndDispose().SlinqAndDispose();
+			return slinq.ToLookup(selector, Smooth.Collections.EqComparer<K>.Default).SortKeys(Comparisons<K>.Default, false).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2322,8 +2323,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
-		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector, IEqualityComparer<K> equalityComparer, IComparer<K> comparer) {
-			return slinq.ToLookup(selector, equalityComparer).SortKeys(Comparisons<K>.ToComparison(comparer), false).FlattenAndDispose().SlinqAndDispose();
+		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector, IEqualityComparer<K> EqComparer, IComparer<K> comparer) {
+			return slinq.ToLookup(selector, EqComparer).SortKeys(Comparisons<K>.ToComparison(comparer), false).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2331,8 +2332,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
-		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector, IEqualityComparer<K> equalityComparer, Comparison<K> comparison) {
-			return slinq.ToLookup(selector, equalityComparer).SortKeys(comparison, false).FlattenAndDispose().SlinqAndDispose();
+		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C>(this Slinq<T, C> slinq, Fn<T, K> selector, IEqualityComparer<K> EqComparer, Comparison<K> comparison) {
+			return slinq.ToLookup(selector, EqComparer).SortKeys(comparison, false).FlattenAndDispose().SlinqAndDispose();
 		}
 
 		/// <summary>
@@ -2341,7 +2342,7 @@ namespace Smooth.Slinq {
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
 		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter) {
-			return slinq.ToLookup(selector, parameter, Smooth.Collections.EqualityComparer<K>.Default).SortKeys(Comparisons<K>.Default, true).FlattenAndDispose().SlinqAndDispose();
+			return slinq.ToLookup(selector, parameter, Smooth.Collections.EqComparer<K>.Default).SortKeys(Comparisons<K>.Default, true).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2349,8 +2350,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
-		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter, IEqualityComparer<K> equalityComparer, IComparer<K> comparer) {
-			return slinq.ToLookup(selector, parameter, equalityComparer).SortKeys(Comparisons<K>.ToComparison(comparer), true).FlattenAndDispose().SlinqAndDispose();
+		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter, IEqualityComparer<K> EqComparer, IComparer<K> comparer) {
+			return slinq.ToLookup(selector, parameter, EqComparer).SortKeys(Comparisons<K>.ToComparison(comparer), true).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2358,8 +2359,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
-		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter, IEqualityComparer<K> equalityComparer, Comparison<K> comparison) {
-			return slinq.ToLookup(selector, parameter, equalityComparer).SortKeys(comparison, true).FlattenAndDispose().SlinqAndDispose();
+		public static Slinq<T, LinkedContext<T>> OrderByGroup<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter, IEqualityComparer<K> EqComparer, Comparison<K> comparison) {
+			return slinq.ToLookup(selector, parameter, EqComparer).SortKeys(comparison, true).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2368,7 +2369,7 @@ namespace Smooth.Slinq {
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
 		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter) {
-			return slinq.ToLookup(selector, parameter, Smooth.Collections.EqualityComparer<K>.Default).SortKeys(Comparisons<K>.Default, false).FlattenAndDispose().SlinqAndDispose();
+			return slinq.ToLookup(selector, parameter, Smooth.Collections.EqComparer<K>.Default).SortKeys(Comparisons<K>.Default, false).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2376,8 +2377,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
-		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter, IEqualityComparer<K> equalityComparer, IComparer<K> comparer) {
-			return slinq.ToLookup(selector, parameter, equalityComparer).SortKeys(Comparisons<K>.ToComparison(comparer), false).FlattenAndDispose().SlinqAndDispose();
+		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter, IEqualityComparer<K> EqComparer, IComparer<K> comparer) {
+			return slinq.ToLookup(selector, parameter, EqComparer).SortKeys(Comparisons<K>.ToComparison(comparer), false).FlattenAndDispose().SlinqAndDispose();
 		}
 		
 		/// <summary>
@@ -2385,8 +2386,8 @@ namespace Smooth.Slinq {
 		/// 
 		/// This method has O(n + k) space compexity and O(n + k log k) time complexity where n is the number of elements and k is the number of keys.
 		/// </summary>
-		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter, IEqualityComparer<K> equalityComparer, Comparison<K> comparison) {
-			return slinq.ToLookup(selector, parameter, equalityComparer).SortKeys(comparison, false).FlattenAndDispose().SlinqAndDispose();
+		public static Slinq<T, LinkedContext<T>> OrderByGroupDescending<K, T, C, P>(this Slinq<T, C> slinq, Fn<T, P, K> selector, P parameter, IEqualityComparer<K> EqComparer, Comparison<K> comparison) {
+			return slinq.ToLookup(selector, parameter, EqComparer).SortKeys(comparison, false).FlattenAndDispose().SlinqAndDispose();
 		}
 
 		/// <summary>
@@ -2496,7 +2497,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.Union().
 		/// </summary>
 		public static Slinq<T, HashSetContext<T, ConcatContext<C2, T, C>>> Union<C2, T, C>(this Slinq<T, C> slinq, Slinq<T, C2> other) {
-			return slinq.Concat(other).Distinct(Smooth.Collections.EqualityComparer<T>.Default);
+			return slinq.Concat(other).Distinct(Smooth.Collections.EqComparer<T>.Default);
 		}
 		
 		/// <summary>
@@ -2510,7 +2511,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.Union().
 		/// </summary>
 		public static Slinq<T, HashSetContext<K, T, ConcatContext<C2, T, C>>> Union<K, C2, T, C>(this Slinq<T, C> slinq, Slinq<T, C2> other, Fn<T, K> selector) {
-			return slinq.Concat(other).Distinct(selector, Smooth.Collections.EqualityComparer<K>.Default);
+			return slinq.Concat(other).Distinct(selector, Smooth.Collections.EqComparer<K>.Default);
 		}
 		
 		/// <summary>
@@ -2524,7 +2525,7 @@ namespace Smooth.Slinq {
 		/// Analog to Enumerable.Union().
 		/// </summary>
 		public static Slinq<T, HashSetContext<K, T, ConcatContext<C2, T, C>, P>> Union<K, C2, T, C, P>(this Slinq<T, C> slinq, Slinq<T, C2> other, Fn<T, P, K> selector, P parameter) {
-			return slinq.Concat(other).Distinct(selector, parameter, Smooth.Collections.EqualityComparer<K>.Default);
+			return slinq.Concat(other).Distinct(selector, parameter, Smooth.Collections.EqComparer<K>.Default);
 		}
 		
 		/// <summary>

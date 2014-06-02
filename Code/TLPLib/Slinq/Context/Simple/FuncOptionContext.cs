@@ -7,6 +7,14 @@ namespace Smooth.Slinq.Context {
 
 		#region Slinqs
 		
+		public static Slinq<T, FuncOptionContext<T>> Sequence(Option<T> seed, Fn<T, Option<T>> selector) {
+			return new Slinq<T, FuncOptionContext<T>>(
+				skip,
+				remove,
+				dispose,
+				new FuncOptionContext<T>(seed, selector));
+		}
+		
 		public static Slinq<T, FuncOptionContext<T>> Sequence(T seed, Fn<T, Option<T>> selector) {
 			return new Slinq<T, FuncOptionContext<T>>(
 				skip,
@@ -27,13 +35,16 @@ namespace Smooth.Slinq.Context {
 		private BacktrackDetector bd;
 		#pragma warning restore 0414
 
-		private FuncOptionContext(T seed, Fn<T, Option<T>> selector) {
+		private FuncOptionContext(Option<T> seed, Fn<T, Option<T>> selector) {
 			this.needsMove = false;
-			this.acc = new Option<T>(seed);
+			this.acc = seed;
 			this.selector = selector;
 			
 			this.bd = BacktrackDetector.Borrow();
 		}
+
+    private FuncOptionContext(T seed, Fn<T, Option<T>> selector) 
+    : this(F.some(seed), selector) {}
 		
 		#endregion
 		
@@ -83,6 +94,16 @@ namespace Smooth.Slinq.Context {
 				dispose,
 				new FuncOptionContext<T, P>(seed, selector, parameter));
 		}
+
+		public static Slinq<T, FuncOptionContext<T, P>> Sequence(
+      Option<T> seed, Fn<T, P, Option<T>> selector, P parameter
+    ) {
+			return new Slinq<T, FuncOptionContext<T, P>>(
+				skip,
+				remove,
+				dispose,
+				new FuncOptionContext<T, P>(seed, selector, parameter));
+		}
 		
 		#endregion
 
@@ -97,14 +118,17 @@ namespace Smooth.Slinq.Context {
 		private BacktrackDetector bd;
 		#pragma warning restore 0414
 
-		private FuncOptionContext(T seed, Fn<T, P, Option<T>> selector, P parameter) {
+		private FuncOptionContext(Option<T> seed, Fn<T, P, Option<T>> selector, P parameter) {
 			this.needsMove = false;
-			this.acc = new Option<T>(seed);
+			this.acc = seed;
 			this.selector = selector;
 			this.parameter = parameter;
 			
 			this.bd = BacktrackDetector.Borrow();
 		}
+
+	  private FuncOptionContext(T seed, Fn<T, P, Option<T>> selector, P parameter)
+	  : this(new Option<T>(seed), selector, parameter) {}
 		
 		#endregion
 		

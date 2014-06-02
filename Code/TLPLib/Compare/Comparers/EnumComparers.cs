@@ -7,7 +7,7 @@ namespace Smooth.Compare.Comparers {
 	/// <summary>
 	/// Fast, allocation free equality comparer for blittable structs with an underlying size of 32 bits or less.
 	/// </summary>
-	public class Blittable32EqualityComparer<T> : Smooth.Collections.EqualityComparer<T> {
+	public class Blittable32EqComparer<T> : Smooth.Collections.EqComparer<T> {
 		public override bool Equals(T t1, T t2) {
 			Converter converter;
 			converter.value = 0;
@@ -38,7 +38,7 @@ namespace Smooth.Compare.Comparers {
 	/// <summary>
 	/// Fast, allocation free equality comparer for blittable structs with an underlying size of 64 bits or less.
 	/// </summary>
-	public class Blittable64EqualityComparer<T> : Smooth.Collections.EqualityComparer<T> {
+	public class Blittable64EqComparer<T> : Smooth.Collections.EqComparer<T> {
 		public override bool Equals(T t1, T t2) {
 			Converter converter;
 			converter.value = 0;
@@ -69,15 +69,15 @@ namespace Smooth.Compare.Comparers {
 //	/// <summary>
 //	/// Fast, allocation free IEqualityComparer<T> for Enums that uses System.Reflection.Emit to create JIT complied equality and hashCode functions.
 //	/// 
-//	/// Note: This class isn't any faster than Blittable32EqualityComparer or Blittable64EqualityComparer and doesn't work on platforms without JIT complilation.
+//	/// Note: This class isn't any faster than Blittable32EqComparer or Blittable64EqComparer and doesn't work on platforms without JIT complilation.
 //	/// 
 //	/// It is provided simply as example code.
 //	/// </summary>
-//	public class EnumEmitEqualityComparer<T> : Smooth.Collections.EqualityComparer<T> {
+//	public class EnumEmitEqComparer<T> : Smooth.Collections.EqComparer<T> {
 //		private readonly Func<T, T, bool> equals;
 //		private readonly Func<T, int> hashCode;
 //		
-//		public EnumEmitEqualityComparer() {
+//		public EnumEmitEqComparer() {
 //			var type = typeof(T);
 //			
 //			if (type.IsEnum) {

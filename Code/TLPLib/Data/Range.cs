@@ -37,10 +37,8 @@ namespace com.tinylabproductions.TLPLib.Data {
     public int random { get { return Random.Range(from, to + 1); } }
 
     public Slinq<int, FuncOptionContext<int, int>> Slinq { get {
-      if (to > from) return F.throws<Slinq<int, FuncOptionContext<int, int>>>(new Exception("???"));
-
       return FuncOptionContext<int, int>.Sequence(
-        from, 
+        from > to ? F.none<int>() : F.some(from), 
         (i, toNum) => i == toNum ? F.none<int>() : F.some(i + 1),
         to
       );

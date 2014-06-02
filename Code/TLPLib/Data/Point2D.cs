@@ -45,7 +45,7 @@ namespace com.tinylabproductions.TLPLib.Data {
       return !left.Equals(right);
     }
 
-    private sealed class XYEqualityComparer : IEqualityComparer<Point2D> {
+    private sealed class XYEqComparer : IEqualityComparer<Point2D> {
       public bool Equals(Point2D x, Point2D y) {
         return x.x == y.x && x.y == y.y;
       }
@@ -57,7 +57,7 @@ namespace com.tinylabproductions.TLPLib.Data {
       }
     }
 
-    private static readonly IEqualityComparer<Point2D> XYComparerInstance = new XYEqualityComparer();
+    private static readonly IEqualityComparer<Point2D> XYComparerInstance = new XYEqComparer();
 
     public static IEqualityComparer<Point2D> xYComparer {
       get { return XYComparerInstance; }

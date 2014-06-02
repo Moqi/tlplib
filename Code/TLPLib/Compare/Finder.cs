@@ -18,10 +18,10 @@ namespace Smooth.Compare {
 		/// </summary>
 		public static GenericEvent<ComparerType, EventType, Type> OnEvent;
 
-		private static readonly IEqualityComparer<Type> typeComparer = new FuncEqualityComparer<Type>((a, b) => a == b);
+		private static readonly IEqualityComparer<Type> typeComparer = new FuncEqComparer<Type>((a, b) => a == b);
 		
 		private static readonly Dictionary<Type, object> comparers = new Dictionary<Type, object>(typeComparer);
-		private static readonly Dictionary<Type, object> equalityComparers = new Dictionary<Type, object>(typeComparer) { { typeof(Type), typeComparer } };
+		private static readonly Dictionary<Type, object> EqComparers = new Dictionary<Type, object>(typeComparer) { { typeof(Type), typeComparer } };
 
 		private static readonly Configuration config;
 
@@ -39,10 +39,10 @@ namespace Smooth.Compare {
 				switch(Type.GetTypeCode(type)) {
 				case TypeCode.Int64:
 				case TypeCode.UInt64:
-					Register<T>(new Blittable64EqualityComparer<T>());
+					Register<T>(new Blittable64EqComparer<T>());
 					break;
 				default:
-					Register<T>(new Blittable32EqualityComparer<T>());
+					Register<T>(new Blittable32EqComparer<T>());
 					break;
 				}
 			} else {
@@ -59,7 +59,7 @@ namespace Smooth.Compare {
 		/// </summary>
 		public static void RegisterKeyValuePair<K, V>() {
 			Register(new KeyValuePairComparer<K, V>());
-			Register(new KeyValuePairEqualityComparer<K, V>());
+			Register(new KeyValuePairEqComparer<K, V>());
 		}
 
 		#endregion
@@ -81,7 +81,7 @@ namespace Smooth.Compare {
 		/// Used to circumvent potential JIT exceptions on platforms without JIT compilation.
 		/// </summary>
 		public static void RegisterIEquatable<T>() where T : IEquatable<T> {
-			Register<T>(new IEquatableEqualityComparer<T>());
+			Register<T>(new EquatableEqComparer<T>());
 		}
 
 		/// <summary>
@@ -91,7 +91,7 @@ namespace Smooth.Compare {
 		/// </summary>
 		public static void RegisterIComparableIEquatable<T>() where T : IComparable<T>, IEquatable<T> {
 			Register<T>(new IComparableComparer<T>());
-			Register<T>(new IEquatableEqualityComparer<T>());
+			Register<T>(new EquatableEqComparer<T>());
 		}
 
 		#endregion
@@ -103,7 +103,7 @@ namespace Smooth.Compare {
 		/// </summary>
 		public static void Register<T>(Comparison<T> comparison, Func<T, T, bool> equals) {
 			Register<T>(new FuncComparer<T>(comparison));
-			Register<T>(new FuncEqualityComparer<T>(equals));
+			Register<T>(new FuncEqComparer<T>(equals));
 		}
 		
 		/// <summary>
@@ -111,17 +111,17 @@ namespace Smooth.Compare {
 		/// </summary>
 		public static void Register<T>(Comparison<T> comparison, Func<T, T, bool> equals, Func<T, int> hashCode) {
 			Register<T>(new FuncComparer<T>(comparison));
-			Register<T>(new FuncEqualityComparer<T>(equals, hashCode));
+			Register<T>(new FuncEqComparer<T>(equals, hashCode));
 		}
 		
 		/// <summary>
 		/// Registers the specified sort order comparer and equality comparer for type T.
 		/// 
-		/// Note: On platforms without JIT compilation, the supplied comparers should respectively inherit from Smooth.Collections.Comparer<T> and Smooth.Collections.EqualityComparer<T> in order to force the AOT compiler to create the proper generic types.
+		/// Note: On platforms without JIT compilation, the supplied comparers should respectively inherit from Smooth.Collections.Comparer<T> and Smooth.Collections.EqComparer<T> in order to force the AOT compiler to create the proper generic types.
 		/// </summary>
-		public static void Register<T>(IComparer<T> comparer, IEqualityComparer<T> equalityComparer) {
+		public static void Register<T>(IComparer<T> comparer, IEqualityComparer<T> EqComparer) {
 			Register<T>(comparer);
-			Register<T>(equalityComparer);
+			Register<T>(EqComparer);
 		}
 		
 		#endregion
@@ -201,39 +201,39 @@ namespace Smooth.Compare {
 		
 		#endregion
 
-		#region EqualityComparer
+		#region EqComparer
 
 		/// <summary>
 		/// Registers an equality comparer with the specified equals function for type T.
 		/// </summary>
 		public static void Register<T>(Func<T, T, bool> equals) {
-			Register<T>(new FuncEqualityComparer<T>(equals));
+			Register<T>(new FuncEqComparer<T>(equals));
 		}
 		
 		/// <summary>
 		/// Registers an equality comparer with the specified equals and hashCode functions for type T.
 		/// </summary>
 		public static void Register<T>(Func<T, T, bool> equals, Func<T, int> hashCode) {
-			Register<T>(new FuncEqualityComparer<T>(equals, hashCode));
+			Register<T>(new FuncEqComparer<T>(equals, hashCode));
 		}
 		
 		/// <summary>
 		/// Registers the specified equality comparer for type T.
 		/// 
-		/// Note: On platforms without JIT compilation, the supplied comparer should inherit from Smooth.Collections.EqualityComparer<T> in order to force the AOT compiler to create the proper generic types.
+		/// Note: On platforms without JIT compilation, the supplied comparer should inherit from Smooth.Collections.EqComparer<T> in order to force the AOT compiler to create the proper generic types.
 		/// </summary>
-		public static void Register<T>(IEqualityComparer<T> equalityComparer) {
-			var comparerType = ComparerType.EqualityComparer;
+		public static void Register<T>(IEqualityComparer<T> EqComparer) {
+			var comparerType = ComparerType.EqComparer;
 			var type = typeof(T);
 			
-			if (equalityComparer == null) {
+			if (EqComparer == null) {
 				Debug.LogError("Tried to register a null equality comparer for: " + type.FullName);
 			} else {
-				lock (equalityComparers) {
-					if (equalityComparers.ContainsKey(type)) {
+				lock (EqComparers) {
+					if (EqComparers.ContainsKey(type)) {
 						OnEvent.Raise(comparerType, EventType.AlreadyRegistered, type);
 					} else {
-						equalityComparers.Add(type, equalityComparer);
+						EqComparers.Add(type, EqComparer);
 						OnEvent.Raise(comparerType, EventType.Registered, type);
 					}
 				}
@@ -243,15 +243,15 @@ namespace Smooth.Compare {
 		/// <summary>
 		/// Finds or creates an equality comparer for type T.
 		/// 
-		/// Note: Do not call this method directly as it is part of the internal API and a new comparers may be created on every call.  Use Smooth.Collections.EqualityComparer<T>.Default to get the default equality comparer.
+		/// Note: Do not call this method directly as it is part of the internal API and a new comparers may be created on every call.  Use Smooth.Collections.EqComparer<T>.Default to get the default equality comparer.
 		/// </summary>
-		public static IEqualityComparer<T> EqualityComparer<T>() {
-			var comparerType = ComparerType.EqualityComparer;
+		public static IEqualityComparer<T> EqComparer<T>() {
+			var comparerType = ComparerType.EqComparer;
 			var type = typeof(T);
 
-			lock(equalityComparers) {
+			lock(EqComparers) {
 				object registered;
-				if (equalityComparers.TryGetValue(type, out registered)) {
+				if (EqComparers.TryGetValue(type, out registered)) {
 					OnEvent.Raise(comparerType, EventType.FindRegistered, type);
 					return (IEqualityComparer<T>) registered;
 				}
@@ -265,7 +265,7 @@ namespace Smooth.Compare {
 			}
 
 			if (config.UseJit) {
-				var custom = config.EqualityComparer<T>();
+				var custom = config.EqComparer<T>();
 				if (custom.isSome) {
 					OnEvent.Raise(comparerType, EventType.CustomJit, type);
 					return custom.get;

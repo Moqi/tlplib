@@ -58,7 +58,7 @@ namespace Smooth.Comparisons {
 		/// <summary>
 		/// The comparison method of the default equality comparer for T in delegate form.
 		/// </summary>
-		public static Fn<T, T, bool> DefaultPredicate { get { return ToPredicate(Smooth.Collections.EqualityComparer<T>.Default); } }
+		public static Fn<T, T, bool> DefaultPredicate { get { return ToPredicate(Smooth.Collections.EqComparer<T>.Default); } }
 
 		/// <summary>
 		/// Returns the comparison method of the specfied sort comparer in delegate form.
@@ -77,12 +77,12 @@ namespace Smooth.Comparisons {
 		/// <summary>
 		/// Returns the comparison method of the specfied equality comparer in delegate form.
 		/// </summary>
-		public static Fn<T, T, bool> ToPredicate(IEqualityComparer<T> equalityComparer) {
+		public static Fn<T, T, bool> ToPredicate(IEqualityComparer<T> EqComparer) {
 			Fn<T, T, bool> c;
 			lock (toPredicate) {
-				if (!toPredicate.TryGetValue(equalityComparer, out c)) {
-					c = equalityComparer.Equals;
-					toPredicate[equalityComparer] = c;
+				if (!toPredicate.TryGetValue(EqComparer, out c)) {
+					c = EqComparer.Equals;
+					toPredicate[EqComparer] = c;
 				}
 			}
 			return c;

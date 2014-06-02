@@ -14,21 +14,21 @@ namespace Smooth.Collections {
 		/// Creates a new dictionary with the default comparer.
 		/// </summary>
 		public static Dictionary<K, V> Create<K, V>() {
-			return new Dictionary<K, V>(Smooth.Collections.EqualityComparer<K>.Default);
+			return new Dictionary<K, V>(Smooth.Collections.EqComparer<K>.Default);
 		}
 		
 		/// <summary>
 		/// Creates a new dictionary with the default comparer and the specified initial capacity.
 		/// </summary>
 		public static Dictionary<K, V> Create<K, V>(int capacity) {
-			return new Dictionary<K, V>(capacity, Smooth.Collections.EqualityComparer<K>.Default);
+			return new Dictionary<K, V>(capacity, Smooth.Collections.EqComparer<K>.Default);
 		}
 		
 		/// <summary>
 		/// Creates a new dictionary with the default comparer and elements copied from the specified dictionary.
 		/// </summary>
 		public static Dictionary<K, V> Create<K, V>(IDictionary<K, V> dictionary) {
-			return new Dictionary<K, V>(dictionary, Smooth.Collections.EqualityComparer<K>.Default);
+			return new Dictionary<K, V>(dictionary, Smooth.Collections.EqComparer<K>.Default);
 		}
 		
 	}
@@ -46,14 +46,14 @@ namespace Smooth.Collections {
 		/// Creates a new hash set with the default comparer.
 		/// </summary>
 		public static HashSet<T> Create<T>() {
-			return new HashSet<T>(Smooth.Collections.EqualityComparer<T>.Default);
+			return new HashSet<T>(Smooth.Collections.EqComparer<T>.Default);
 		}
 		
 		/// <summary>
 		/// Creates a new hash set with the default comparer and elements copied from the specified collection.
 		/// </summary>
 		public static HashSet<T> Create<T>(IEnumerable<T> collection) {
-			return new HashSet<T>(collection, Smooth.Collections.EqualityComparer<T>.Default);
+			return new HashSet<T>(collection, Smooth.Collections.EqComparer<T>.Default);
 		}
 
 	}

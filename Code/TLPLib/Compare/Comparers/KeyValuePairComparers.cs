@@ -16,17 +16,17 @@ namespace Smooth.Compare.Comparers {
 	/// <summary>
 	/// Allocation free equality comparer for KeyValuePair<K,V>s.
 	/// </summary>
-	public class KeyValuePairEqualityComparer<K, V> : Smooth.Collections.EqualityComparer<KeyValuePair<K, V>> {
+	public class KeyValuePairEqComparer<K, V> : Smooth.Collections.EqComparer<KeyValuePair<K, V>> {
 		public override bool Equals(KeyValuePair<K, V> l, KeyValuePair<K, V> r) {
-			return Smooth.Collections.EqualityComparer<K>.Default.Equals(l.Key, r.Key) &&
-				Smooth.Collections.EqualityComparer<V>.Default.Equals(l.Value, r.Value);
+			return Smooth.Collections.EqComparer<K>.Default.Equals(l.Key, r.Key) &&
+				Smooth.Collections.EqComparer<V>.Default.Equals(l.Value, r.Value);
 		}
 		
 		public override int GetHashCode(KeyValuePair<K, V> kvp) {
 			unchecked {
 				int hash = 17;
-				hash = 29 * hash + Smooth.Collections.EqualityComparer<K>.Default.GetHashCode(kvp.Key);
-				hash = 29 * hash + Smooth.Collections.EqualityComparer<V>.Default.GetHashCode(kvp.Value);
+				hash = 29 * hash + Smooth.Collections.EqComparer<K>.Default.GetHashCode(kvp.Key);
+				hash = 29 * hash + Smooth.Collections.EqComparer<V>.Default.GetHashCode(kvp.Value);
 				return hash;
 			}
 		}

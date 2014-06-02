@@ -424,7 +424,7 @@ namespace Smooth.Slinq.Collections {
 		/// Ownership of the nodes contained in this list is transerred to the lookup.
 		/// </summary>
 		public Lookup<K, T> ToLookup<K>(Fn<T, K> selector) {
-			return AddTo(Lookup<K, T>.Borrow(Smooth.Collections.EqualityComparer<K>.Default), selector);
+			return AddTo(Lookup<K, T>.Borrow(Smooth.Collections.EqComparer<K>.Default), selector);
 		}
 		
 		/// <summary>
@@ -442,7 +442,7 @@ namespace Smooth.Slinq.Collections {
 		/// Ownership of the nodes contained in this list is transerred to the lookup.
 		/// </summary>
 		public Lookup<K, T> ToLookup<K, P>(Fn<T, P, K> selector, P parameter) {
-			return AddTo(Lookup<K, T>.Borrow(Smooth.Collections.EqualityComparer<K>.Default), selector, parameter);
+			return AddTo(Lookup<K, T>.Borrow(Smooth.Collections.EqComparer<K>.Default), selector, parameter);
 		}
 
 		/// <summary>

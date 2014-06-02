@@ -597,14 +597,14 @@ namespace Smooth.Slinq.Test {
 		}
 
 		public class Equals_1<T1, T2> : IEquatable<Equals_1<T1, T2>>, IEqualityComparer<Tpl<T1, T2>> {
-			public readonly IEqualityComparer<T1> equalityComparer;
+			public readonly IEqualityComparer<T1> EqComparer;
 
 			public Equals_1() {
-				this.equalityComparer = Smooth.Collections.EqualityComparer<T1>.Default;
+				this.EqComparer = Smooth.Collections.EqComparer<T1>.Default;
 			}
 
-			public Equals_1(IEqualityComparer<T1> equalityComparer) {
-				this.equalityComparer = equalityComparer;
+			public Equals_1(IEqualityComparer<T1> EqComparer) {
+				this.EqComparer = EqComparer;
 			}
 			
 			public override bool Equals(object o) {
@@ -612,11 +612,11 @@ namespace Smooth.Slinq.Test {
 			}
 			
 			public bool Equals(Equals_1<T1, T2> other) {
-				return this.equalityComparer == other.equalityComparer;
+				return this.EqComparer == other.EqComparer;
 			}
 			
 			public override int GetHashCode() {
-				return this.equalityComparer.GetHashCode();
+				return this.EqComparer.GetHashCode();
 			}
 			
 			public static bool operator == (Equals_1<T1, T2> lhs, Equals_1<T1, T2> rhs) {
@@ -628,11 +628,11 @@ namespace Smooth.Slinq.Test {
 			}
 
 			public bool Equals(Tpl<T1, T2> a, Tpl<T1, T2> b) {
-				return equalityComparer.Equals(a._1, b._1);
+				return EqComparer.Equals(a._1, b._1);
 			}
 
 			public int GetHashCode(Tpl<T1, T2> a) {
-				return equalityComparer.GetHashCode(a._1);
+				return EqComparer.GetHashCode(a._1);
 			}
 		}
 	}

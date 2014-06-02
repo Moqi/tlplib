@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
+using Smooth.Collections;
+using Smooth.Slinq;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
@@ -180,13 +181,13 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       // Mark a flag to prevent concurrent modification of subscriptions array.
       iterating = true;
       try {
-        subscriptions.each(t => t._2(value));
+        subscriptions.Slinq().ForEach((t, v) => t._2(v), value);
       }
       finally {
         iterating = false;
         subscriptions.AddRange(pendingSubscriptions);
         pendingSubscriptions.Clear();
-        pendingRemovals.each(unsubscribe);
+        pendingRemovals.Slinq().ForEach(unsubscribe);
         pendingRemovals.Clear();
       }
     }
@@ -318,7 +319,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         filter(events => {
           if (events.Count != count) return false;
           var last = events.Last.Value._2;
-          return events.All(t => last - t._2 <= timeframe);
+          return events.Slinq().All(t => last - t._2 <= timeframe);
         }).subscribe(obs.push)
       );
     }
@@ -378,7 +379,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return changesBase((obs, lastValue, val) => {
         var valueChanged = lastValue.fold(
           () => true,
-          lastVal => EqualityComparer<A>.Default.Equals(lastVal, val)
+          lastVal => EqComparer<A>.Default.Equals(lastVal, val)
           );
         if (valueChanged) obs.push(F.t(lastValue, val));
       }, builder);
@@ -390,7 +391,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     protected O changesImpl<O>(ObserverBuilder<Tpl<A, A>, O> builder) {
       return changesBase((obs, lastValue, val) => lastValue.each(lastVal => {
-        if (! EqualityComparer<A>.Default.Equals(lastVal, val))
+        if (! EqComparer<A>.Default.Equals(lastVal, val))
           obs.push(F.t(lastVal, val));
       }), builder);
     }
@@ -400,13 +401,11 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     protected O changedValuesImpl<O>(ObserverBuilder<A, O> builder) {
-      return changesBase((obs, lastValue, val) => lastValue.voidFold(
-        () => obs.push(val),
-        lastVal => {
-          if (! EqualityComparer<A>.Default.Equals(lastVal, val))
-            obs.push(val);
-        }
-      ), builder);
+      return changesBase((obs, lastValue, val) => {
+        if (lastValue.isEmpty) obs.push(val);
+        else if (! EqComparer<A>.Default.Equals(lastValue.get, val))
+          obs.push(val);
+      }, builder);
     }
 
     private void unsubscribe(Subscription s) {

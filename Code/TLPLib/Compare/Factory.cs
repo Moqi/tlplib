@@ -38,7 +38,7 @@ namespace Smooth.Compare {
 		
 		#endregion
 
-		#region EqualityComparer
+		#region EqComparer
 
 		/// <summary>
 		/// Returns an option containing an equality comparer for type T, or None if no comparer can be created.
@@ -49,15 +49,15 @@ namespace Smooth.Compare {
 		/// System.Collections.KeyValuePair<,>s,
 		/// Value types T with a public T.Equals(T) method or ==(T,T) operator.
 		/// </summary>
-		public static Option<IEqualityComparer<T>> EqualityComparer<T>() {
+		public static Option<IEqualityComparer<T>> EqComparer<T>() {
 			var type = typeof(T);
 
 			if (!type.IsValueType) {
 				return Option<IEqualityComparer<T>>.None;
 			} else if (type.IsEnum) {
-				return new Option<IEqualityComparer<T>>(EnumEqualityComparer<T>(type));
+				return new Option<IEqualityComparer<T>>(EnumEqComparer<T>(type));
 			} else if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>)) {
-				return new Option<IEqualityComparer<T>>(KeyValuePairEqualityComparer<T>(type));
+				return new Option<IEqualityComparer<T>>(KeyValuePairEqComparer<T>(type));
 			} else {
 				var l = Expression.Parameter(type, "l");
 				var r = Expression.Parameter(type, "r");
@@ -65,7 +65,7 @@ namespace Smooth.Compare {
 				var expression = EqualsExpression(l, r);
 
 				return expression.isSome ?
-					new Option<IEqualityComparer<T>>(new FuncEqualityComparer<T>(Expression.Lambda<Func<T, T, bool>>(expression.get, l, r).Compile())) :
+					new Option<IEqualityComparer<T>>(new FuncEqComparer<T>(Expression.Lambda<Func<T, T, bool>>(expression.get, l, r).Compile())) :
 						Option<IEqualityComparer<T>>.None; 
 			}
 		}
@@ -155,8 +155,8 @@ namespace Smooth.Compare {
 		/// a MethodInfo for the comparer's Equals(T, T) method, and
 		/// a MethodInfo for the comparer's GetHashCode(T) method.
 		/// </summary>
-		public static Tpl<Expression, MethodInfo, MethodInfo> ExistingEqualityComparer<T>() {
-			return ExistingEqualityComparer(typeof(T));
+		public static Tpl<Expression, MethodInfo, MethodInfo> ExistingEqComparer<T>() {
+			return ExistingEqComparer(typeof(T));
 		}
 
 		/// <summary>
@@ -165,8 +165,8 @@ namespace Smooth.Compare {
 		/// a MethodInfo for the comparer's Equals(T, T) method, and
 		/// a MethodInfo for the comparer's GetHashCode(T) method.
 		/// </summary>
-		public static Tpl<Expression, MethodInfo, MethodInfo> ExistingEqualityComparer(Type type) {
-			var pi = typeof(Smooth.Collections.EqualityComparer<>).MakeGenericType(type).GetProperty(
+		public static Tpl<Expression, MethodInfo, MethodInfo> ExistingEqComparer(Type type) {
+			var pi = typeof(Smooth.Collections.EqComparer<>).MakeGenericType(type).GetProperty(
 				"Default",
 				BindingFlags.Public | BindingFlags.Static,
 				null,
@@ -207,19 +207,19 @@ namespace Smooth.Compare {
 		
 		#endregion
 
-		#region EqualityComparers for specific types
+		#region EqComparers for specific types
 
-		private static IEqualityComparer<T> EnumEqualityComparer<T>(Type type) {
+		private static IEqualityComparer<T> EnumEqComparer<T>(Type type) {
 			switch(Type.GetTypeCode(type)) {
 			case TypeCode.Int64:
 			case TypeCode.UInt64:
-				return new Blittable64EqualityComparer<T>();
+				return new Blittable64EqComparer<T>();
 			default:
-				return new Blittable32EqualityComparer<T>();
+				return new Blittable32EqComparer<T>();
 			}
 		}
 		
-		private static IEqualityComparer<T> KeyValuePairEqualityComparer<T>(Type type) {
+		private static IEqualityComparer<T> KeyValuePairEqComparer<T>(Type type) {
 			var l = Expression.Parameter(type, "l");
 			var r = Expression.Parameter(type, "r");
 
@@ -229,8 +229,8 @@ namespace Smooth.Compare {
 			var valueL = Expression.Property(l, "Value");
 			var valueR = Expression.Property(r, "Value");
 
-			var keyComparer = ExistingEqualityComparer(keyL.Type);
-			var valueComparer = ExistingEqualityComparer(valueL.Type);
+			var keyComparer = ExistingEqComparer(keyL.Type);
+			var valueComparer = ExistingEqComparer(valueL.Type);
 
 			var keysEqual = Expression.Call(keyComparer._1, keyComparer._2, keyL, keyR);
 			var valuesEqual = Expression.Call(valueComparer._1, valueComparer._2, valueL, valueR);
@@ -246,7 +246,7 @@ namespace Smooth.Compare {
 			hashCode = BinaryExpression.Add(hashCodeKey, BinaryExpression.Multiply(hashCode, hashCodeStepMultiplier));
 			hashCode = BinaryExpression.Add(hashCodeValue, BinaryExpression.Multiply(hashCode, hashCodeStepMultiplier));
 
-			return new FuncEqualityComparer<T>(
+			return new FuncEqComparer<T>(
 				Expression.Lambda<Func<T, T, bool>>(equals, l, r).Compile(),
 				Expression.Lambda<Func<T, int>>(hashCode, l).Compile());
 		}

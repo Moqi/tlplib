@@ -148,7 +148,7 @@ public struct Option<A> : IEquatable<Option<A>> {
   }
 
   public bool exists(A a) {
-    return exists(a, Smooth.Collections.EqualityComparer<A>.Default);
+    return exists(a, Smooth.Collections.EqComparer<A>.Default);
   }
 
   public bool exists(A a, IEqualityComparer<A> comparer) {
@@ -172,7 +172,7 @@ public struct Option<A> : IEquatable<Option<A>> {
   }
 
   public override int GetHashCode() {
-    return Smooth.Collections.EqualityComparer<A>.Default.GetHashCode(value);
+    return Smooth.Collections.EqComparer<A>.Default.GetHashCode(value);
   }
 
   public static bool operator == (Option<A> lhs, Option<A> rhs) {
