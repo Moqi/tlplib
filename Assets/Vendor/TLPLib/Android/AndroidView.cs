@@ -37,10 +37,13 @@ namespace com.tinylabproductions.TLPLib.Android {
           }
           catch (Exception e1) {
             Log.warn("Failed to get immersive sticky mode flags: " + e1);
-            flags =
+            future.completeSuccess(false);
+            return;
+            // This makes android 4.1 ignore first click 
+            /*flags =
               view.GetStatic<int>(FLAG_HIDE_NAVIGATION) |
               view.GetStatic<int>(FLAG_STABLE_LAYOUT) |
-              view.GetStatic<int>(FLAG_FULLSCREEN);
+              view.GetStatic<int>(FLAG_FULLSCREEN);*/
           }
 
           var decor = activity.
