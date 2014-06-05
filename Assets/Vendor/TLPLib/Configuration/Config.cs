@@ -244,7 +244,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     private Either<string, IList<A>> getList<A>(
       string key, Parser<A> parser
     ) {
-      return getConcrete(split(key), n => F.some(n.AsArray)).flatMapRight(arr => {
+      return get(key, n => F.some(n.AsArray)).flatMapRight(arr => {
         var list = new List<A>(arr.Count);
         for (var idx = 0; idx < arr.Count; idx++) {
           var node = arr[idx];
