@@ -1,9 +1,20 @@
 ﻿using System;
 
 namespace com.tinylabproductions.TLPLib.Functional {
-  public struct Try<A> {
+  public 
+#if UNITY_IOS
+	class
+#else
+	struct 
+#endif
+	Try<A> {
+
     private readonly A _value;
     private readonly Exception _exception;
+
+#if UNITY_IOS
+	public Try() {}
+#endif
 
     public Try(A value) { 
       _value = value;
