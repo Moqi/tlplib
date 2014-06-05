@@ -11,19 +11,6 @@ namespace com.tinylabproductions.TLPLib.Functional {
   * http://stackoverflow.com/questions/1188354/can-i-specify-a-supertype-relation-in-c-sharp-generic-constraints
   **/
 public static class Option {
-  static Option() {
-    #if UNITY_IOS
-    Log.debug(
-      "iOS AOT type hints: " +
-        
-      new Option<byte>() + new Option<short>() + new Option<int>() + 
-      new Option<long>() + new Option<float>() + new Option<double>() +
-      new Option<decimal>() + new Option<bool>() + new Option<DateTime>() +
-      new Option<char>()
-    );
-    #endif
-  }
-
   public static IEnumerable<A> asEnum<A, B>(this Option<B> opt)
   where B : A {
     return opt.isDefined 
@@ -100,9 +87,19 @@ public static class Option {
   }
 }
 
-public struct Option<A> {
+public 
+#if UNITY_IOS
+class
+#else
+struct 
+#endif
+	Option<A> {
   private readonly A value;
   private readonly bool isSome;
+
+#if UNITY_IOS
+  public Option() {}
+#endif
 
   public Option(A value) : this() {
     this.value = value;

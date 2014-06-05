@@ -2,7 +2,13 @@
 using com.tinylabproductions.TLPLib.Extensions;
 
 namespace com.tinylabproductions.TLPLib.Functional {
-  public struct Either<A, B> {
+  public 
+#if UNITY_IOS
+  class
+#else
+	struct 
+#endif
+	Either<A, B> {
     private readonly A _leftValue;
     private readonly B _rightValue;
     private readonly bool _isLeft;
