@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Smooth.Collections;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
   /**
@@ -50,7 +51,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public A value { 
       get { return _value; }
       set {
-        if (EqualityComparer<A>.Default.Equals(_value, value)) return;
+        if (EqComparer<A>.Default.Equals(_value, value)) return;
         _value = value;
         submit(value);
       }
