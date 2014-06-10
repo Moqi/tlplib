@@ -104,6 +104,15 @@ dirlink() {
   add_setup_file "$name"
 }
 
+# Recursive dir link - find all dirs in given name and link them.
+rdirlink() {
+  local name="$1"
+  for f in $(find "$ld/$name" -type d -mindepth 1 -maxdepth 1 | xargs); do
+    local tname=`echo $f | sed -e "s|$ld/||"`
+    dirlink "$tname"
+  done
+}
+
 filelink() {
   local name="$1"
   mkdir -p `dirname $name`
