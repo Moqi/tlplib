@@ -41,16 +41,12 @@ public static class Option {
     return opt;
   }
 
-  public static Option<A> orElse<A, B>(
-    this Option<A> opt, Fn<Option<B>> other
-  ) where B : A {
-    return opt.isDefined ? opt : other().to<B, A>();
+  public static Option<A> orElse<A>(this Option<A> opt, Fn<Option<A>> other) {
+    return opt.isDefined ? opt : other();
   }
 
-  public static Option<A> orElse<A, B>(
-    this Option<A> opt, Option<B> other
-  ) where B : A {
-    return opt.isDefined ? opt : other.to<B, A>();
+  public static Option<A> orElse<A>(this Option<A> opt, Option<A> other) {
+    return opt.isDefined ? opt : other;
   }
 
   public static A orNull<A>(this Option<A> opt) where A : class {

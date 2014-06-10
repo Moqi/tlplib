@@ -98,6 +98,15 @@ value type that you can imagine and then never define value types yourself.
 
 Obviously this needs a better solution, but it is currently out of scope for us.
 
+where B : A constraint
+~~~~~~~~~~~~~~~~~~~~~~
+
+Following pattern causes boxing for structs and causes problems in web player:
+
+  public static B foo(this A a, B b) where B : A {
+    return b;
+  }
+
 General iOS
 ~~~~~~~~~~~
 
