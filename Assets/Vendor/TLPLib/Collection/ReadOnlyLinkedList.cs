@@ -12,7 +12,7 @@ namespace com.tinylabproductions.TLPLib.Collection {
 
   [ComVisible(false)]
   [DebuggerDisplay("Count = {Count}")]
-  public class ReadOnlyLinkedList<A> : ILinkedList<A> {
+  public struct ReadOnlyLinkedList<A> : ILinkedList<A> {
     private readonly LinkedList<A> backing;
 
     public ReadOnlyLinkedList(LinkedList<A> backingList) {

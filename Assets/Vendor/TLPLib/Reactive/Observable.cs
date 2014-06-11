@@ -2,11 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
-using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Iter;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
@@ -230,7 +229,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     protected virtual void submit(A value) {
       // Make a copy of subscriptions to prevent concurrent modification of it.
       var localSubscription = subscriptions.ToArray();
-      localSubscription.each(t => t._2(value));
+      for (var iter = localSubscription.iter(); iter; iter++) 
+        (~iter)._2(value);
     }
 
     public int subscribers { get { return subscriptions.Count; } }
@@ -266,7 +266,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public O flatMapImpl<B, O>
     (Fn<A, IEnumerable<B>> mapper, ObserverBuilder<B, O> builder) {
-      return builder(obs => subscribe(val => mapper(val).each(obs.push)));
+      return builder(obs => subscribe(val => mapper(val).hIter().each(obs.push)));
     }
 
     public IObservable<A> filter(Fn<A, bool> predicate) {
@@ -482,7 +482,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     private void unsubscribe(Subscription s) {
-      subscriptions.indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
+      subscriptions.iter().indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
 
       // Unsubscribe from source if we don't have any subscribers that are
       // subscribed to us.

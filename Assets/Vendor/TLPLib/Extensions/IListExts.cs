@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Iter;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class IListExts {
     public static Option<T> get<T>(this IList<T> list, int index) {
       return (index >= 0 && index < list.Count) 
         ? F.some(list[index]) : F.none<T>();
+    }
+
+    public static List<A> reversed<A>(this List<A> list) {
+      var reversed = new List<A>(list);
+      reversed.Reverse();
+      return reversed;
     }
 
     // AOT safe version of ToDictionary.
@@ -24,27 +31,28 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static T updateOrAdd<T>(
       this IList<T> list, Fn<T, bool> finder, Fn<T> ifNotFound, Fn<T, T> ifFound
     ) {
-      return list.findWithIndex(finder).fold(
-        () => {
-          var item = ifNotFound();
-          list.Add(item);
-          return item;
-        },
-        t => {
-          var updated = ifFound(t._1);
-          list[t._2] = updated;
-          return updated;
-        }
-      );
+      var idxOpt = list.iter().indexWhere(finder);
+      if (idxOpt.isEmpty) {
+        var item = ifNotFound();
+        list.Add(item);
+        return item;
+      }
+      else {
+        var idx = idxOpt.get;
+        var updated = ifFound(list[idx]);
+        list[idx] = updated;
+        return updated;
+      }
     }
 
     public static void updateWhere<T>(
       this IList<T> list, Fn<T, bool> finder, Fn<T, T> ifFound
     ) {
-      list.findWithIndex(finder).each(t => {
-        var updated = ifFound(t._1);
-        list[t._2] = updated;
-      });
+      var idxOpt = list.iter().indexWhere(finder);
+      if (idxOpt.isEmpty) return;
+
+      var idx = idxOpt.get;
+      list[idx] = ifFound(list[idx]);
     }
 
     public static void Shuffle<A>(this IList<A> list) {
@@ -59,23 +67,8 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       }
     }
 
-    public static IList<B> map<A, B>(this IList<A> list, Fn<A, B> mapper) {
-      var nList = new List<B>(list.Count);
-      list.each(e => nList.Add(mapper(e)));
-      return nList;
-    }
-
-    public static IList<B> mapWithIndex<A, B>(this IList<A> list, Fn<A, int, B> mapper) {
-      var nList = new List<B>(list.Count);
-      list.eachWithIndex((e, i) => nList.Add(mapper(e, i)));
-      return nList;
-    }
-
-    public static IList<A> filter<A>(this IList<A> list, Fn<A, bool> predicate) {
-      var nList = new List<A>(list.Count);
-      list.each(e => { if (predicate(e)) nList.Add(e); });
-      return nList;
-    }
+    public static bool isEmpty<A>(this IList<A> list) 
+    { return list.Count == 0; }
 
     public static Option<A> random<A>(this IList<A> list) {
       return list.Count == 0 
@@ -96,5 +89,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         idx++;
       }
     }
+
+    public static IList<A> toIList<A>(this List<A> list) { return list; }
   }
 }

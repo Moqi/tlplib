@@ -1,14 +1,16 @@
 ﻿using System;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Iter;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class ArrayExts {
     public static A[] concat<A>(this A[] a, params A[][] others) {
-      var total = others.sum(_ => _.Length).getOrElse(0);
+      var total = others.iter().map(_ => _.Length).
+        reduceLeft((s, o) => s + o).getOrElse(0);
 
       var self = new A[a.Length + total];
       a.CopyTo(self, 0);
-      others.foldLeft(a.Length, (startIdx, arr) => {
+      others.iter().foldLeft(a.Length, (startIdx, arr) => {
         arr.CopyTo(self, startIdx);
         return startIdx + arr.Length;
       });
