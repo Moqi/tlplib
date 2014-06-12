@@ -1,5 +1,6 @@
 ﻿#if DFGUI && GOTWEEN
-﻿using System.Collections.Generic;
+using com.tinylabproductions.TLPLib.Iter;
+using System.Collections.Generic;
 ﻿using System.Linq;
 ﻿using System;
 using System.Text.RegularExpressions;
@@ -53,11 +54,12 @@ namespace com.tinylabproductions.TLPLib.Binding {
     public static IObservable<Tpl<A, dfMouseEventArgs>> clicksObservable<A>(
       this A button
     ) where A : dfControl {
-      return new Observable<Tpl<A, dfMouseEventArgs>>(observer =>
-        button.Click += (control, @event) => observer.push(F.t(
-          (A) control, @event
-        ))
-      );
+      return new Observable<Tpl<A, dfMouseEventArgs>>(observer => {
+        MouseEventHandler dlg = (control, @event) =>
+          observer.push(F.t((A) control, @event));
+        button.Click += dlg;
+        return new Subscription(() => button.Click -= dlg);
+      });
     }
     
     /*********** One-way binds ***********/
@@ -166,7 +168,7 @@ namespace com.tinylabproductions.TLPLib.Binding {
         foreach (var cb in checkboxes) cb.IsChecked = false;
       };
       Act<Option<T>, string> check = (v, name) => 
-        checkboxes.findOpt(cb => cb.name == name).voidFold(
+        checkboxes.hIter().find(cb => cb.name == name).voidFold(
           () => {
             throw new Exception(String.Format(
               "Can't find checkbox with name {0} which was mapped from {1}",

@@ -10,6 +10,7 @@ It contains various things, including but not limited to:
 * BiMap.
 * Promises & Futures, CoRoutine helpers.
 * Various data structures.
+* Iter library - allocation free enumerators.
 * A bunch of extension methods.
 * JSON parser/emmiter.
 * Functional utilities: Option, Lazy, Tuple, Either, Try, Unit, co-variant functions and actions, rudimentary pattern matching.
@@ -97,6 +98,15 @@ can pick up, so it generates the appropriate machine code) for every single
 value type that you can imagine and then never define value types yourself.
 
 Obviously this needs a better solution, but it is currently out of scope for us.
+
+where B : A constraint
+~~~~~~~~~~~~~~~~~~~~~~
+
+Following pattern causes boxing for structs and causes problems in web player:
+
+  public static B foo(this A a, B b) where B : A {
+    return b;
+  }
 
 General iOS
 ~~~~~~~~~~~

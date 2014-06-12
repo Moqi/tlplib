@@ -6,9 +6,12 @@ namespace com.tinylabproductions.TLPLib.Functional {
 #if UNITY_IOS
   class
 #else
-	struct 
+  struct
 #endif
-	Either<A, B> {
+  Either<A, B> {
+    public static Either<A, B> Left(A value) { return new Either<A, B>(value); }
+    public static Either<A, B> Right(B value) { return new Either<A, B>(value); }
+
     private readonly A _leftValue;
     private readonly B _rightValue;
     private readonly bool _isLeft;
@@ -47,6 +50,9 @@ namespace com.tinylabproductions.TLPLib.Functional {
 
     public C fold<C>(Fn<A, C> onLeft, Fn<B, C> onRight) 
       { return isLeft ? onLeft(_leftValue) : onRight(_rightValue); }
+
+    public void voidFold(Act<A> onLeft, Act<B> onRight) 
+      { if (isLeft) onLeft(_leftValue); else onRight(_rightValue); }
   }
 
   public static class EitherBuilderExts {

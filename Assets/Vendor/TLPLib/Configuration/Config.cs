@@ -5,6 +5,7 @@ using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Formats.SimpleJSON;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Iter;
 using com.tinylabproductions.TLPLib.Utilities;
 using UnityEngine;
 
@@ -205,11 +206,14 @@ namespace com.tinylabproductions.TLPLib.Configuration {
 
     private Either<string, IList<Config>> fetchSubConfigList(string key) {
       return getList(key, jsClassParser).
-        mapRight(nList => nList.mapWithIndex((n, idx) => new Config(
-          url, string.Format(
-            "{0}[{1}]", scope == "" ? key : scope + "." + key, idx
-          ), n
-        )));
+        mapRight(nList => nList.iter().zipWithIndex().map(t => {
+          var n = t._1; var idx = t._2;
+          return new Config(
+            url, string.Format(
+              "{0}[{1}]", scope == "" ? key : scope + "." + key, idx
+            ), n
+          );
+        }).toIList());
     }
 
     private Either<string, A> get<A>(string key, Parser<A> parser) {
@@ -264,14 +268,14 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     ) {
       var current = configuration;
 
-      var key = parts.mkString(".");
+      var key = parts.iter().mkString(".");
       foreach (var part in parts.dropRight(1)) {
         var either = fetch(current, key, part, jsClassParser);
         if (either.isLeft) return either.mapRight(_ => default(A));
         current = either.rightValue.get;
       }
 
-      return fetch(current, key, parts.lastOpt().get, parser);
+      return fetch(current, key, ~parts.rIter(), parser);
     }
 
     private static Either<string, A> fetch<A>(

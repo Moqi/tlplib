@@ -27,25 +27,11 @@ namespace com.tinylabproductions.TLPLib.Android {
       var future = new FutureImpl<bool>();
       activity.Call("runOnUiThread", new AndroidJavaRunnable(() => {
         try {
-          int flags;
-          try {
-            flags =
-              view.GetStatic<int>(FLAG_HIDE_NAVIGATION) |
-              view.GetStatic<int>(FLAG_STABLE_LAYOUT) |
-              view.GetStatic<int>(FLAG_IMMERSIVE_STICKY) |
-              view.GetStatic<int>(FLAG_FULLSCREEN);
-          }
-          catch (Exception e1) {
-            Log.warn("Failed to get immersive sticky mode flags: " + e1);
-            future.completeSuccess(false);
-            return;
-            // This makes android 4.1 ignore first click 
-            /*flags =
-              view.GetStatic<int>(FLAG_HIDE_NAVIGATION) |
-              view.GetStatic<int>(FLAG_STABLE_LAYOUT) |
-              view.GetStatic<int>(FLAG_FULLSCREEN);*/
-          }
-
+          var flags =
+            view.GetStatic<int>(FLAG_HIDE_NAVIGATION) |
+            view.GetStatic<int>(FLAG_STABLE_LAYOUT) |
+            view.GetStatic<int>(FLAG_IMMERSIVE_STICKY) |
+            view.GetStatic<int>(FLAG_FULLSCREEN);
           var decor = activity.
             Call<AndroidJavaObject>("getWindow").
             Call<AndroidJavaObject>("getDecorView");
@@ -53,9 +39,9 @@ namespace com.tinylabproductions.TLPLib.Android {
           Log.debug("Hiding android navigation bar succeeded.");
           future.completeSuccess(true);
         }
-        catch (Exception e2) {
+        catch (Exception e) {
           Log.warn(
-            "Error while trying to hide navigation bar on android: " + e2
+            "Error while trying to hide navigation bar on android: " + e
           );
           future.completeSuccess(false);
         }

@@ -1,5 +1,4 @@
-﻿using System.Net.Mime;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Utilities {
   public static class Platform {
@@ -7,7 +6,7 @@ namespace com.tinylabproductions.TLPLib.Utilities {
     public const string IOS = "ios";
     public const string WP8 = "wp8";
     public const string METRO = "metro";
-    public const string BB10 = "bb10";
+    public const string BLACKBERRY = "blackberry";
     public const string WEB = "web";
     public const string PC = "pc";
     public const string OTHER = "other";
@@ -29,8 +28,8 @@ namespace com.tinylabproductions.TLPLib.Utilities {
         case RuntimePlatform.MetroPlayerX64:
         case RuntimePlatform.MetroPlayerX86:
           return METRO;
-        case RuntimePlatform.BB10Player:
-          return BB10;
+        case RuntimePlatform.BlackBerryPlayer:
+          return BLACKBERRY;
         case RuntimePlatform.WindowsWebPlayer:
         case RuntimePlatform.OSXWebPlayer:
           return WEB;
@@ -55,6 +54,26 @@ namespace com.tinylabproductions.TLPLib.Utilities {
 #elif UNITY_OPERA
         return "opera";
 #endif
+      }
+      if (name == PC) {
+        switch (Application.platform) {
+          case RuntimePlatform.WindowsPlayer:
+            return "windows";
+          case RuntimePlatform.OSXPlayer:
+            return "osx";
+          case RuntimePlatform.OSXDashboardPlayer:
+            return "osx-dashboard";
+          case RuntimePlatform.LinuxPlayer:
+            return "linux";
+        }
+      }
+      if (name == WEB) {
+        switch (Application.platform) {
+          case RuntimePlatform.WindowsWebPlayer:
+            return "windows";
+          case RuntimePlatform.OSXWebPlayer:
+            return "osx";
+        }
       }
 
       return "";

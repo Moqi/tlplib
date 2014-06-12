@@ -1,13 +1,24 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using com.tinylabproductions.TLPLib.Iter;
 using com.tinylabproductions.TLPLib.Utilities;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace com.tinylabproductions.TLPLib.Data {
+  public static class RangeExts {
+    public static Range to(this int from, int to) {
+      return new Range(from, to);
+    }
+    public static Range until(this int from, int to) {
+      return new Range(from, to - 1);
+    }
+  }
+
   [Serializable]
-  public class Range {
+  // [from, to]
+  public struct Range {
     // No it can't, Unity...
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
     [SerializeField] private int _from, _to;
@@ -20,6 +31,9 @@ namespace com.tinylabproductions.TLPLib.Data {
     }
 
     public int random { get { return Random.Range(from, to + 1); } }
+
+    public Iter<int, Tpl<int, int, int>> iter 
+      { get { return Iter.Iter.range(from, to); } }
   }
 
   [Serializable]
@@ -35,7 +49,7 @@ namespace com.tinylabproductions.TLPLib.Data {
   }
 
   [Serializable]
-  public class FRange {
+  public struct FRange {
     // No it can't, Unity...
     // ReSharper disable once FieldCanBeMadeReadOnly.Local
     [SerializeField] private float _from, _to;

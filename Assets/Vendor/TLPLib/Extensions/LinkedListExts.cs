@@ -1,29 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using com.tinylabproductions.TLPLib.Collection;
+using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class LinkedListExts {
-    public static LinkedList<B> map<A, B>(this ILinkedList<A> list, Fn<A, B> mapper) {
-      var nList = new LinkedList<B>();
-      list.each(e => nList.AddLast(mapper(e)));
-      return nList;
+    public static bool isEmpty<A>(this ILinkedList<A> list) 
+    { return list.Count == 0; }
+
+    public static bool isEmpty<A>(this LinkedList<A> list) 
+    { return list.Count == 0; }
+
+    /* Removes first element and returns it. */
+    public static Option<A> shift<A>(this LinkedList<A> list) {
+      var a = F.opt(list.First);
+      list.RemoveFirst();
+      return a.map(_ => _.Value);
     }
 
-    public static LinkedList<B> mapWithIndex<A, B>(
-      this ILinkedList<A> list, Fn<A, int, B> mapper
-    ) {
-      var nList = new LinkedList<B>();
-      list.eachWithIndex((e, i) => nList.AddLast(mapper(e, i)));
-      return nList;
-    }
-
-    public static LinkedList<A> filter<A>(
-      this LinkedList<A> list, Fn<A, bool> predicate
-    ) {
-      var nList = new LinkedList<A>();
-      list.each(e => { if (predicate(e)) nList.AddLast(e); });
-      return nList;
+    /* Removes last element and returns it. */
+    public static Option<A> pop<A>(this LinkedList<A> list) {
+      var a = F.opt(list.Last);
+      list.RemoveLast();
+      return a.map(_ => _.Value);
     }
   }
 }

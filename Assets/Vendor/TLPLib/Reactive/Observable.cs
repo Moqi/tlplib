@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
-using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Iter;
+using Smooth.Collections;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
@@ -50,7 +49,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     /**
      * Waits until `count` events are emmited within a single `timeframe` 
      * seconds window and emits a read only linked list of 
-     * (element, emmision time) tuples with emmission time taken from 
+     * (element, emmision time) Tpls with emmission time taken from 
      * `Time.time`.
      **/
     IObservable<ILinkedList<Tpl<A, float>>> withinTimeframe(int count, float timeframe);
@@ -124,20 +123,11 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       );
     } }
 
-    public static IObservable<DateTime> interval(
-      MonoBehaviour behaviour, float intervalS
-      ) {
-      return interval(intervalS, F.none<float>());
-    }
+    public static IObservable<DateTime> interval(float intervalS, float delayS) 
+    { return interval(intervalS, F.some(delayS)); }
 
     public static IObservable<DateTime> interval(
-      MonoBehaviour behaviour, float intervalS, float delayS
-    ) {
-      return interval(intervalS, F.some(delayS));
-    }
-
-    public static IObservable<DateTime> interval(
-      float intervalS, Option<float> delayS
+      float intervalS, Option<float> delayS=new Option<float>()
     ) {
       return new Observable<DateTime>(observer => {
         var cr = ASync.StartCoroutine(interval(observer, intervalS, delayS));
@@ -145,8 +135,11 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       });
     }
 
-    public static IObservable<DateTime> interval(float intervalS) {
-      return interval(intervalS, F.none<float>());
+    public static IObservable<Tpl<P1, P2, P3, P4>> Tpl<P1, P2, P3, P4>(
+      IObservable<P1> o1, IObservable<P2> o2, IObservable<P3> o3, IObservable<P4> o4
+    ) {
+      return o1.zip<P2>(o2).zip<P3>(o3).zip<P4>(o4).
+        map<Tpl<P1, P2, P3, P4>>(t => F.t(t._1._1._1, t._1._1._2, t._1._2, t._2));
     }
 
     private static IEnumerator everyFrameCR(IObserver<Unit> observer) {
@@ -212,8 +205,15 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return builder => new Observable<Elem>(builder);
     }
 
-    private readonly IList<Tpl<Subscription, Act<A>>> subscriptions =
+    private readonly List<Tpl<Subscription, Act<A>>> subscriptions =
       new List<Tpl<Subscription, Act<A>>>();
+    private readonly List<Tpl<Subscription, Act<A>>> pendingSubscriptions =
+      new List<Tpl<Subscription, Act<A>>>();
+    private readonly List<Subscription> pendingRemovals =
+      new List<Subscription>();
+
+    // Are we currently iterating through subscriptions?
+    private bool iterating;
 
     private readonly Option<SourceProperties> sourceProps;
 
@@ -227,19 +227,33 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       ));
     }
 
-    protected virtual void submit(A value) {
-      // Make a copy of subscriptions to prevent concurrent modification of it.
-      var localSubscription = subscriptions.ToArray();
-      localSubscription.each(t => t._2(value));
+    protected void submit(A value) {
+      // Mark a flag to prevent concurrent modification of subscriptions array.
+      iterating = true;
+      try {
+        for (var iter = subscriptions.iter(); iter; iter++) 
+          (~iter)._2(value);
+      }
+      finally {
+        iterating = false;
+        subscriptions.AddRange(pendingSubscriptions);
+        pendingSubscriptions.Clear();
+
+        if (pendingRemovals.Count > 0) {
+          // This causes heap allocations somehow.
+          pendingRemovals.iter().each(unsubscribe);
+          pendingRemovals.Clear();
+        }
+      }
     }
 
-    public int subscribers { get { return subscriptions.Count; } }
+    public int subscribers { get { return subscriptions.Count - pendingRemovals.Count; } }
 
     public virtual ISubscription subscribe(Act<A> onChange) {
       Subscription subscription = null;
       // ReSharper disable once AccessToModifiedClosure
       subscription = new Subscription(() => unsubscribe(subscription));
-      subscriptions.Add(F.t(subscription, onChange));
+      (iterating ? pendingSubscriptions : subscriptions).Add(F.t(subscription, onChange));
       // Subscribe to source if we have a first subscriber.
       sourceProps.each(_ => _.trySubscribe());
       return subscription;
@@ -266,7 +280,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public O flatMapImpl<B, O>
     (Fn<A, IEnumerable<B>> mapper, ObserverBuilder<B, O> builder) {
-      return builder(obs => subscribe(val => mapper(val).each(obs.push)));
+      return builder(obs => subscribe(val => mapper(val).hIter().each(obs.push)));
     }
 
     public IObservable<A> filter(Fn<A, bool> predicate) {
@@ -363,7 +377,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         filter(events => {
           if (events.Count != count) return false;
           var last = events.Last.Value._2;
-          return events.All(t => last - t._2 <= timeframe);
+          return events.iter().ctx(last, timeframe).forall(
+            _ => _.ua((t, lst, tf) => lst - t._2 <= tf)
+          );
         }).subscribe(obs.push)
       );
     }
@@ -450,8 +466,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return changesBase((obs, lastValue, val) => {
         var valueChanged = lastValue.fold(
           () => true,
-          lastVal => EqualityComparer<A>.Default.Equals(lastVal, val)
-          );
+          lastVal => EqComparer<A>.Default.Equals(lastVal, val)
+        );
         if (valueChanged) obs.push(F.t(lastValue, val));
       }, builder);
     }
@@ -462,7 +478,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     protected O changesImpl<O>(ObserverBuilder<Tpl<A, A>, O> builder) {
       return changesBase((obs, lastValue, val) => lastValue.each(lastVal => {
-        if (! EqualityComparer<A>.Default.Equals(lastVal, val))
+        if (! EqComparer<A>.Default.Equals(lastVal, val))
           obs.push(F.t(lastVal, val));
       }), builder);
     }
@@ -472,23 +488,27 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     protected O changedValuesImpl<O>(ObserverBuilder<A, O> builder) {
-      return changesBase((obs, lastValue, val) => lastValue.voidFold(
-        () => obs.push(val),
-        lastVal => {
-          if (! EqualityComparer<A>.Default.Equals(lastVal, val))
-            obs.push(val);
-        }
-      ), builder);
+      return changesBase((obs, lastValue, val) => {
+        if (lastValue.isEmpty) obs.push(val);
+        else if (! EqComparer<A>.Default.Equals(lastValue.get, val))
+          obs.push(val);
+      }, builder);
     }
 
-    private void unsubscribe(Subscription s) {
-      subscriptions.indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
+    private void unsubscribe(Subscription subscription) {
+      if (iterating) 
+        pendingRemovals.Add(subscription);
+      else 
+        subscriptions.iter().ctx(subscription).
+          indexWhere(_ => _.ua((t, s) => t._1 == s)).
+          each(subscriptions.RemoveAt);
+      subscriptions.iter().ctx(subscription).
+        indexWhere(_ => _.ua((t, s) => t._1 == s)).
+        each(subscriptions.RemoveAt);
 
       // Unsubscribe from source if we don't have any subscribers that are
       // subscribed to us.
-      if (subscribers == 0) {
-        sourceProps.each(_ => _.tryUnsubscribe());
-      }
+      if (subscribers == 0) sourceProps.each(_ => _.tryUnsubscribe());
     }
   }
 }
