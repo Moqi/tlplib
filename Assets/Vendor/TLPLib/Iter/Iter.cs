@@ -60,11 +60,9 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     #region Base interface
 
-    public static Iter<A, Ctx> empty { get { return new Iter<A, Ctx>(
-      F.none<Ctx>(), _ => F.none<Ctx>(), 
-      _ => F.throws<A>(new IllegalStateException("getter on empty Iter")),
-      _ => F.none<int>()
-    ); } }
+    public static readonly Iter<A, Ctx> empty = new Iter<A, Ctx>(
+      F.none<Ctx>(), _ => F.none<Ctx>(), _ => default(A), _ => F.none<int>()
+    );
 
     public Iter(
       Option<Ctx> state, Fn<Ctx, Option<Ctx>> skipper, Fn<Ctx, A> getter, 

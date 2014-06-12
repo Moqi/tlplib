@@ -76,41 +76,63 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     #region LinkedList
 
-    /* ILinkedList to Iter wrapper. */
-    public static Iter<A, Tpl<LinkedListNode<A>, int, bool>> iter<A>(
-      this ILinkedList<A> list, bool reverse = false
+    private static Option<Tpl<LinkedListNode<A>, int, bool>> linkedListLikeSkipper<A>(
+      Tpl<LinkedListNode<A>, int, bool> ctx
     ) {
-      if (list.Count == 0) return Iter<A, Tpl<LinkedListNode<A>, int, bool>>.empty;
+      var node = ctx._1; var index = ctx._2; var rev = ctx._3;
+      var newNode = rev ? node.Previous : node.Next;
+      return newNode == null
+        ? F.none<Tpl<LinkedListNode<A>, int, bool>>()
+        : F.some(F.t(newNode, index + (rev ? -1 : 1), rev));
+    }
+
+    private static A linkedListLikeGetter<A>(Tpl<LinkedListNode<A>, int, bool> ctx) {
+      return ctx._1.Value;
+    }
+
+    private static Option<int> linkedListLikeSizeHint<A>(Tpl<LinkedListNode<A>, int, bool> ctx) {
+      return F.some(elementsLeft(ctx._1.List.Count, ctx._2, ctx._3));
+    }
+
+    /* LinkedList like to Iter wrapper. */
+    private static Iter<A, Tpl<LinkedListNode<A>, int, bool>> iter<A>(
+      int elements, Tpl<LinkedListNode<A>, int, bool> context
+    ) {
+      if (elements == 0) return Iter<A, Tpl<LinkedListNode<A>, int, bool>>.empty;
 
       return new Iter<A, Tpl<LinkedListNode<A>, int, bool>>(
         // list node, index, reverse
-        F.t(
-          reverse ? list.Last : list.First,
-          reverse ? list.Count - 1 : 0, reverse
-        ),
-        ctx => {
-          var newNode = ctx._3 ? ctx._1.Previous : ctx._1.Next;
-          return newNode == null
-            ? F.none<Tpl<LinkedListNode<A>, int, bool>>()
-            : F.some(F.t(newNode, ctx._2 + (ctx._3 ? -1 : 1), ctx._3));
-        },
-        ctx => ctx._1.Value,
-        ctx => F.some(elementsLeft(ctx._1.List.Count, ctx._2, ctx._3))
+        context, linkedListLikeSkipper, linkedListLikeGetter, linkedListLikeSizeHint
       );
     }
-
-    /* Reverse ILinkedList to Iter wrapper. */
-    public static Iter<A, Tpl<LinkedListNode<A>, int, bool>>
-    rIter<A>(this ILinkedList<A> list) { return list.iter(true); }
 
     /* LinkedList to Iter wrapper. */
     public static Iter<A, Tpl<LinkedListNode<A>, int, bool>> iter<A>(
       this LinkedList<A> list, bool reverse = false
-    ) { return ReadOnlyLinkedList.a(list).iter(reverse); }
+    ) {
+      return iter(list.Count, F.t(
+        // list node, index, reverse
+        reverse ? list.Last : list.First, reverse ? list.Count - 1 : 0, reverse
+      ));
+    }
 
     /* Reverse LinkedList to Iter wrapper. */
-    public static Iter<A, Tpl<LinkedListNode<A>, int, bool>> 
+    public static Iter<A, Tpl<LinkedListNode<A>, int, bool>>
     rIter<A>(this LinkedList<A> list) { return list.iter(true); }
+
+    /* ReadOnlyLinkedList to Iter wrapper. */
+    public static Iter<A, Tpl<LinkedListNode<A>, int, bool>> iter<A>(
+      this ReadOnlyLinkedList<A> list, bool reverse = false
+    ) {
+      return iter(list.Count, F.t(
+        // list node, index, reverse
+        reverse ? list.Last : list.First, reverse ? list.Count - 1 : 0, reverse
+      ));
+    }
+
+    /* Reverse ReadOnlyLinkedList to Iter wrapper. */
+    public static Iter<A, Tpl<LinkedListNode<A>, int, bool>>
+    rIter<A>(this ReadOnlyLinkedList<A> list) { return list.iter(true); }
 
     #endregion
 

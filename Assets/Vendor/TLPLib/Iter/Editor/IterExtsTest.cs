@@ -1,4 +1,5 @@
-﻿#if UNITY_TEST
+﻿using com.tinylabproductions.TLPLib.Collection;
+#if UNITY_TEST
 using System;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
@@ -11,6 +12,7 @@ using NUnit.Framework;
 public class IterExtsTest {
   readonly List<int> list = F.list(1, 2, 3, 4);
   readonly LinkedList<int> linked = F.linkedList(1, 2, 3, 4);
+  readonly ReadOnlyLinkedList<int> roLinked = ReadOnlyLinkedList.a(F.linkedList(1, 2, 3, 4));
   private const int elem = 3;
 
   #region range
@@ -170,6 +172,54 @@ public class IterExtsTest {
     Assert.AreEqual(F.some(linked.Count - 2), i.elementsLeft);
     for (; i; i++) actual.Add(~i);
     Assert.AreEqual(linked.Reverse().Skip(2).ToList(), actual);
+    Assert.AreEqual(F.some(0), i.elementsLeft);
+  }
+
+  [Test]
+  public void roLinkedIterTest() {
+    var actual = new List<int>();
+    var i = roLinked.iter();
+    Assert.AreEqual(F.some(roLinked.Count), i.elementsLeft);
+    for (; i; i++) actual.Add(~i);
+    Assert.AreEqual(roLinked, actual);
+    Assert.AreEqual(F.some(0), i.elementsLeft);
+  }
+
+  [Test]
+  public void roLinkedReverseIterTest() {
+    var actual = new List<int>();
+    var i = roLinked.rIter();
+    Assert.AreEqual(F.some(roLinked.Count), i.elementsLeft);
+    for (; i; i++) actual.Add(~i);
+    Assert.AreEqual(roLinked.Reverse(), actual);
+    Assert.AreEqual(F.some(0), i.elementsLeft);
+  }
+
+  [Test]
+  public void roLinkedSkippedIterTest() {
+    var actual = new List<int>();
+    var i = roLinked.iter();
+    Assert.AreEqual(F.some(roLinked.Count), i.elementsLeft);
+    i.progress();
+    Assert.AreEqual(F.some(roLinked.Count - 1), i.elementsLeft);
+    i.progress();
+    Assert.AreEqual(F.some(roLinked.Count - 2), i.elementsLeft);
+    for (; i; i++) actual.Add(~i);
+    Assert.AreEqual(roLinked.Skip(2).ToList(), actual);
+    Assert.AreEqual(F.some(0), i.elementsLeft);
+  }
+
+  [Test]
+  public void roLinkedSkippedReverseIterTest() {
+    var actual = new List<int>();
+    var i = roLinked.rIter();
+    Assert.AreEqual(F.some(roLinked.Count), i.elementsLeft);
+    i.progress();
+    Assert.AreEqual(F.some(roLinked.Count - 1), i.elementsLeft);
+    i.progress();
+    Assert.AreEqual(F.some(roLinked.Count - 2), i.elementsLeft);
+    for (; i; i++) actual.Add(~i);
+    Assert.AreEqual(roLinked.Reverse().Skip(2).ToList(), actual);
     Assert.AreEqual(F.some(0), i.elementsLeft);
   }
 

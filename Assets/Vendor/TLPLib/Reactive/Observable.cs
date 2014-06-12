@@ -28,14 +28,14 @@ namespace com.tinylabproductions.TLPLib.Reactive {
      * are at the front of the buffer. Only emits `size` items at a time. When
      * new item arrives to the buffer, oldest one is removed.
      **/
-    IObservable<ILinkedList<A>> buffer(int size);
+    IObservable<ReadOnlyLinkedList<A>> buffer(int size);
     /**
      * Buffers values into a linked list for specified time period. Oldest values 
      * are at the front of the buffer. Emits tuples of (element, time), where time
      * is `Time.time`. Only emits items if `seconds` has passed. When
      * new item arrives to the buffer, oldest one is removed.
      **/
-    IObservable<ILinkedList<Tpl<A, float>>> timeBuffer(float seconds);
+    IObservable<ReadOnlyLinkedList<Tpl<A, float>>> timeBuffer(float seconds);
     /**
      * Joins events of two observables returning an observable which emits
      * events when either observable emits them.
@@ -52,7 +52,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
      * (element, emmision time) Tpls with emmission time taken from 
      * `Time.time`.
      **/
-    IObservable<ILinkedList<Tpl<A, float>>> withinTimeframe(int count, float timeframe);
+    IObservable<ReadOnlyLinkedList<Tpl<A, float>>> withinTimeframe(int count, float timeframe);
     /** Delays each event X seconds. **/
     IObservable<A> delayed(float seconds);
     IObservable<Tpl<A, B>> zip<B>(IObservable<B> other);
@@ -302,12 +302,12 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       }));
     }
 
-    public IObservable<ILinkedList<A>> buffer(int size) {
-      return bufferImpl(size, builder<ILinkedList<A>>());
+    public IObservable<ReadOnlyLinkedList<A>> buffer(int size) {
+      return bufferImpl(size, builder<ReadOnlyLinkedList<A>>());
     }
 
     protected O bufferImpl<O>
-    (int size, ObserverBuilder<ILinkedList<A>, O> builder) {
+    (int size, ObserverBuilder<ReadOnlyLinkedList<A>, O> builder) {
       return builder(obs => {
         var buffer = new LinkedList<A>();
         var roFacade = new ReadOnlyLinkedList<A>(buffer);
@@ -319,12 +319,12 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       });
     }
 
-    public IObservable<ILinkedList<Tpl<A, float>>> timeBuffer(float seconds) {
-      return timeBufferImpl(seconds, builder<ILinkedList<Tpl<A, float>>>());
+    public IObservable<ReadOnlyLinkedList<Tpl<A, float>>> timeBuffer(float seconds) {
+      return timeBufferImpl(seconds, builder<ReadOnlyLinkedList<Tpl<A, float>>>());
     }
 
     protected O timeBufferImpl<O>
-    (float seconds, ObserverBuilder<ILinkedList<Tpl<A, float>>, O> builder) {
+    (float seconds, ObserverBuilder<ReadOnlyLinkedList<Tpl<A, float>>, O> builder) {
       return builder(obs => {
         var buffer = new LinkedList<Tpl<A, float>>();
         var roFacade = ReadOnlyLinkedList.a(buffer);
@@ -368,16 +368,16 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       });
     }
 
-    public IObservable<ILinkedList<Tpl<A, float>>> 
+    public IObservable<ReadOnlyLinkedList<Tpl<A, float>>> 
     withinTimeframe(int count, float timeframe) {
       return withinTimeframeImpl(
-        count, timeframe, builder<ILinkedList<Tpl<A, float>>>()
+        count, timeframe, builder<ReadOnlyLinkedList<Tpl<A, float>>>()
       );
     }
 
     protected O withinTimeframeImpl<O>(
       int count, float timeframe, 
-      ObserverBuilder<ILinkedList<Tpl<A, float>>, O> builder
+      ObserverBuilder<ReadOnlyLinkedList<Tpl<A, float>>, O> builder
     ) {
       return builder(obs => 
         map(value => F.t(value, Time.time)).

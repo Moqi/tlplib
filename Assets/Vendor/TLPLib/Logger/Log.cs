@@ -30,9 +30,8 @@ namespace com.tinylabproductions.TLPLib.Logger {
 
       editor("\n\nLog opened at " + DateTime.Now + "\n\n");
     }
-#endif
 
-    [Conditional("UNITY_EDITOR")]
     public static void editor(object o) { logfile.WriteLine(o); }
+#endif
   }
 }

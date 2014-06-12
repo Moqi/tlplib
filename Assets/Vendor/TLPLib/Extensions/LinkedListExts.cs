@@ -4,7 +4,7 @@ using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class LinkedListExts {
-    public static bool isEmpty<A>(this ILinkedList<A> list) 
+    public static bool isEmpty<A>(this ReadOnlyLinkedList<A> list) 
     { return list.Count == 0; }
 
     public static bool isEmpty<A>(this LinkedList<A> list) 
