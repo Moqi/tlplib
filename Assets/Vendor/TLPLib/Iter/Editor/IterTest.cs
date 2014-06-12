@@ -7,8 +7,31 @@ using com.tinylabproductions.TLPLib.Functional;
 using com.tinylabproductions.TLPLib.Iter;
 using NUnit.Framework;
 
+[TestFixture]
 public class IterTest {
   readonly List<int> list = F.list(1, 2, 3, 4, 5, 6, 7, 8);
+
+#region general interface
+
+  [Test]
+  public void operatorsTest() {
+    var iter = F.list(1, 2, 3).iter();
+    var ppIter = iter;
+    Assert.AreEqual(1, ~iter);
+    Assert.AreEqual(1, ~ppIter);
+    iter.progress();
+    Assert.AreEqual(2, ~iter);
+    Assert.AreEqual(1, ~(ppIter++));
+    Assert.AreEqual(2, ~ppIter);
+    iter.progress();
+    Assert.AreEqual(3, ~iter);
+    Assert.AreEqual(3, ~(++ppIter));
+    iter.progress();
+    Assert.AreEqual(F.none<int>(), iter.current);
+    Assert.AreEqual(F.none<int>(), (++ppIter).current);
+  }
+
+#endregion
 
 #region toList
 
@@ -188,6 +211,14 @@ public class IterTest {
   public void takeAllAndMoreTest() {
     var N = list.Count + 3;
     Assert.AreEqual(list, list.iter().take(N).toList());
+  }
+
+  [Test]
+  public void takeSizeHintTest() {
+    Assert.AreEqual(F.some(1), list.iter().take(1).elementsLeft);
+    Assert.AreEqual(F.some(2), list.iter().take(2).elementsLeft);
+    Assert.AreEqual(F.some(3), list.iter().take(3).elementsLeft);
+    Assert.AreEqual(F.some(list.Count), list.iter().take(list.Count + 10).elementsLeft);
   }
 
 #endregion

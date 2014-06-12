@@ -5,15 +5,25 @@ using com.tinylabproductions.TLPLib.Iter;
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class ArrayExts {
     public static A[] concat<A>(this A[] a, params A[][] others) {
-      var total = others.iter().map(_ => _.Length).
-        reduceLeft((s, o) => s + o).getOrElse(0);
+      // Functional programming crashes Mono runtime.
+
+      var total = 0;
+      // ReSharper disable once LoopCanBeConvertedToQuery
+      // Mono runtime bug.
+      for (var idx = 0; idx < others.Length; idx++)
+        total += others[idx].Length;
 
       var self = new A[a.Length + total];
       a.CopyTo(self, 0);
-      others.iter().foldLeft(a.Length, (startIdx, arr) => {
+      var startIdx = a.Length;
+      // ReSharper disable once ForCanBeConvertedToForeach
+      // Mono runtime bug.
+      for (var idx = 0; idx < others.Length; idx++) {
+        var arr = others[idx];
         arr.CopyTo(self, startIdx);
-        return startIdx + arr.Length;
-      });
+        startIdx += arr.Length;
+      }
+
       return self;
     }
 

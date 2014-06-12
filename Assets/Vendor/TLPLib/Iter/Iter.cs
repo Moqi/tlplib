@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Logger;
 using Smooth.Collections;
 using Random = UnityEngine.Random;
 
@@ -81,11 +82,11 @@ namespace com.tinylabproductions.TLPLib.Iter {
     ) : this(F.some(ctx), skipper, getter, sizeHint) {}
 
     public override string ToString() {
-      return string.Format("Iter({0})", state);
+      return string.Format("Iter({0}|sh:{1})", state, elementsLeft);
     }
 
     /* Mutates Iter and moves it to next place in the sequence. */
-    public void skip() { state = state.flatMap(skipper); }
+    public void progress() { state = state.flatMap(skipper); }
 
     /* Does this Iter currently has a value? */
     public bool hasValue { get { return state.isDefined; } }
@@ -103,7 +104,7 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     /* Skips Iter and returns new current element. */
     public Option<A> next { get {
-      skip();
+      progress();
       return current;
     } }
 
@@ -121,7 +122,7 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     /* Alias to .skip() */
     public static Iter<A, Ctx> operator ++(Iter<A, Ctx> iter) {
-      iter.skip();
+      iter.progress();
       return iter;
     }
 
@@ -347,44 +348,44 @@ namespace com.tinylabproductions.TLPLib.Iter {
     public Iter<
       B, Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
     > flatMap<B, BCtx>(Fn<A, Iter<B, BCtx>> mapper) {
-      var iter = this;
-
       // We might be empty.
-      if (! iter) return Iter<
+      if (! this) return Iter<
         B, Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
       >.empty;
 
-      var otherI = mapper(~iter);
-      // Find first other which isn't empty.
-      while (iter && ! otherI) {
+      var iter = this;
+      var subIter = mapper(~iter);
+      // Find first sub iterator which isn't empty.
+      while (iter && ! subIter) {
         iter++;
-        if (iter) otherI = mapper(~iter);
+        if (iter) subIter = mapper(~iter);
       }
 
-      // ReSharper disable HeuristicUnreachableCode
       // We might not have any of these, in which case our iter is invalid.
       if (! iter) return Iter<
         B, Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
       >.empty;
-      // ReSharper restore HeuristicUnreachableCode
 
       return new Iter<
         B, Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
       >(
-        F.t(iter, otherI, mapper),
+        F.t(iter, subIter, mapper),
         ctx => { var i = ctx._1; var bi = ctx._2; var map = ctx._3;
-          // Subiterator has a value.
-          if ((++bi).hasValue) return F.some(F.t(i, bi, map));
+          if (++bi) {
+            // Subiterator has a value.
+            var nCtx = F.some(F.t(i, bi, map));
+            return nCtx;
+          }
           else {
             // Find next point where a value exists.
             i++;
-            var nextB = i ? map(~i) : Iter<B, BCtx>.empty;
-            while (i && ! nextB) {
+            bi = i ? map(~i) : Iter<B, BCtx>.empty;
+            while (i && ! bi) {
               i++;
-              if (i) nextB = map(~i);
+              if (i) bi = map(~i);
             }
 
-            return nextB ? F.some(F.t(i, nextB, map)) : F.none<
+            return bi ? F.some(F.t(i, bi, map)) : F.none<
               Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
             >();
           }
@@ -408,12 +409,19 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
       return new Iter<A, Tpl<Iter<A, Ctx>, int, int>>(
         F.t(this, 1, count), // iter, taken, max
-        ctx => { var iter = ctx._1; var taken = ctx._2; var max = ctx._3;
-          return (taken < count && (++iter).hasValue)
+        ctx => ctx.ua((iter, taken, max) => 
+          (taken < count && (++iter).hasValue)
             ? F.some(F.t(iter, taken + 1, max))
-            : F.none<Tpl<Iter<A, Ctx>, int, int>>();
-        },
-        ctx => ~ctx._1, ctx => ctx._1.elementsLeft
+            : F.none<Tpl<Iter<A, Ctx>, int, int>>()
+        ),
+        ctx => ~ctx._1,
+        ctx => ctx.ua((iter, taken, max) => {
+          var leftOpt = iter.elementsLeft;
+          var takeLeft = max - taken + 1;
+          return F.some(
+            leftOpt.isEmpty ? takeLeft : Math.Min(leftOpt.get, takeLeft)
+          );
+        }) 
       );
     }
 
