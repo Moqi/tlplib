@@ -49,10 +49,6 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
     }
 
-    public static Coroutine NextFrame(Action action) {
-      return behaviour.StartCoroutine(NextFrameEnumerator(action));
-    }
-
     private static IEnumerator WithDelayEnumerator(
       float seconds, Action action
     ) {

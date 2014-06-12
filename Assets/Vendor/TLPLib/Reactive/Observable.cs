@@ -123,20 +123,11 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       );
     } }
 
-    public static IObservable<DateTime> interval(
-      MonoBehaviour behaviour, float intervalS
-      ) {
-      return interval(intervalS, F.none<float>());
-    }
+    public static IObservable<DateTime> interval(float intervalS, float delayS) 
+    { return interval(intervalS, F.some(delayS)); }
 
     public static IObservable<DateTime> interval(
-      MonoBehaviour behaviour, float intervalS, float delayS
-    ) {
-      return interval(intervalS, F.some(delayS));
-    }
-
-    public static IObservable<DateTime> interval(
-      float intervalS, Option<float> delayS
+      float intervalS, Option<float> delayS=new Option<float>()
     ) {
       return new Observable<DateTime>(observer => {
         var cr = ASync.StartCoroutine(interval(observer, intervalS, delayS));

@@ -1,8 +1,7 @@
-﻿using Castle.Core.Internal;
-#if UNITY_TEST
+﻿#if UNITY_TEST
+using Castle.Core.Internal;
 using System;
 using System.Linq;
-using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 using NUnit.Framework;
 

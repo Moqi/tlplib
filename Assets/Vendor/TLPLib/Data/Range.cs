@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using com.tinylabproductions.TLPLib.Extensions;
-using com.tinylabproductions.TLPLib.Functional;
-using com.tinylabproductions.TLPLib.Logger;
+using com.tinylabproductions.TLPLib.Iter;
 using com.tinylabproductions.TLPLib.Utilities;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -34,13 +32,8 @@ namespace com.tinylabproductions.TLPLib.Data {
 
     public int random { get { return Random.Range(from, to + 1); } }
 
-    public Slinq<int, FuncOptionContext<int, int>> Slinq { get {
-      return FuncOptionContext<int, int>.Sequence(
-        from > to ? F.none<int>() : F.some(from), 
-        (i, toNum) => i == toNum ? F.none<int>() : F.some(i + 1),
-        to
-      );
-    } }
+    public Iter<int, Tpl<int, int, int>> iter 
+      { get { return Iter.Iter.range(from, to); } }
   }
 
   [Serializable]
