@@ -221,6 +221,10 @@ public class IterTest {
   [Test]
   public void zipTestFirstIsShorter() {
     Assert.AreEqual(
+      F.list(F.t(1, 1f)),
+      F.list(1).iter().zip(F.list(1f, 2f, 3f).iter()).toList()
+    );
+    Assert.AreEqual(
       F.list(F.t(1, 1f), F.t(2, 2f)),
       F.list(1, 2).iter().zip(F.list(1f, 2f, 3f).iter()).toList()
     );
