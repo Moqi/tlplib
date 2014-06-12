@@ -95,9 +95,11 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     /* Unsafe get the current value of Iter. 
      * Throws exception if iter is finished. */
-    public A get { get { return current.getOrThrow(
-      () => new IllegalStateException("Iter is finished!")
-    ); } }
+    public A get { get {
+      return current.getOrThrow(() => new IllegalStateException(string.Format(
+        "Iter({0}, {1}) is finished.", typeof(A), typeof(Ctx))
+      ));
+    } }
 
     /* Skips Iter and returns new current element. */
     public Option<A> next { get {
