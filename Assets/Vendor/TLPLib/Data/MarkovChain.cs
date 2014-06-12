@@ -1,5 +1,6 @@
 ﻿using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Iter;
 
 namespace com.tinylabproductions.TLPLib.Data {
   public static class MarkovState {
@@ -22,9 +23,10 @@ namespace com.tinylabproductions.TLPLib.Data {
       this.transitions = transitions;
     }
 
-    public MarkovState<A> next {
-      get { return transitions.get.randomElementByWeight(_ => _.weight).nextState; }
-    }
+    public MarkovState<A> next { get {
+      return transitions.get.iter().
+        randomElementByWeight(_ => _.weight).get.nextState;
+    } }
   }
 
   public static class MarkovTransition {

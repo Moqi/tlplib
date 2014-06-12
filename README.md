@@ -10,6 +10,7 @@ It contains various things, including but not limited to:
 * BiMap.
 * Promises & Futures, CoRoutine helpers.
 * Various data structures.
+* Iter library - allocation free enumerators.
 * A bunch of extension methods.
 * JSON parser/emmiter.
 * Functional utilities: Option, Lazy, Tuple, Either, Try, Unit, co-variant functions and actions, rudimentary pattern matching.

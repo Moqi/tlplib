@@ -5,8 +5,6 @@ using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 using com.tinylabproductions.TLPLib.Logger;
 using com.tinylabproductions.TLPLib.Utilities;
-using Smooth.Slinq;
-using Smooth.Slinq.Context;
 using UnityEngine;
 using Random = UnityEngine.Random;
 

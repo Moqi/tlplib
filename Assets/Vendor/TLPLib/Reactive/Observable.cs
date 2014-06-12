@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
-using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Iter;
 using Smooth.Collections;
-using Smooth.Slinq;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
@@ -243,7 +240,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       // Mark a flag to prevent concurrent modification of subscriptions array.
       iterating = true;
       try {
-        subscriptions.Slinq().ForEach((t, v) => t._2(v), value);
+        for (var iter = subscriptions.iter(); iter; iter++) 
+          (~iter)._2(value);
       }
       finally {
         iterating = false;
@@ -252,7 +250,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
         if (pendingRemovals.Count > 0) {
           // This causes heap allocations somehow.
-          pendingRemovals.Slinq().ForEach(unsubscribe);
+          pendingRemovals.iter().each(unsubscribe);
           pendingRemovals.Clear();
         }
       }
@@ -291,7 +289,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public O flatMapImpl<B, O>
     (Fn<A, IEnumerable<B>> mapper, ObserverBuilder<B, O> builder) {
-      return builder(obs => subscribe(val => mapper(val).each(obs.push)));
+      return builder(obs => subscribe(val => mapper(val).hIter().each(obs.push)));
     }
 
     public IObservable<A> filter(Fn<A, bool> predicate) {
@@ -388,7 +386,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         filter(events => {
           if (events.Count != count) return false;
           var last = events.Last.Value._2;
-          return events.Slinq().All(t => last - t._2 <= timeframe);
+          return events.iter().ctx(last, timeframe).forall(
+            _ => _.ua((t, lst, tf) => lst - t._2 <= tf)
+          );
         }).subscribe(obs.push)
       );
     }
@@ -504,16 +504,20 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       }, builder);
     }
 
-    private void unsubscribe(Subscription s) {
-      if (iterating) pendingRemovals.Add(s);
-      else subscriptions.indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
-      subscriptions.indexWhere(t => t._1 == s).each(subscriptions.RemoveAt);
+    private void unsubscribe(Subscription subscription) {
+      if (iterating) 
+        pendingRemovals.Add(subscription);
+      else 
+        subscriptions.iter().ctx(subscription).
+          indexWhere(_ => _.ua((t, s) => t._1 == s)).
+          each(subscriptions.RemoveAt);
+      subscriptions.iter().ctx(subscription).
+        indexWhere(_ => _.ua((t, s) => t._1 == s)).
+        each(subscriptions.RemoveAt);
 
       // Unsubscribe from source if we don't have any subscribers that are
       // subscribed to us.
-      if (subscribers == 0) {
-        sourceProps.each(_ => _.tryUnsubscribe());
-      }
+      if (subscribers == 0) sourceProps.each(_ => _.tryUnsubscribe());
     }
   }
 }

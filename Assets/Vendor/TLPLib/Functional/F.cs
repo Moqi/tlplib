@@ -36,6 +36,14 @@ namespace com.tinylabproductions.TLPLib.Functional {
       return new List<A>(args);
     }
 
+    public static LinkedList<A> linkedList<A>(params A[] args) {
+      return new LinkedList<A>(args);
+    }
+
+    public static List<A> emptyList<A>(int capacity=0) {
+      return new List<A>(capacity);
+    }
+
     public static A[] arrayFill<A>(int size, Fn<int, A> creator) {
       var arr = new A[size];
       for (var idx = 0; idx < size; idx++) arr[idx] = creator(idx);
