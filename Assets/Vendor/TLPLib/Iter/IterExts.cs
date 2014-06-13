@@ -14,11 +14,11 @@ namespace com.tinylabproductions.TLPLib.Iter {
     public static Iter<int, Tpl<int, int, int>> range(
       int from, int to, int step = 1
     ) {
+      var cache = Iter<int, Tpl<int, int, int>>.fnCache(".range");
       if ((step > 0 && from > to) || (step < 0 && to > from))
-        return Iter<int, Tpl<int, int, int>>.empty;
+        return cache.empty;
 
-      return new Iter<int, Tpl<int, int, int>>(
-        F.t(from, to, step),
+      return (cache.fns ?? (cache.fns = cache.build(
         ctx => ctx.ua((_current, _end, _step) => {
           var newCurrent = _current + _step;
           return
@@ -31,7 +31,7 @@ namespace com.tinylabproductions.TLPLib.Iter {
           _step == 0 ? F.none<int>() :
           F.some(Math.Abs(_end - _current) / Math.Abs(_step) + 1)
         )
-      );
+      ))).iter(F.t(from, to, step));
     }
   }
 
@@ -52,11 +52,11 @@ namespace com.tinylabproductions.TLPLib.Iter {
     public static Iter<A, Tpl<IList<A>, int, bool>> iter<A>(
       this IList<A> list, bool reverse = false
     ) {
-      if (list.Count == 0) return Iter<A, Tpl<IList<A>, int, bool>>.empty;
+      var cache = Iter<A, Tpl<IList<A>, int, bool>>.fnCache(".iter(IList)");
 
-      return new Iter<A, Tpl<IList<A>, int, bool>>(
+      if (list.Count == 0) return cache.empty;
+      return (cache.fns ?? (cache.fns = cache.build(
         // list, index, reverse
-        F.t(list, reverse ? list.Count - 1 : 0, reverse),
         ctx => { var lst = ctx._1; var idx = ctx._2; var rev = ctx._3;
           var newIndex = idx + (rev ? -1 : 1);
           return newIndex < 0 || newIndex >= lst.Count
@@ -65,7 +65,7 @@ namespace com.tinylabproductions.TLPLib.Iter {
         },
         ctx => ctx._1[ctx._2],
         ctx => F.some(elementsLeft(ctx._1.Count, ctx._2, ctx._3))
-      );
+      ))).iter(F.t(list, reverse ? list.Count - 1 : 0, reverse));
     }
 
     /* Reverse IList to Iter wrapper. */
@@ -75,42 +75,32 @@ namespace com.tinylabproductions.TLPLib.Iter {
     #endregion
 
     #region LinkedList
-
-    private static Option<Tpl<LinkedListNode<A>, int, bool>> linkedListLikeSkipper<A>(
-      Tpl<LinkedListNode<A>, int, bool> ctx
-    ) {
-      var node = ctx._1; var index = ctx._2; var rev = ctx._3;
-      var newNode = rev ? node.Previous : node.Next;
-      return newNode == null
-        ? F.none<Tpl<LinkedListNode<A>, int, bool>>()
-        : F.some(F.t(newNode, index + (rev ? -1 : 1), rev));
-    }
-
-    private static A linkedListLikeGetter<A>(Tpl<LinkedListNode<A>, int, bool> ctx) {
-      return ctx._1.Value;
-    }
-
-    private static Option<int> linkedListLikeSizeHint<A>(Tpl<LinkedListNode<A>, int, bool> ctx) {
-      return F.some(elementsLeft(ctx._1.List.Count, ctx._2, ctx._3));
-    }
-
+    
     /* LinkedList like to Iter wrapper. */
-    private static Iter<A, Tpl<LinkedListNode<A>, int, bool>> iter<A>(
+    private static Iter<A, Tpl<LinkedListNode<A>, int, bool>> llIter<A>(
       int elements, Tpl<LinkedListNode<A>, int, bool> context
     ) {
-      if (elements == 0) return Iter<A, Tpl<LinkedListNode<A>, int, bool>>.empty;
+      var cache = Iter<A, Tpl<LinkedListNode<A>, int, bool>>.fnCache(".-llIter");
 
-      return new Iter<A, Tpl<LinkedListNode<A>, int, bool>>(
+      if (elements == 0) return cache.empty;
+      return (cache.fns ?? (cache.fns = cache.build(
         // list node, index, reverse
-        context, linkedListLikeSkipper, linkedListLikeGetter, linkedListLikeSizeHint
-      );
+        ctx => { var node = ctx._1; var index = ctx._2; var rev = ctx._3;
+          var newNode = rev ? node.Previous : node.Next;
+          return newNode == null
+            ? F.none<Tpl<LinkedListNode<A>, int, bool>>()
+            : F.some(F.t(newNode, index + (rev ? -1 : 1), rev));
+        }, 
+        ctx => ctx._1.Value,
+        ctx => F.some(elementsLeft(ctx._1.List.Count, ctx._2, ctx._3))
+      ))).iter(context);
     }
 
     /* LinkedList to Iter wrapper. */
     public static Iter<A, Tpl<LinkedListNode<A>, int, bool>> iter<A>(
       this LinkedList<A> list, bool reverse = false
     ) {
-      return iter(list.Count, F.t(
+      return llIter(list.Count, F.t(
         // list node, index, reverse
         reverse ? list.Last : list.First, reverse ? list.Count - 1 : 0, reverse
       ));
@@ -124,7 +114,7 @@ namespace com.tinylabproductions.TLPLib.Iter {
     public static Iter<A, Tpl<LinkedListNode<A>, int, bool>> iter<A>(
       this ReadOnlyLinkedList<A> list, bool reverse = false
     ) {
-      return iter(list.Count, F.t(
+      return llIter(list.Count, F.t(
         // list node, index, reverse
         reverse ? list.Last : list.First, reverse ? list.Count - 1 : 0, reverse
       ));
@@ -143,11 +133,11 @@ namespace com.tinylabproductions.TLPLib.Iter {
     public static Iter<A, IEnumerator<A>> hIter<A>(
       this IEnumerable<A> enumerable
     ) {
+      var cache = Iter<A, IEnumerator<A>>.fnCache(".hIter");
       var enumerator = enumerable.GetEnumerator();
-      if (!enumerator.MoveNext()) return Iter<A, IEnumerator<A>>.empty;
+      if (!enumerator.MoveNext()) return cache.empty;
 
-      return new Iter<A, IEnumerator<A>>(
-        enumerator,
+      return (cache.fns ?? (cache.fns = cache.build(
         e => {
           if (e.MoveNext()) return F.some(e);
           else {
@@ -157,7 +147,7 @@ namespace com.tinylabproductions.TLPLib.Iter {
         },
         e => e.Current,
         e => F.none<int>()
-      );
+      ))).iter(enumerator);
     }
 
     #endregion
@@ -166,7 +156,10 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     /* Returns Iter that emits one element. */
     public static Iter<A, A> singleIter<A>(this A any) {
-      return new Iter<A, A>(any, _ => F.none<A>(), _ => _, _ => F.some(1));
+      var cache = Iter<A, A>.fnCache(".singleIter");
+      return (cache.fns ?? (cache.fns = cache.build(
+        _ => F.none<A>(), _ => _, _ => F.some(1)
+      ))).iter(any);
     }
 
     #endregion

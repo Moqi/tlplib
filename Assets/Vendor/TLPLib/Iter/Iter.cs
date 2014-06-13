@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using com.tinylabproductions.TLPLib.Functional;
-using com.tinylabproductions.TLPLib.Logger;
 using Smooth.Collections;
 using Random = UnityEngine.Random;
 
@@ -43,6 +42,52 @@ namespace com.tinylabproductions.TLPLib.Iter {
    * this is my take on this problem.
    **/
   public struct Iter<A, Ctx> {
+    #region Cache
+
+    /* Function cache storage. */
+    private static readonly IDictionary<string, FnCache> _fnCache = 
+      new Dictionary<string, FnCache>();
+
+    /* Several methods might use same Ctx signature, so we need to pass a diferentiator. */
+    public static FnCache fnCache(string id) {
+      FnCache cache;
+      if (! _fnCache.TryGetValue(id, out cache)) {
+        cache = new FnCache();
+        _fnCache[id] = cache;
+      }
+      return cache;
+    }
+
+    /* Actual function cache that helps us cache fns and reduce boilerplate. */
+    public class FnCache {
+      public Fns fns;
+
+      // ReSharper disable once MemberHidesStaticFromOuterClass
+      public Iter<A, Ctx> empty { get { return Iter<A, Ctx>.empty; } }
+
+      public Fns build(
+        Fn<Ctx, Option<Ctx>> skipper, Fn<Ctx, A> getter, 
+        Fn<Ctx, Option<int>> sizeHint
+      ) { return new Fns(skipper, getter, sizeHint); }
+    }
+
+    /* Holder for Iter function cache. */
+    public class Fns {
+      public readonly Fn<Ctx, Option<Ctx>> skipper;
+      public readonly Fn<Ctx, A> getter;
+      public readonly Fn<Ctx, Option<int>> sizeHint;
+
+      public Fns(Fn<Ctx, Option<Ctx>> skipper, Fn<Ctx, A> getter, Fn<Ctx, Option<int>> sizeHint) {
+        this.skipper = skipper;
+        this.getter = getter;
+        this.sizeHint = sizeHint;
+      }
+
+      public Iter<A, Ctx> iter(Ctx ctx) { return new Iter<A, Ctx>(ctx, this); }
+    }
+
+    #endregion
+
     #region Internal state
 
     /* Takes a context and provides next context, which is None if Iter is 
@@ -60,24 +105,14 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     #region Base interface
 
-    public static readonly Iter<A, Ctx> empty = new Iter<A, Ctx>(
-      F.none<Ctx>(), _ => F.none<Ctx>(), _ => default(A), _ => F.none<int>()
-    );
+    public static readonly Iter<A, Ctx> empty = new Iter<A, Ctx>();
 
-    public Iter(
-      Option<Ctx> state, Fn<Ctx, Option<Ctx>> skipper, Fn<Ctx, A> getter, 
-      Fn<Ctx, Option<int>> sizeHint
-    ) {
-      this.state = state;
-      this.skipper = skipper;
-      this.getter = getter;
-      this.sizeHint = sizeHint;
+    public Iter(Ctx ctx, Fns fns) {
+      state = F.some(ctx);
+      skipper = fns.skipper;
+      getter = fns.getter;
+      sizeHint = fns.sizeHint;
     }
-
-    public Iter(
-      Ctx ctx, Fn<Ctx, Option<Ctx>> skipper, Fn<Ctx, A> getter,
-      Fn<Ctx, Option<int>> sizeHint
-    ) : this(F.some(ctx), skipper, getter, sizeHint) {}
 
     public override string ToString() {
       return string.Format("Iter({0}|sh:{1})", state, elementsLeft);
@@ -162,36 +197,6 @@ namespace com.tinylabproductions.TLPLib.Iter {
         for (var i = this; i; i++) list.Add(~i);
         return list.ToArray();
       }
-    }
-
-    #endregion
-
-    #region Context Adding
-
-    public Iter<Tpl<A, P1>, Tpl<Iter<A, Ctx>, P1>> ctx<P1>(P1 _p1) {
-      if (! this) return Iter<Tpl<A, P1>, Tpl<Iter<A, Ctx>, P1>>.empty;
-
-      return new Iter<Tpl<A, P1>, Tpl<Iter<A, Ctx>, P1>>(
-        F.t(this, _p1),
-        ctx => { var i = ctx._1;
-          return ++i ? F.some(F.t(i, ctx._2)) : F.none<Tpl<Iter<A, Ctx>, P1>>();
-        },
-        ctx => F.t(~ctx._1, ctx._2),
-        ctx => ctx._1.elementsLeft
-      );
-    }
-
-    public Iter<Tpl<A, P1, P2>, Tpl<Iter<A, Ctx>, P1, P2>> ctx<P1, P2>(P1 _p1, P2 _p2) {
-      if (! this) return Iter<Tpl<A, P1, P2>, Tpl<Iter<A, Ctx>, P1, P2>>.empty;
-
-      return new Iter<Tpl<A, P1, P2>, Tpl<Iter<A, Ctx>, P1, P2>>(
-        F.t(this, _p1, _p2),
-        ctx => { var i = ctx._1;
-          return ++i ? F.some(F.t(i, ctx._2, ctx._3)) : F.none<Tpl<Iter<A, Ctx>, P1, P2>>();
-        },
-        ctx => F.t(~ctx._1, ctx._2, ctx._3),
-        ctx => ctx._1.elementsLeft
-      );
     }
 
     #endregion
@@ -301,17 +306,17 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     /* Filters Iter with given predicate. */
     public Iter<A, Tpl<Iter<A, Ctx>, Fn<A, bool>>>
-    filter(Fn<A, bool> predicate) {
+    filter(Fn<A, bool> __predicate) {
       var iter = this;
       // Find first item which satisfies given predicate.
-      for (; iter && ! predicate(~iter); iter++) {}
+      for (; iter && ! __predicate(~iter); iter++) {}
 
+      var cache = Iter<A, Tpl<Iter<A, Ctx>, Fn<A, bool>>>.fnCache("filter");
       // If we're done with the iterator, return empty Iter.
-      if (! iter) return Iter<A, Tpl<Iter<A, Ctx>, Fn<A, bool>>>.empty;
+      if (! iter) return cache.empty;
 
       // Otherwise return new iterator that filters elements.
-      return new Iter<A, Tpl<Iter<A, Ctx>, Fn<A, bool>>>(
-        F.t(iter, predicate),
+      return (cache.fns ?? (cache.fns = cache.build(
         ctx => { var i = ctx._1; var p = ctx._2;
           // Skip to first next one where predicate is satisfied.
           while ((++i).hasValue && ! p(~i)) {}
@@ -322,15 +327,15 @@ namespace com.tinylabproductions.TLPLib.Iter {
         },
         ctx => ~ctx._1,
         ctx => F.none<int>()
-      );
+      ))).iter(F.t(iter, __predicate));
     }
 
     /* Maps type A to type B. */
-    public Iter<B, Tpl<Iter<A, Ctx>, Fn<A, B>>> map<B>(Fn<A, B> mapper) {
-      if (state.isEmpty) return Iter<B, Tpl<Iter<A, Ctx>, Fn<A, B>>>.empty;
+    public Iter<B, Tpl<Iter<A, Ctx>, Fn<A, B>>> map<B>(Fn<A, B> __mapper) {
+      var cache = Iter<B, Tpl<Iter<A, Ctx>, Fn<A, B>>>.fnCache("map");
+      if (state.isEmpty) return cache.empty;
 
-      return new Iter<B, Tpl<Iter<A, Ctx>, Fn<A, B>>>(
-        F.t(this, mapper),
+      return (cache.fns ?? (cache.fns = cache.build(
         ctx => { var i = ctx._1; var map = ctx._2;
           return (++i).hasValue
             ? F.some(F.t(i, map))
@@ -338,36 +343,33 @@ namespace com.tinylabproductions.TLPLib.Iter {
         },
         ctx => ctx._2(~ctx._1),
         ctx => ctx._1.elementsLeft
-      );
+      ))).iter(F.t(this, __mapper));
     }
 
     /* Maps type A to types B Iter (multiple values) and flattens it to an 
      * Iter. */
     public Iter<
       B, Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
-    > flatMap<B, BCtx>(Fn<A, Iter<B, BCtx>> mapper) {
-      // We might be empty.
-      if (! this) return Iter<
+    > flatMap<B, BCtx>(Fn<A, Iter<B, BCtx>> __mapper) {
+      var cache = Iter<
         B, Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
-      >.empty;
+      >.fnCache("flatMap");
 
-      var iter = this;
-      var subIter = mapper(~iter);
+      // We might be empty.
+      if (! this) return cache.empty;
+
+      var _iter = this;
+      var _subIter = __mapper(~_iter);
       // Find first sub iterator which isn't empty.
-      while (iter && ! subIter) {
-        iter++;
-        if (iter) subIter = mapper(~iter);
+      while (_iter && ! _subIter) {
+        _iter++;
+        if (_iter) _subIter = __mapper(~_iter);
       }
 
       // We might not have any of these, in which case our iter is invalid.
-      if (! iter) return Iter<
-        B, Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
-      >.empty;
+      if (! _iter) return cache.empty;
 
-      return new Iter<
-        B, Tpl<Iter<A, Ctx>, Iter<B, BCtx>, Fn<A, Iter<B, BCtx>>>
-      >(
-        F.t(iter, subIter, mapper),
+      return (cache.fns ?? (cache.fns = cache.build(
         ctx => { var i = ctx._1; var bi = ctx._2; var map = ctx._3;
           if (++bi) {
             // Subiterator has a value.
@@ -390,7 +392,7 @@ namespace com.tinylabproductions.TLPLib.Iter {
         },
         ctx => ~ctx._2,
         ctx => F.none<int>()
-      );
+      ))).iter(F.t(_iter, _subIter, __mapper));
     }
 
     /* Skips N elements from this Iter. */
@@ -401,14 +403,13 @@ namespace com.tinylabproductions.TLPLib.Iter {
     }
 
     /* Takes N elements from this Iter. */
-    public Iter<A, Tpl<Iter<A, Ctx>, int, int>> take(int count) {
-      if (state.isEmpty || count < 1) 
-        return Iter<A, Tpl<Iter<A, Ctx>, int, int>>.empty;
+    public Iter<A, Tpl<Iter<A, Ctx>, int, int>> take(int __count) {
+      var cache = Iter<A, Tpl<Iter<A, Ctx>, int, int>>.fnCache("take");
+      if (state.isEmpty || __count < 1) return cache.empty;
 
-      return new Iter<A, Tpl<Iter<A, Ctx>, int, int>>(
-        F.t(this, 1, count), // iter, taken, max
-        ctx => ctx.ua((iter, taken, max) => 
-          (taken < count && (++iter).hasValue)
+      return (cache.fns ?? (cache.fns = cache.build(
+        ctx => ctx.ua((iter, taken, max) =>
+          (taken < max && ++iter)
             ? F.some(F.t(iter, taken + 1, max))
             : F.none<Tpl<Iter<A, Ctx>, int, int>>()
         ),
@@ -420,7 +421,7 @@ namespace com.tinylabproductions.TLPLib.Iter {
             leftOpt.isEmpty ? takeLeft : Math.Min(leftOpt.get, takeLeft)
           );
         }) 
-      );
+      ))).iter(F.t(this, 1, __count) /* iter, taken, max */);
     }
 
     /* Iterates through Iter and returns first element that satisfies predicate. */
@@ -544,12 +545,11 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     /* Zips two Iters. Emits values while this or other is exhausted. */
     public Iter<Tpl<A, B>, Tpl<Iter<A, Ctx>, Iter<B, BCtx>>> 
-    zip<B, BCtx>(Iter<B, BCtx> other) {
-      if (! this || ! other) 
-        return Iter<Tpl<A, B>, Tpl<Iter<A, Ctx>, Iter<B, BCtx>>>.empty;
+    zip<B, BCtx>(Iter<B, BCtx> __other) {
+      var cache = Iter<Tpl<A, B>, Tpl<Iter<A, Ctx>, Iter<B, BCtx>>>.fnCache("zip");
+      if (! this || ! __other) return cache.empty;
 
-      return new Iter<Tpl<A, B>, Tpl<Iter<A, Ctx>, Iter<B, BCtx>>>(
-        F.t(this, other),
+      return (cache.fns ?? (cache.fns = cache.build(
         ctx => { var i1 = ctx._1; var i2 = ctx._2;
           return (++i1).hasValue && (++i2).hasValue
             ? F.some(F.t(i1, i2))
@@ -559,14 +559,14 @@ namespace com.tinylabproductions.TLPLib.Iter {
         ctx => 
           ctx._1.elementsLeft.zip(ctx._2.elementsLeft).
           map(t => Math.Min(t._1, t._2))
-      );
+      ))).iter(F.t(this, __other));
     }
 
     /* Returns new Iter that emits (value, index) tuples. */
     public Iter<Tpl<A, int>, Tpl<Iter<A, Ctx>, int>> zipWithIndex() {
-      if (state.isEmpty) return Iter<Tpl<A, int>, Tpl<Iter<A, Ctx>, int>>.empty;
-      return new Iter<Tpl<A, int>, Tpl<Iter<A, Ctx>, int>>(
-        F.t(this, 0),
+      var cache = Iter<Tpl<A, int>, Tpl<Iter<A, Ctx>, int>>.fnCache("zipWithIndex");
+      if (state.isEmpty) return cache.empty;
+      return (cache.fns ?? (cache.fns = cache.build(
         ctx => { var iter = ctx._1; var idx = ctx._2;
           return (++iter).hasValue 
             ? F.some(F.t(iter, idx + 1)) 
@@ -574,9 +574,410 @@ namespace com.tinylabproductions.TLPLib.Iter {
         },
         ctx => F.t(~ctx._1, ctx._2),
         ctx => ctx._1.elementsLeft
-      );
+      ))).iter(F.t(this, 0));
     }
 
     #endregion
+    
+    #region Context Adding
+
+/**
+ * Scala code to generate this part.
+ * 
+ 
+import java.io._
+
+val iterCtx = new PrintWriter("IterCtx.cs")
+
+(1 to 21).foreach { i =>
+  val params = (1 to i).map(s => s"P$s").mkString(", ")
+  val args = (1 to i).map(s => s"P$s _p$s").mkString(", ")
+  val argVals = (1 to i).map(s => s"_p$s").mkString(", ")
+  val ctxArgs = (1 to i).map(s => s"ctx._${s + 1}").mkString(", ")
+  val emit = s"Tpl<A, $params>"
+  
+  iterCtx.println(s"""
+  // Wrap Iter into a context with $i parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<$emit, Tpl<Iter<A, Ctx>, $params>> ctx<$params>($args) {
+    var cache = Iter<$emit, Tpl<Iter<A, Ctx>, $params>>.fnCache("ctx$i");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, $ctxArgs)) : F.none<Tpl<Iter<A, Ctx>, $params>>();
+      },
+      ctx => F.t(~ctx._1, $ctxArgs),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, $argVals));
+  }
+  """)
+}
+  
+iterCtx.close()
+ 
+ * 
+ **/
+
+
+  // Wrap Iter into a context with 1 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1>, Tpl<Iter<A, Ctx>, P1>> ctx<P1>(P1 _p1) {
+    var cache = Iter<Tpl<A, P1>, Tpl<Iter<A, Ctx>, P1>>.fnCache("ctx1");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2)) : F.none<Tpl<Iter<A, Ctx>, P1>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1));
+  }
+  
+
+  // Wrap Iter into a context with 2 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2>, Tpl<Iter<A, Ctx>, P1, P2>> ctx<P1, P2>(P1 _p1, P2 _p2) {
+    var cache = Iter<Tpl<A, P1, P2>, Tpl<Iter<A, Ctx>, P1, P2>>.fnCache("ctx2");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3)) : F.none<Tpl<Iter<A, Ctx>, P1, P2>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2));
+  }
+  
+
+  // Wrap Iter into a context with 3 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3>, Tpl<Iter<A, Ctx>, P1, P2, P3>> ctx<P1, P2, P3>(P1 _p1, P2 _p2, P3 _p3) {
+    var cache = Iter<Tpl<A, P1, P2, P3>, Tpl<Iter<A, Ctx>, P1, P2, P3>>.fnCache("ctx3");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3));
+  }
+  
+
+  // Wrap Iter into a context with 4 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4>> ctx<P1, P2, P3, P4>(P1 _p1, P2 _p2, P3 _p3, P4 _p4) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4>>.fnCache("ctx4");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4));
+  }
+  
+
+  // Wrap Iter into a context with 5 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5>> ctx<P1, P2, P3, P4, P5>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5>>.fnCache("ctx5");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5));
+  }
+  
+
+  // Wrap Iter into a context with 6 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6>> ctx<P1, P2, P3, P4, P5, P6>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6>>.fnCache("ctx6");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6));
+  }
+  
+
+  // Wrap Iter into a context with 7 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7>> ctx<P1, P2, P3, P4, P5, P6, P7>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7>>.fnCache("ctx7");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7));
+  }
+  
+
+  // Wrap Iter into a context with 8 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8>> ctx<P1, P2, P3, P4, P5, P6, P7, P8>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8>>.fnCache("ctx8");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8));
+  }
+  
+
+  // Wrap Iter into a context with 9 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9>>.fnCache("ctx9");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9));
+  }
+  
+
+  // Wrap Iter into a context with 10 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>>.fnCache("ctx10");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10));
+  }
+  
+
+  // Wrap Iter into a context with 11 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11>>.fnCache("ctx11");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11));
+  }
+  
+
+  // Wrap Iter into a context with 12 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>>.fnCache("ctx12");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12));
+  }
+  
+
+  // Wrap Iter into a context with 13 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13>>.fnCache("ctx13");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13));
+  }
+  
+
+  // Wrap Iter into a context with 14 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13, P14 _p14) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14>>.fnCache("ctx14");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14));
+  }
+  
+
+  // Wrap Iter into a context with 15 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13, P14 _p14, P15 _p15) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15>>.fnCache("ctx15");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14, _p15));
+  }
+  
+
+  // Wrap Iter into a context with 16 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13, P14 _p14, P15 _p15, P16 _p16) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16>>.fnCache("ctx16");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14, _p15, _p16));
+  }
+  
+
+  // Wrap Iter into a context with 17 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13, P14 _p14, P15 _p15, P16 _p16, P17 _p17) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17>>.fnCache("ctx17");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14, _p15, _p16, _p17));
+  }
+  
+
+  // Wrap Iter into a context with 18 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13, P14 _p14, P15 _p15, P16 _p16, P17 _p17, P18 _p18) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18>>.fnCache("ctx18");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18, ctx._19)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18, ctx._19),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14, _p15, _p16, _p17, _p18));
+  }
+  
+
+  // Wrap Iter into a context with 19 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13, P14 _p14, P15 _p15, P16 _p16, P17 _p17, P18 _p18, P19 _p19) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19>>.fnCache("ctx19");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18, ctx._19, ctx._20)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18, ctx._19, ctx._20),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14, _p15, _p16, _p17, _p18, _p19));
+  }
+  
+
+  // Wrap Iter into a context with 20 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13, P14 _p14, P15 _p15, P16 _p16, P17 _p17, P18 _p18, P19 _p19, P20 _p20) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20>>.fnCache("ctx20");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18, ctx._19, ctx._20, ctx._21)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18, ctx._19, ctx._20, ctx._21),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14, _p15, _p16, _p17, _p18, _p19, _p20));
+  }
+  
+
+  // Wrap Iter into a context with 21 parameters.
+  // Useful for avoiding heap alocations.
+  public Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21>> ctx<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21>(P1 _p1, P2 _p2, P3 _p3, P4 _p4, P5 _p5, P6 _p6, P7 _p7, P8 _p8, P9 _p9, P10 _p10, P11 _p11, P12 _p12, P13 _p13, P14 _p14, P15 _p15, P16 _p16, P17 _p17, P18 _p18, P19 _p19, P20 _p20, P21 _p21) {
+    var cache = Iter<Tpl<A, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21>, Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21>>.fnCache("ctx21");
+
+    if (! this) return cache.empty;
+
+    return (cache.fns ?? (cache.fns = cache.build(
+      ctx => { var i = ctx._1;
+        return ++i ? F.some(F.t(i, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18, ctx._19, ctx._20, ctx._21, ctx._22)) : F.none<Tpl<Iter<A, Ctx>, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20, P21>>();
+      },
+      ctx => F.t(~ctx._1, ctx._2, ctx._3, ctx._4, ctx._5, ctx._6, ctx._7, ctx._8, ctx._9, ctx._10, ctx._11, ctx._12, ctx._13, ctx._14, ctx._15, ctx._16, ctx._17, ctx._18, ctx._19, ctx._20, ctx._21, ctx._22),
+      ctx => ctx._1.elementsLeft
+    ))).iter(F.t(this, _p1, _p2, _p3, _p4, _p5, _p6, _p7, _p8, _p9, _p10, _p11, _p12, _p13, _p14, _p15, _p16, _p17, _p18, _p19, _p20, _p21));
+  }
+  
+    #endregion
+
   }
 }
