@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Functional;
-using com.tinylabproductions.TLPLib.Iter;
 
 namespace com.tinylabproductions.TLPLib.Collection {
   /**
@@ -28,11 +27,17 @@ namespace com.tinylabproductions.TLPLib.Collection {
       IEnumerable<Tpl<A, int>> itemsWithCounts
     ) {
       this.itemsWithCounts = itemsWithCounts.Where(t => t._2 > 0).ToArray();
-      totalCount = this.itemsWithCounts.iter().
-        reduceLeft(_ => _._2, (sum, t) => sum + t._2).getOrElse(() => 0);
-      maxCount =
-        this.itemsWithCounts.iter().keepLeft((t1, t2) => t1._2 > t2._2).
-        map(_ => _._2).getOrElse(() => 0);
+
+      var totalCnt = 0;
+      var maxCnt = 0;
+      // ReSharper disable once LoopCanBeConvertedToQuery
+      for (var idx = 0; idx < this.itemsWithCounts.Length; idx++) {
+        var cnt = this.itemsWithCounts[idx]._2;
+        totalCnt += cnt;
+        maxCnt = Math.Max(maxCnt, cnt);
+      }
+      totalCount = totalCnt;
+      maxCount = maxCnt;
     }
 
     public IEnumerator<A> GetEnumerator() {

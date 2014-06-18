@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using com.tinylabproductions.TLPLib.Extensions;
-using com.tinylabproductions.TLPLib.Iter;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
   public interface ISubscription {
@@ -42,7 +40,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public ISubscription join(params ISubscription[] other) {
       return new Subscription(() => {
         unsubscribe();
-        other.iter().each(_ => _.unsubscribe());
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var idx = 0; idx < other.Length; idx++)
+          other[idx].unsubscribe();
       });
     }
   }

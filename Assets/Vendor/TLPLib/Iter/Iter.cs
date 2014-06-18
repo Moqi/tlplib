@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if ! UNITY_IOS
+using System;
 using System.Collections.Generic;
 using System.Text;
 using com.tinylabproductions.TLPLib.Functional;
@@ -7,7 +8,8 @@ using Random = UnityEngine.Random;
 
 namespace com.tinylabproductions.TLPLib.Iter {
   /**
-   * Heap allocation free enumerator.
+   * Heap allocation free enumerator. Doesn't work on non-JIT platforms. 
+   * What does work there?
    * 
    * Basic usage:
    * 
@@ -1000,3 +1002,4 @@ iterCtx.close()
 
   }
 }
+#endif

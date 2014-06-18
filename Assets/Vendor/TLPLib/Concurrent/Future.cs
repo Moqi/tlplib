@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Functional;
-using com.tinylabproductions.TLPLib.Iter;
 using com.tinylabproductions.TLPLib.Logger;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
@@ -88,14 +87,16 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       var sourceFutures = enumerable.ToArray();
       var results = new A[sourceFutures.Length];
       var future = new FutureImpl<A[]>();
-      sourceFutures.iter().eachWithIndex((f, idx) => {
+      for (var idx = 0; idx < sourceFutures.Length; idx++) {
+        var f = sourceFutures[idx]; 
+        var fixedIdx = idx;
         f.onSuccess(value => {
-          results[idx] = value;
+          results[fixedIdx] = value;
           completed++;
           if (completed == results.Length) future.tryCompleteSuccess(results);
         });
         f.onFailure(future.completeError);
-      });
+      };
       return future;
     }
 
@@ -105,8 +106,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     public static Future<A> firstOf<A>
     (this IEnumerable<Future<A>> enumerable) {
       var future = new FutureImpl<A>();
-      for (var iter = enumerable.hIter(); iter; iter++)
-        (~iter).onComplete(v => future.tryComplete(v));
+      foreach (var f in enumerable) f.onComplete(v => future.tryComplete(v));
       return future;
     }
 

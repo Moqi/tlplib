@@ -1,6 +1,4 @@
 ﻿using System;
-using com.tinylabproductions.TLPLib.Functional;
-using com.tinylabproductions.TLPLib.Iter;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class ArrayExts {

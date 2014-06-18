@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if ! UNITY_IOS
+using System;
 using System.Collections.Generic;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Functional;
@@ -164,6 +165,22 @@ namespace com.tinylabproductions.TLPLib.Iter {
 
     #endregion
 
+    #region Ranges
+
+    public static Iter<int, Tpl<int, int, int>> iter(this Range range) {
+      return range(range.from, range.to);
+    }
+
+    #endregion
+
+    #region Option
+
+    public static Iter<A, A> asIter<A>(this Option<A> opt) {
+      return opt.isDefined ? opt.get.singleIter() : Iter<A, A>.empty;
+    }
+
+    #endregion
+
     #region Private methods
 
     private static int elementsLeft(int total, int currentIdx, bool reverse) {
@@ -173,3 +190,4 @@ namespace com.tinylabproductions.TLPLib.Iter {
     #endregion
   }
 }
+#endif

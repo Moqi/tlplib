@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Extensions;
-using com.tinylabproductions.TLPLib.Iter;
 
 namespace com.tinylabproductions.TLPLib.Functional {
 /** 
@@ -25,10 +24,6 @@ public static class Option {
 
   public static IEnumerable<A> asEnum<A>(this Option<A> opt) {
     return opt.isDefined ? opt.get.Yield() : Enumerable.Empty<A>();
-  }
-
-  public static Iter<A, A> asIter<A>(this Option<A> opt) {
-    return opt.isDefined ? opt.get.singleIter() : Iter<A, A>.empty;
   }
 
   public static A getOrElse<A>(this Option<A> opt, Fn<A> orElse) {

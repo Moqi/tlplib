@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
+using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
-using com.tinylabproductions.TLPLib.Iter;
 using Smooth.Collections;
 using UnityEngine;
 
@@ -239,8 +240,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       // Mark a flag to prevent concurrent modification of subscriptions array.
       iterating = true;
       try {
-        for (var iter = subscriptions.iter(); iter; iter++) 
-          (~iter)._2(value);
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var idx = 0; idx < subscriptions.Count; idx++)
+          subscriptions[idx]._2(value);
       }
       finally {
         iterating = false;
@@ -248,8 +250,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         pendingSubscriptions.Clear();
 
         if (pendingRemovals.Count > 0) {
-          // This causes heap allocations somehow.
-          pendingRemovals.iter().each(unsubscribe);
+          // ReSharper disable once ForCanBeConvertedToForeach
+          for (var idx = 0; idx < pendingRemovals.Count; idx++)
+            pendingRemovals[idx].unsubscribe();
           pendingRemovals.Clear();
         }
       }
@@ -288,7 +291,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public O flatMapImpl<B, O>
     (Fn<A, IEnumerable<B>> mapper, ObserverBuilder<B, O> builder) {
-      return builder(obs => subscribe(val => mapper(val).hIter().each(obs.push)));
+      return builder(obs => subscribe(val => {
+        foreach (var b in mapper(val)) obs.push(b);
+      }));
     }
 
     public IObservable<A> filter(Fn<A, bool> predicate) {
@@ -385,9 +390,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         filter(events => {
           if (events.Count != count) return false;
           var last = events.Last.Value._2;
-          return events.iter().ctx(last, timeframe).forall(
-            _ => _.ua((t, lst, tf) => lst - t._2 <= tf)
-          );
+
+          return events.All(t => last - t._2 <= timeframe);
         }).subscribe(obs.push)
       );
     }
@@ -507,12 +511,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       if (iterating) 
         pendingRemovals.Add(subscription);
       else 
-        subscriptions.iter().ctx(subscription).
-          indexWhere(_ => _.ua((t, s) => t._1 == s)).
+        subscriptions.indexWhere(t => t._1 == subscription).
           each(subscriptions.RemoveAt);
-      subscriptions.iter().ctx(subscription).
-        indexWhere(_ => _.ua((t, s) => t._1 == s)).
-        each(subscriptions.RemoveAt);
 
       // Unsubscribe from source if we don't have any subscribers that are
       // subscribed to us.
