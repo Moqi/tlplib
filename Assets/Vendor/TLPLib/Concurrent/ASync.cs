@@ -40,12 +40,33 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     }
 
     public static Coroutine WithDelay(float seconds, Action action) {
+      return WithDelay(seconds, behaviour, action);
+    }
+
+    public static Coroutine WithDelay(
+      float seconds, MonoBehaviour behaviour, Action action
+    ) {
       var enumerator = WithDelayEnumerator(seconds, action);
       return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
     }
 
     public static Coroutine NextFrame(Action action) {
+      return NextFrame(behaviour, action);
+    }
+
+    public static Coroutine NextFrame(MonoBehaviour behaviour, Action action) {
       var enumerator = NextFrameEnumerator(action);
+      return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
+    }
+
+    /* Do thing every frame until f returns false. */
+    public static Coroutine EveryFrame(Fn<bool> f) {
+      return EveryFrame(behaviour, f);
+    }
+
+    /* Do thing every frame until f returns false. */
+    public static Coroutine EveryFrame(MonoBehaviour behaviour, Fn<bool> f) {
+      var enumerator = EveryFrameEnumerator(f);
       return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
     }
 
@@ -61,14 +82,15 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       action();
     }
 
+    private static IEnumerator EveryFrameEnumerator(Fn<bool> f) {
+      while (f()) yield return null;
+    }
+
     public static IObservable<bool> onAppPause 
       { get { return behaviour.onPause; } }
 
     public static IObservable<Unit> onAppQuit
       { get { return behaviour.onQuit; } }
-
-    public static IObservable<Unit> onGUI
-      { get { return behaviour.onGUI; } }
 
     /**
      * Takes a function that transforms an element into a future and 

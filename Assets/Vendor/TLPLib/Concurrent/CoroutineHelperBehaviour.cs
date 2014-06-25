@@ -10,15 +10,8 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     public IObservable<Unit> onQuit { get { return _onQuit; } }
     private readonly Subject<Unit> _onQuit = new Subject<Unit>();
 
-    public IObservable<Unit> onGUI { get { return _onGUI; } }
-    private readonly Subject<Unit> _onGUI = new Subject<Unit>();
-
     internal void OnApplicationPause(bool paused) {
       _onPause.push(paused);
-    }
-
-    internal void OnGUI() {
-      _onGUI.push(F.unit);
     }
 
     internal void OnApplicationQuit() {

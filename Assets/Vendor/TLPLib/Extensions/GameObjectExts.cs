@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using com.tinylabproductions.TLPLib.Concurrent;
+using UnityEngine;
+using Coroutine = com.tinylabproductions.TLPLib.Concurrent.Coroutine;
 using Object = UnityEngine.Object;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
@@ -17,6 +20,17 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       replacement.transform.rotation = go.transform.rotation;
       replacement.transform.localScale = go.transform.localScale;
       Object.Destroy(go);
+    }
+
+    public static Coroutine everyFrame(this GameObject go, Fn<bool> f) {
+      var behaviour =
+        go.GetComponent<CoroutineHelperBehaviour>() ??
+        go.AddComponent<CoroutineHelperBehaviour>();
+      return ASync.EveryFrame(behaviour, f);
+    }
+
+    public static Coroutine everyFrame(this GameObject go, Act a) {
+      return go.everyFrame(() => { a(); return true; });
     }
   }
 }
