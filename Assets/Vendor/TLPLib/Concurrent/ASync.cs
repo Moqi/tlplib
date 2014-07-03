@@ -8,15 +8,20 @@ using Object = UnityEngine.Object;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
   public static class ASync {
+    private static CoroutineHelperBehaviour coroutineHelper(GameObject go) {
+      return 
+        go.GetComponent<CoroutineHelperBehaviour>() ?? 
+        go.AddComponent<CoroutineHelperBehaviour>();
+    }
+
     private static CoroutineHelperBehaviour behaviour { get {
       const string name = "Coroutine Helper";
       var go = GameObject.Find(name);
       if (go == null) {
         go = new GameObject(name);
         Object.DontDestroyOnLoad(go);
-        go.AddComponent<CoroutineHelperBehaviour>();
       }
-      return go.GetComponent<CoroutineHelperBehaviour>();
+      return coroutineHelper(go);
     } }
 
     public static Future<A> StartCoroutine<A>(
@@ -65,8 +70,29 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     }
 
     /* Do thing every frame until f returns false. */
+    public static Coroutine EveryFrame(GameObject go, Fn<bool> f) {
+      return EveryFrame(coroutineHelper(go), f);
+    }
+
+    /* Do thing every frame until f returns false. */
     public static Coroutine EveryFrame(MonoBehaviour behaviour, Fn<bool> f) {
-      var enumerator = EveryFrameEnumerator(f);
+      var enumerator = EveryWaitEnumerator(null, f);
+      return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
+    }
+
+    /* Do thing every X seconds until f returns false. */
+    public static Coroutine EveryXSeconds(float seconds, Fn<bool> f) {
+      return EveryXSeconds(seconds, behaviour, f);
+    }
+
+    /* Do thing every X seconds until f returns false. */
+    public static Coroutine EveryXSeconds(float seconds, GameObject go, Fn<bool> f) {
+      return EveryXSeconds(seconds, coroutineHelper(go), f);
+    }
+
+    /* Do thing every X seconds until f returns false. */
+    public static Coroutine EveryXSeconds(float seconds, MonoBehaviour behaviour, Fn<bool> f) {
+      var enumerator = EveryWaitEnumerator(new WaitForSeconds(seconds), f);
       return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
     }
 
@@ -82,8 +108,8 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       action();
     }
 
-    private static IEnumerator EveryFrameEnumerator(Fn<bool> f) {
-      while (f()) yield return null;
+    private static IEnumerator EveryWaitEnumerator(WaitForSeconds wait, Fn<bool> f) {
+      while (f()) yield return wait;
     }
 
     public static IObservable<bool> onAppPause 
