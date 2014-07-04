@@ -44,12 +44,12 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       behaviour.StopCoroutine(coroutine.enumerator);
     }
 
-    public static Coroutine WithDelay(float seconds, Action action) {
+    public static Coroutine WithDelay(float seconds, Act action) {
       return WithDelay(seconds, behaviour, action);
     }
 
     public static Coroutine WithDelay(
-      float seconds, MonoBehaviour behaviour, Action action
+      float seconds, MonoBehaviour behaviour, Act action
     ) {
       var enumerator = WithDelayEnumerator(seconds, action);
       return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
@@ -97,7 +97,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     }
 
     private static IEnumerator WithDelayEnumerator(
-      float seconds, Action action
+      float seconds, Act action
     ) {
       yield return new WaitForSeconds(seconds);
       action();
