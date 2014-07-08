@@ -12,22 +12,25 @@ namespace com.tinylabproductions.TLPLib.Logger {
     public static void warn(object o) { Debug.LogWarning("[WARN]> " + o); }
     public static void error(Exception ex) { Debug.LogException(ex); }
     public static void error(object o) { Debug.LogError("[ERROR]> " + o); }
+    [Conditional("UNITY_EDITOR")]
+    public static void editor(object o) { EditorLog.log(o); }
+  }
 
-#if UNITY_EDITOR
+  class EditorLog {
     public static readonly string logfilePath;
     public static readonly StreamWriter logfile;
-
-    static Log() {
+    
+    static EditorLog() {
       logfilePath = Application.temporaryCachePath + "/unity-editor-runtime.log";
-      info("Editor Runtime Logfile: " + logfilePath);
+      Log.info("Editor Runtime Logfile: " + logfilePath);
       logfile = new StreamWriter(
         File.Open(logfilePath, FileMode.Append, FileAccess.Write, FileShare.Read)
       ) { AutoFlush = true };
 
-      editor("\n\nLog opened at " + DateTime.Now + "\n\n");
+      log("\n\nLog opened at " + DateTime.Now + "\n\n");
     }
 
-    public static void editor(object o) { logfile.WriteLine(o); }
-#endif
+    [Conditional("UNITY_EDITOR")]
+    public static void log(object o) { logfile.WriteLine(o); }
   }
 }
