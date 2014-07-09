@@ -14,6 +14,17 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       }
     }
 
+    public static void doRecursively(this GameObject go, Act<GameObject> act) {
+      act(go);
+      var t = go.transform;
+      for (var idx = 0; idx < t.childCount; idx++)
+        t.GetChild(idx).gameObject.doRecursively(act);
+    }
+
+    public static void setLayerRecursively(this GameObject go, int layer) {
+      go.doRecursively(o => o.layer = layer);
+    }
+
     public static void replaceWith(this GameObject go, GameObject replacement) {
       replacement.transform.parent = go.transform.parent;
       replacement.transform.position = go.transform.position;
