@@ -33,15 +33,17 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     }
 
     public static Coroutine StartCoroutine(IEnumerator coroutine) {
-      return new Coroutine(behaviour.StartCoroutine(coroutine), coroutine);
+      return new Coroutine(behaviour, coroutine);
     }
 
+    [Obsolete("Use Coroutine#stop")]
     public static void StopCoroutine(IEnumerator enumerator) {
       behaviour.StopCoroutine(enumerator);
     }
 
+    [Obsolete("Use Coroutine#stop")]
     public static void StopCoroutine(Coroutine coroutine) {
-      behaviour.StopCoroutine(coroutine.enumerator);
+      coroutine.stop();
     }
 
     public static Coroutine WithDelay(float seconds, Act action) {
@@ -52,7 +54,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       float seconds, MonoBehaviour behaviour, Act action
     ) {
       var enumerator = WithDelayEnumerator(seconds, action);
-      return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
+      return new Coroutine(behaviour, enumerator);
     }
 
     public static Coroutine NextFrame(Action action) {
@@ -61,7 +63,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
 
     public static Coroutine NextFrame(MonoBehaviour behaviour, Action action) {
       var enumerator = NextFrameEnumerator(action);
-      return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
+      return new Coroutine(behaviour, enumerator);
     }
 
     /* Do thing every frame until f returns false. */
@@ -77,7 +79,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     /* Do thing every frame until f returns false. */
     public static Coroutine EveryFrame(MonoBehaviour behaviour, Fn<bool> f) {
       var enumerator = EveryWaitEnumerator(null, f);
-      return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
+      return new Coroutine(behaviour, enumerator);
     }
 
     /* Do thing every X seconds until f returns false. */
@@ -93,7 +95,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     /* Do thing every X seconds until f returns false. */
     public static Coroutine EveryXSeconds(float seconds, MonoBehaviour behaviour, Fn<bool> f) {
       var enumerator = EveryWaitEnumerator(new WaitForSeconds(seconds), f);
-      return new Coroutine(behaviour.StartCoroutine(enumerator), enumerator);
+      return new Coroutine(behaviour, enumerator);
     }
 
     private static IEnumerator WithDelayEnumerator(
