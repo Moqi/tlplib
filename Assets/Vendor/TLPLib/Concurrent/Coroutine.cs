@@ -14,6 +14,8 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       this.enumerator = enumerator;
     }
 
-    public void stop() { behaviour.StopCoroutine(enumerator); }
+    public void stop() {
+      if (behaviour) behaviour.StopCoroutine(enumerator);
+    }
   }
 }
