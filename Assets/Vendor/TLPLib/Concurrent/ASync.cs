@@ -66,9 +66,32 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return new Coroutine(behaviour, enumerator);
     }
 
+    public static Coroutine AfterXFrames(
+      int framesToSkip, Action action
+    ) { return AfterXFrames(behaviour, framesToSkip, action); }
+
+    public static Coroutine AfterXFrames(
+      MonoBehaviour behaviour, int framesToSkip, Action action
+    ) {
+      return EveryFrame(behaviour, () => {
+        if (framesToSkip <= 0) {
+          action();
+          return false;
+        }
+        else {
+          framesToSkip--;
+          return true;
+        }
+      });
+    }
+
     public static void NextPostRender(Camera camera, Act action) {
+      NextPostRender(camera, 1, action);
+    }
+
+    public static void NextPostRender(Camera camera, int afterFrames, Act action) {
       var pr = camera.gameObject.AddComponent<NextPostRenderBehaviour>();
-      pr.init(action);
+      pr.init(action, afterFrames);
     }
 
     /* Do thing every frame until f returns false. */

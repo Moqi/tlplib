@@ -3,15 +3,21 @@ using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
   class NextPostRenderBehaviour : MonoBehaviour {
+    private int framesLeft;
     private Act action;
 
-    public void init(Act action) {
+    public void init(Act action, int framesLeft) {
       this.action = action;
+      this.framesLeft = framesLeft;
     }
 
     internal void OnPostRender() {
-      action();
-      Destroy(this);
+      if (framesLeft == 1) {
+        action();
+        Destroy(this);
+      }
+      else
+        framesLeft--;
     }
   }
 }
