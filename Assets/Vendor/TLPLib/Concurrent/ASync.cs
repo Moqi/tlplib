@@ -66,6 +66,11 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return new Coroutine(behaviour, enumerator);
     }
 
+    public static void NextPostRender(Camera camera, Act action) {
+      var pr = camera.gameObject.AddComponent<NextPostRenderBehaviour>();
+      pr.init(action);
+    }
+
     /* Do thing every frame until f returns false. */
     public static Coroutine EveryFrame(Fn<bool> f) {
       return EveryFrame(behaviour, f);
