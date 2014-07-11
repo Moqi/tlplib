@@ -61,6 +61,10 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return NextFrame(behaviour, action);
     }
 
+    public static Coroutine NextFrame(GameObject gameObject, Action action) {
+      return NextFrame(coroutineHelper(gameObject), action);
+    }
+
     public static Coroutine NextFrame(MonoBehaviour behaviour, Action action) {
       var enumerator = NextFrameEnumerator(action);
       return new Coroutine(behaviour, enumerator);
