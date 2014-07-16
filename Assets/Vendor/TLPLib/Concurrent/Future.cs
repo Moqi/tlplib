@@ -72,6 +72,12 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return f;
     }
 
+    public static Future<A> failed<A>(Exception ex) {
+      var f = new FutureImpl<A>();
+      f.completeError(ex);
+      return f;
+    }
+
     public static Future<A> unfullfiled<A>() {
       return new FutureImpl<A>();
     }

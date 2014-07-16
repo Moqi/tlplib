@@ -38,9 +38,9 @@ namespace com.tinylabproductions.TLPLib.Configuration {
 
     private static readonly Parser<JSONClass> jsClassParser = n => F.opt(n.AsObject);
     private static readonly Parser<string> stringParser = n => F.some(n.Value);
-    private static readonly Parser<int> intParser = n => n.Value.parseInt();
-    private static readonly Parser<float> floatParser = n => n.Value.parseFloat();
-    private static readonly Parser<bool> boolParser = n => n.Value.parseBool();
+    private static readonly Parser<int> intParser = n => n.Value.parseInt().rightValue;
+    private static readonly Parser<float> floatParser = n => n.Value.parseFloat().rightValue;
+    private static readonly Parser<bool> boolParser = n => n.Value.parseBool().rightValue;
 
     public readonly string url, scope;
     private readonly JSONClass configuration;
@@ -137,7 +137,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     public Try<int> tryInt(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
-      return get(key, n => n.Value.parseInt()).
+      return get(key, n => n.Value.parseInt().rightValue).
         fold<Try<int>>(tryArgEx<int>, F.scs);
     }
 
@@ -151,7 +151,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     public Try<float> tryFloat(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
-      return get(key, n => n.Value.parseFloat()).
+      return get(key, n => n.Value.parseFloat().rightValue).
         fold<Try<float>>(tryArgEx<float>, F.scs);
     }
 
@@ -165,7 +165,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
     public Try<bool> tryBool(string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
-      return get(key, n => n.Value.parseBool()).
+      return get(key, n => n.Value.parseBool().rightValue).
         fold<Try<bool>>(tryArgEx<bool>, F.scs);
     }
 

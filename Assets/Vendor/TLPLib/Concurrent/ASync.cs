@@ -8,16 +8,19 @@ using Object = UnityEngine.Object;
 
 namespace com.tinylabproductions.TLPLib.Concurrent {
   public static class ASync {
+    private static CoroutineHelperBehaviour _behaviour;
+
     private static CoroutineHelperBehaviour behaviour { get {
-      const string name = "Coroutine Helper";
-      var go = GameObject.Find(name);
-      if (go == null) {
-        go = new GameObject(name);
+      if (_behaviour == null) { 
+        const string name = "Coroutine Helper";
+        var go = new GameObject(name);
         Object.DontDestroyOnLoad(go);
-        go.AddComponent<CoroutineHelperBehaviour>();
+        _behaviour = go.AddComponent<CoroutineHelperBehaviour>();
       }
-      return go.GetComponent<CoroutineHelperBehaviour>();
+      return _behaviour;
     } }
+
+    public static void init() { var _ = behaviour; }
 
     public static Future<A> StartCoroutine<A>(
       Func<Promise<A>, IEnumerator> coroutine
