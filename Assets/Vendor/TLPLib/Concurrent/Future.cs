@@ -32,6 +32,37 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       ));
       return p;
     }
+
+    /* Given future and a recovery function return a new future, which 
+     * calls recovery function on exception in the original future and 
+     * completes the new function with value on Some or exception on None. */
+    public static Future<A> recover<A>(
+      this Future<A> future, Fn<Exception, Option<A>> recoverFn
+    ) {
+      var f = new FutureImpl<A>();
+      future.onComplete(t => t.voidFold(
+        f.completeSuccess, e => recoverFn(e).voidFold(
+          () => f.completeError(e), f.completeSuccess
+        ))
+      );
+      return f;
+    }
+
+    /* Given future and a recovery function return a new future, which 
+     * calls recovery function on exception in the original future and 
+     * completes the new function with value on Some or exception on None. */
+    public static Future<A> recover<A>(
+      this Future<A> future, Fn<Exception, Option<Future<A>>> recoverFn
+    ) {
+      var f = new FutureImpl<A>();
+      future.onComplete(t => t.voidFold(
+        f.completeSuccess, e => recoverFn(e).voidFold(
+          () => f.completeError(e), 
+          recoverFuture => recoverFuture.onComplete(f.complete)
+        ))
+      );
+      return f;
+    }
   }
 
   /** Coroutine based future **/
