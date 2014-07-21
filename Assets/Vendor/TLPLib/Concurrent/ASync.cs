@@ -14,15 +14,19 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
         go.AddComponent<CoroutineHelperBehaviour>();
     }
 
+    private static CoroutineHelperBehaviour _behaviour;
+
     private static CoroutineHelperBehaviour behaviour { get {
-      const string name = "Coroutine Helper";
-      var go = GameObject.Find(name);
-      if (go == null) {
-        go = new GameObject(name);
+      if (_behaviour == null) { 
+        const string name = "Coroutine Helper";
+        var go = new GameObject(name);
         Object.DontDestroyOnLoad(go);
+        _behaviour = coroutineHelper(go);
       }
-      return coroutineHelper(go);
+      return _behaviour;
     } }
+
+    public static void init() { var _ = behaviour; }
 
     public static Future<A> StartCoroutine<A>(
       Func<Promise<A>, IEnumerator> coroutine

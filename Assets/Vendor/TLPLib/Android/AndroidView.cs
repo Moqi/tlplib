@@ -1,5 +1,4 @@
-﻿using com.tinylabproductions.TLPLib.Functional;
-using com.tinylabproductions.TLPLib.Concurrent;
+﻿using com.tinylabproductions.TLPLib.Concurrent;
 using System;
 using com.tinylabproductions.TLPLib.Logger;
 using UnityEngine;
