@@ -1,3 +1,5 @@
 #!/bin/sh
+
 dirlink Assets/Vendor/TLPLib
-dirlink Assets/Plugins/Android/tlplib
+# Unity fails to merge .jars in subdirectories
+rfilelink Assets/Plugins/Android
