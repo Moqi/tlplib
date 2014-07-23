@@ -1,5 +1,5 @@
-﻿using com.tinylabproductions.TLPLib.Collection;
-#if UNITY_TEST
+﻿#if UNITY_TEST
+using com.tinylabproductions.TLPLib.Collection;
 using System;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
@@ -15,7 +15,7 @@ public class IterExtsTest {
   readonly ReadOnlyLinkedList<int> roLinked = ReadOnlyLinkedList.a(F.linkedList(1, 2, 3, 4));
   private const int elem = 3;
 
-  #region range
+#region range
 
   private static void rangeTest(List<int> expected, Iter<int, Tpl<int, int, int>> iter) {
     Assert.AreEqual(expected, iter.toList());
@@ -73,7 +73,7 @@ public class IterExtsTest {
 
   #endregion
 
-  #region IList
+#region IList
 
   [Test]
   public void listIterTest() {
@@ -123,9 +123,9 @@ public class IterExtsTest {
     Assert.AreEqual(F.some(0), i.elementsLeft);
   }
 
-#endregion
+  #endregion
 
-  #region LinkedList
+#region LinkedList
 
   [Test]
   public void linkedIterTest() {
@@ -225,7 +225,7 @@ public class IterExtsTest {
 
   #endregion
 
-  #region IEnumerable
+#region IEnumerable
 
   [Test]
   public void enumerableIterTest() {
@@ -253,7 +253,7 @@ public class IterExtsTest {
 
   #endregion
 
-  #region Single Element
+#region Single Element
 
   [Test]
   public void singleElementIterTest() {
