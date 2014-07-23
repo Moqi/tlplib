@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
-using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 using Smooth.Collections;
 using UnityEngine;
@@ -13,6 +12,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
   public interface IObservable<A> {
     int subscribers { get; }
     ISubscription subscribe(Act<A> onChange);
+    ISubscription subscribe(Act<A, ISubscription> onChange);
     /** Emits first value to the future and unsubscribes. **/
     Future<A> toFuture();
     /** Maps events coming from this observable. **/
@@ -214,15 +214,13 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return builder => new Observable<Elem>(builder);
     }
 
-    private readonly List<Tpl<Subscription, Act<A>>> subscriptions =
-      new List<Tpl<Subscription, Act<A>>>();
-    private readonly List<Tpl<Subscription, Act<A>>> pendingSubscriptions =
-      new List<Tpl<Subscription, Act<A>>>();
-    private readonly List<Subscription> pendingRemovals =
-      new List<Subscription>();
+    private readonly RandomList<Tpl<Subscription, Act<A>>> subscriptions =
+      new RandomList<Tpl<Subscription, Act<A>>>();
 
     // Are we currently iterating through subscriptions?
     private bool iterating;
+    // How many subscription removals we have pending?
+    private int pendingRemovals;
 
     private readonly Option<SourceProperties> sourceProps;
 
@@ -241,32 +239,34 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       iterating = true;
       try {
         // ReSharper disable once ForCanBeConvertedToForeach
-        for (var idx = 0; idx < subscriptions.Count; idx++)
-          subscriptions[idx]._2(value);
+        for (var idx = 0; idx < subscriptions.Count; idx++) {
+          var t = subscriptions[idx];
+          var subscription = t._1;
+          var act = t._2;
+          if (subscription.isSubscribed) act(value);
+        }
       }
       finally {
         iterating = false;
-        subscriptions.AddRange(pendingSubscriptions);
-        pendingSubscriptions.Clear();
-
-        if (pendingRemovals.Count > 0) {
-          // ReSharper disable once ForCanBeConvertedToForeach
-          for (var idx = 0; idx < pendingRemovals.Count; idx++)
-            pendingRemovals[idx].unsubscribe();
-          pendingRemovals.Clear();
-        }
+        cleanupSubscriptions();
       }
     }
 
-    public int subscribers { get { return subscriptions.Count - pendingRemovals.Count; } }
+    public int subscribers { get { return subscriptions.Count - pendingRemovals; } }
 
     public virtual ISubscription subscribe(Act<A> onChange) {
-      Subscription subscription = null;
-      // ReSharper disable once AccessToModifiedClosure
-      subscription = new Subscription(() => unsubscribe(subscription));
-      (iterating ? pendingSubscriptions : subscriptions).Add(F.t(subscription, onChange));
+      var subscription = new Subscription(onUnsubscribed);
+      // We can safely add to the subscriptions lists end.
+      subscriptions.Add(F.t(subscription, onChange));
       // Subscribe to source if we have a first subscriber.
       sourceProps.each(_ => _.trySubscribe());
+      return subscription;
+    }
+
+    public ISubscription subscribe(Act<A, ISubscription> onChange) {
+      ISubscription subscription = null;
+      // ReSharper disable once AccessToModifiedClosure
+      subscription = subscribe(a => onChange(a, subscription));
       return subscription;
     }
 
@@ -507,16 +507,21 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       }, builder);
     }
 
-    private void unsubscribe(Subscription subscription) {
-      if (iterating) 
-        pendingRemovals.Add(subscription);
-      else 
-        subscriptions.indexWhere(t => t._1 == subscription).
-          each(subscriptions.RemoveAt);
+    private void onUnsubscribed() {
+      pendingRemovals++;
+      if (iterating) return;
+      cleanupSubscriptions();
 
       // Unsubscribe from source if we don't have any subscribers that are
       // subscribed to us.
       if (subscribers == 0) sourceProps.each(_ => _.tryUnsubscribe());
+    }
+
+    private void cleanupSubscriptions() {
+      if (pendingRemovals == 0) return;
+
+      subscriptions.RemoveWhere(t => !t._1.isSubscribed);
+      pendingRemovals = 0;
     }
   }
 }

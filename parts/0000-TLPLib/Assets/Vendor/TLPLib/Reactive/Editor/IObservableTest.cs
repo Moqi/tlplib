@@ -41,6 +41,30 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     [Test]
+    public void SubscribeFromInsideEvent() {
+      var subject = new Subject<Unit>();
+      var called = 0;
+      subject.subscribe(_ => subject.subscribe(__ => called++));
+      subject.push(F.unit);
+      Assert.AreEqual(1, called);
+      subject.push(F.unit);
+      Assert.AreEqual(3, called);
+    }
+
+    [Test]
+    public void UnsubscribeAfterEvent() {
+      var subject = new Subject<Unit>();
+      var called = 0;
+      subject.subscribe((_, subscription) => {
+        called += 1;
+        subscription.unsubscribe();
+      });
+      subject.push(F.unit);
+      subject.push(F.unit);
+      Assert.AreEqual(1, called);
+    }
+
+    [Test]
     public void Map() {
       var subj = new Subject<int>();
       var list = F.list<int>();
