@@ -62,5 +62,11 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       self.addChild(child.transform);
       return child;
     }
+
+    public static void doRecursively(this Transform t, Act<Transform> act) {
+      act(t);
+      for (var idx = 0; idx < t.childCount; idx++)
+        t.GetChild(idx).doRecursively(act);
+    }
   }
 }

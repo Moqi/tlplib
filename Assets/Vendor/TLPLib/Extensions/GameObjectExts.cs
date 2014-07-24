@@ -16,9 +16,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
 
     public static void doRecursively(this GameObject go, Act<GameObject> act) {
       act(go);
-      var t = go.transform;
-      for (var idx = 0; idx < t.childCount; idx++)
-        t.GetChild(idx).gameObject.doRecursively(act);
+      go.transform.doRecursively(t => act(t.gameObject));
     }
 
     public static void setLayerRecursively(this GameObject go, int layer) {
