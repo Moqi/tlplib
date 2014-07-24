@@ -63,11 +63,24 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       );
       return f;
     }
+
+    /* Waits until both futures yield a result. */
+    public static Future<Tpl<A, B>> zip<A, B>(
+      this Future<A> fa, Future<B> fb
+    ) {
+      var fab = new FutureImpl<Tpl<A, B>>();
+      Act tryComplete = 
+        () => fa.pureValue.zip(fb.pureValue).each(ab => fab.tryCompleteSuccess(ab));
+      fa.onComplete(ta => ta.voidFold(_ => tryComplete(), fab.completeError));
+      fb.onComplete(tb => tb.voidFold(_ => tryComplete(), fab.completeError));
+      return fab;
+    }
   }
 
   /** Coroutine based future **/
   public interface Future<A> {
     Option<Try<A>> value { get; }
+    Option<A> pureValue { get; }
     CancellationToken onComplete(Act<Try<A>> action);
     CancellationToken onSuccess(Act<A> action);
     CancellationToken onFailure(Act<Exception> action);
@@ -195,6 +208,8 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
 
     private Option<Try<A>> _value = F.none<Try<A>>();
     public Option<Try<A>> value { get { return _value; } }
+    public Option<A> pureValue 
+    { get { return _value.flatMap(t => t.fold(F.some, _ => F.none<A>())); } }
 
     public void complete(Try<A> v) {
       if (! tryComplete(v)) throw new IllegalStateException(string.Format(
