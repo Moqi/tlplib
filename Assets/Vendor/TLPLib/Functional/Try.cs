@@ -37,9 +37,19 @@ namespace com.tinylabproductions.TLPLib.Functional {
       return isSuccess ? F.none<Exception>() : F.some(_exception);
     } }
 
+    public B fold<B>(Fn<A, B> onValue, Fn<Exception, B> onException) {
+      return isSuccess ? onValue(_value) : onException(_exception);
+    }
+
     public void voidFold(Act<A> onValue, Act<Exception> onException) {
       if (isSuccess) onValue(_value); else onException(_exception);
     }
+
+    public Try<B> map<B>(Fn<A, B> onValue) 
+    { return flatMap(a => F.scs(onValue(a))); }
+
+    public Try<B> flatMap<B>(Fn<A, Try<B>> onValue) 
+    { return isSuccess ? onValue(_value) : F.err<B>(_exception); }
 
     public A getOrThrow 
       { get { return isSuccess ? _value : F.throws<A>(_exception); } }
