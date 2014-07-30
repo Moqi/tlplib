@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Android {
+#if UNITY_ANDROID
   /* DSL for nicer android object instantiation. */
   public static class Droid {
     #region class names
@@ -59,4 +60,5 @@ namespace com.tinylabproductions.TLPLib.Android {
 
     #endregion
   }
+#endif
 }
