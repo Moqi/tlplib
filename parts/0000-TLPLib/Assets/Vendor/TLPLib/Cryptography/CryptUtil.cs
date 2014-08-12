@@ -102,6 +102,8 @@ namespace com.tinylabproductions.Cryptography {
       return rsaParameters;
     }
 
+#if ! UNITY_WP8
+
     public static bool VerifySignature_2048_Bit_PKCS1_v1_5(byte[] data, byte[] signature, byte[] publicKey) {
       // Links for information about PKCS #1 version 1.5:
       // RFC 2313: http://tools.ietf.org/html/rfc2313
@@ -123,6 +125,8 @@ namespace com.tinylabproductions.Cryptography {
       rsaDeformatter.SetHashAlgorithm("SHA1");
       return rsaDeformatter.VerifySignature(hash, signature);
     }
+
+#endif
 
   }
 }
