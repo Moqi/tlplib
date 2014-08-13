@@ -164,6 +164,9 @@ public
     throw new IllegalStateException("#get on None!");
   } }
 
+  /* A quick way to get None instance for this options type. */
+  public Option<A> none { get { return F.none<A>(); } }
+
   public override bool Equals(object o) {
     return o is Option<A> && Equals((Option<A>)o);
   }
