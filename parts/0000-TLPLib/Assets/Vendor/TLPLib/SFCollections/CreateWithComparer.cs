@@ -87,6 +87,8 @@ namespace Smooth.Collections {
 	
 	#region SortedList
 
+#if ! UNITY_WP8
+
 	/// <summary>
 	/// Helper class for instantiating SortedList<>s without specifying a comparer.
 	/// </summary>
@@ -113,6 +115,8 @@ namespace Smooth.Collections {
 			return new SortedList<K, V>(dictionary, Smooth.Collections.Comparer<K>.Default);
 		}
 	}
+
+#endif
 	
 	#endregion
 
