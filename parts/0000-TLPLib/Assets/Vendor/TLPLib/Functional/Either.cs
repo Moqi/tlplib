@@ -2,13 +2,7 @@
 using com.tinylabproductions.TLPLib.Extensions;
 
 namespace com.tinylabproductions.TLPLib.Functional {
-  public 
-#if UNITY_IOS
-  class
-#else
-  struct
-#endif
-  Either<A, B> {
+  public struct Either<A, B> {
     public static Either<A, B> Left(A value) { return new Either<A, B>(value); }
     public static Either<A, B> Right(B value) { return new Either<A, B>(value); }
 
@@ -36,23 +30,33 @@ namespace com.tinylabproductions.TLPLib.Functional {
       return isLeft ? "Left(" + _leftValue + ")" : "Right(" + _rightValue + ")";
     }
 
-    public Either<C, B> flatMapLeft<C>(Fn<A, Either<C, B>> mapper) 
-      { return fold(mapper, F.right<C, B>); }
-
-    public Either<A, C> flatMapRight<C>(Fn<B, Either<A, C>> mapper) 
-      { return fold(F.left<A, C>, mapper); }
-
-    public Either<C, B> mapLeft<C>(Fn<A, C> mapper) 
-      { return fold(v => F.left<C, B>(mapper(v)), F.right<C, B>); }
-
-    public Either<A, C> mapRight<C>(Fn<B, C> mapper) 
-      { return fold(F.left<A, C>, v => F.right<A, C>(mapper(v))); }
-
-    public C fold<C>(Fn<A, C> onLeft, Fn<B, C> onRight) 
-      { return isLeft ? onLeft(_leftValue) : onRight(_rightValue); }
-
     public void voidFold(Act<A> onLeft, Act<B> onRight) 
       { if (isLeft) onLeft(_leftValue); else onRight(_rightValue); }
+  }
+
+  public static class EitherExts {
+    public static Either<C, B> flatMapLeft<A, B, C>(
+      this Either<A, B> either, Fn<A, Either<C, B>> mapper
+    ) { return either.fold(mapper, F.right<C, B>); }
+
+    public static Either<A, C> flatMapRight<A, B, C>(
+      this Either<A, B> either, Fn<B, Either<A, C>> mapper
+    ) { return either.fold(F.left<A, C>, mapper); }
+
+    public static Either<C, B> mapLeft<A, B, C>(
+      this Either<A, B> either, Fn<A, C> mapper
+    ) { return either.fold(v => F.left<C, B>(mapper(v)), F.right<C, B>); }
+
+    public static Either<A, C> mapRight<A, B, C>(
+      this Either<A, B> either, Fn<B, C> mapper
+    ) { return either.fold(F.left<A, C>, v => F.right<A, C>(mapper(v))); }
+
+    public static C fold<A, B, C>(
+      this Either<A, B> either, Fn<A, C> onLeft, Fn<B, C> onRight
+    ) {
+      return either.isLeft 
+        ? onLeft(either.leftValue.get) : onRight(either.rightValue.get);
+    }
   }
 
   public static class EitherBuilderExts {
@@ -64,13 +68,7 @@ namespace com.tinylabproductions.TLPLib.Functional {
     }
   }
 
-  public 
-#if UNITY_IOS
-    class
-#else
-    struct 
-#endif
-    LeftEitherBuilder<A> {
+  public struct LeftEitherBuilder<A> {
     public readonly A leftValue;
 
     public LeftEitherBuilder(A leftValue) {
@@ -80,13 +78,7 @@ namespace com.tinylabproductions.TLPLib.Functional {
     public Either<A, B> r<B>() { return new Either<A, B>(leftValue); }
   }
 
-  public 
-#if UNITY_IOS
-    class
-#else
-    struct 
-#endif
-    RightEitherBuilder<B> {
+  public struct RightEitherBuilder<B> {
     public readonly B rightValue;
 
     public RightEitherBuilder(B rightValue) {

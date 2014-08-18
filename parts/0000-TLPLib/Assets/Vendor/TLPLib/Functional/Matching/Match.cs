@@ -17,13 +17,7 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
     public MatchError(string message) : base(message) { }
   }
 
-  public 
-#if UNITY_IOS
-  class
-#else
-  struct 
-#endif
-  Matcher<Base, Return> 
+  public struct Matcher<Base, Return> 
   : IVoidMatcher<Base>, IMatcher<Base, Return>
   where Base : class {
     private readonly Base subject;
@@ -59,13 +53,7 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
     public Return getOrElse(Fn<Return> elseFunc) { return elseFunc.Invoke(); }
   }
 
-  public
-#if UNITY_IOS
-  class
-#else
-  struct 
-#endif
-  SuccessfulMatcher<Base, Return> 
+  public struct SuccessfulMatcher<Base, Return> 
   : IVoidMatcher<Base>, IMatcher<Base, Return>
   where Base : class {
     private readonly Return result;
@@ -85,13 +73,7 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
     public Return getOrElse(Fn<Return> elseFunc) { return get(); }
   }
 
-  public
-#if UNITY_IOS
-  class
-#else
-  struct 
-#endif
-  MatcherBuilder<T> where T : class {
+  public struct MatcherBuilder<T> where T : class {
     private readonly T subject;
 
     public MatcherBuilder(T subject) {

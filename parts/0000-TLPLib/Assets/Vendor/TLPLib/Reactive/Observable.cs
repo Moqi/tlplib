@@ -128,16 +128,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     { return interval(intervalS, F.some(delayS)); }
 
     public static IObservable<DateTime> interval(
-      float intervalS, Option<float> delayS=
-#if UNITY_IOS
-      null
-#else
-      new Option<float>()
-#endif
+      float intervalS, Option<float> delayS=new Option<float>()
     ) {
-#if UNITY_IOS
-      if (delayS == null) delayS = new Option<float>();
-#endif
       return new Observable<DateTime>(observer => {
         var cr = ASync.StartCoroutine(interval(observer, intervalS, delayS));
         return new Subscription(() => ASync.StopCoroutine(cr));

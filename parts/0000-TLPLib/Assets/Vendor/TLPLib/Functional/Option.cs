@@ -101,22 +101,11 @@ public static class Option {
   }
 }
 
-public 
-#if UNITY_IOS
-  class
-#else
-  struct 
-#endif
-	Option<A> 
-{
+public struct Option<A> {
   public static Option<A> None { get { return new Option<A>(); } }
 
   private readonly A value;
   public readonly bool isSome;
-
-#if UNITY_IOS
-  public Option() {}
-#endif
 
   public Option(A value) : this() {
     this.value = value;

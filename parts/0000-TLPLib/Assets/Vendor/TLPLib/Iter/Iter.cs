@@ -1,5 +1,4 @@
-﻿#if ! UNITY_IOS
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using com.tinylabproductions.TLPLib.Functional;
@@ -419,23 +418,21 @@ namespace com.tinylabproductions.TLPLib.Iter {
       if (! __iter || __count < 1) return cache.empty;
 
       return (cache.fns ?? (cache.fns = cache.build(
-        // ReSharper disable once RedundantTypeArgumentsOfMethod
-        // Mono compiler bug.
-        ctx => ctx.ua<Option<Tpl<Iter<A, Ctx>, int, int>>>((iter, taken, max) =>
-          (taken < max && ++iter)
+        ctx => {
+          var iter = ctx._1; var taken = ctx._2; var max = ctx._3;
+          return (taken < max && ++iter)
             ? F.some(F.t(iter, taken + 1, max))
-            : F.none<Tpl<Iter<A, Ctx>, int, int>>()
-        ),
+            : F.none<Tpl<Iter<A, Ctx>, int, int>>();
+        },
         ctx => ~ctx._1,
-        // ReSharper disable once RedundantTypeArgumentsOfMethod
-        // Mono compiler bug.
-        ctx => ctx.ua<Option<int>>((iter, taken, max) => {
+        ctx => {
+          var iter = ctx._1; var taken = ctx._2; var max = ctx._3;
           var leftOpt = iter.elementsLeft;
           var takeLeft = max - taken + 1;
           return F.some(
             leftOpt.isEmpty ? takeLeft : Math.Min(leftOpt.get, takeLeft)
           );
-        }) 
+        } 
       ))).iter(F.t(__iter, 1, __count) /* iter, taken, max */);
     }
 
@@ -1002,4 +999,3 @@ iterCtx.close()
 
   }
 }
-#endif

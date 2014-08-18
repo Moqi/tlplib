@@ -1,5 +1,4 @@
-﻿#if ! UNITY_IOS
-using com.tinylabproductions.TLPLib.Data;
+﻿using com.tinylabproductions.TLPLib.Data;
 using System;
 using System.Collections.Generic;
 using com.tinylabproductions.TLPLib.Collection;
@@ -21,18 +20,21 @@ namespace com.tinylabproductions.TLPLib.Iter {
         return cache.empty;
 
       return (cache.fns ?? (cache.fns = cache.build(
-        ctx => ctx.ua((_current, _end, _step) => {
+        ctx => {
+          var _current = ctx._1; var _end = ctx._2; var _step = ctx._3;
           var newCurrent = _current + _step;
           return
             ((_step > 0 && newCurrent > _end) || (_step < 0 && newCurrent < _end))
             ? F.none<Tpl<int, int, int>>()
             : F.some(F.t(newCurrent, _end, _step));
-        }),
+        },
         ctx => ctx._1,
-        ctx => ctx.ua((_current, _end, _step) => 
-          _step == 0 ? F.none<int>() :
-          F.some(Math.Abs(_end - _current) / Math.Abs(_step) + 1)
-        )
+        ctx => {
+          var _current = ctx._1; var _end = ctx._2; var _step = ctx._3;
+          return _step == 0 
+            ? F.none<int>() 
+            : F.some(Math.Abs(_end - _current) / Math.Abs(_step) + 1);
+        }
       ))).iter(F.t(from, to, step));
     }
   }
@@ -191,4 +193,3 @@ namespace com.tinylabproductions.TLPLib.Iter {
     #endregion
   }
 }
-#endif
