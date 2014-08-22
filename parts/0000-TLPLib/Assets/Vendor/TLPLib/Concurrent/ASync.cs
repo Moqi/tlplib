@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 using com.tinylabproductions.TLPLib.Reactive;
 using UnityEngine;
@@ -134,19 +135,34 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return new Coroutine(behaviour, enumerator);
     }
 
-    private static IEnumerator WithDelayEnumerator(
+    /* Do async WWW request. Completes with WWWException if WWW fails. */
+    public static Future<WWW> www(Fn<WWW> createWWW) {
+      var f = new FutureImpl<WWW>();
+      StartCoroutine(WWWEnumerator(createWWW(), f));
+      return f;
+    }
+
+    public static IEnumerator WWWEnumerator(WWW www, Promise<WWW> promise) {
+      yield return www;
+      if (String.IsNullOrEmpty(www.error))
+        promise.completeSuccess(www);
+      else
+        promise.completeError(new WWWException(www));
+    }
+
+    public static IEnumerator WithDelayEnumerator(
       float seconds, Act action
     ) {
       yield return new WaitForSeconds(seconds);
       action();
     }
 
-    private static IEnumerator NextFrameEnumerator(Action action) {
+    public static IEnumerator NextFrameEnumerator(Action action) {
       yield return null;
       action();
     }
 
-    private static IEnumerator EveryWaitEnumerator(WaitForSeconds wait, Fn<bool> f) {
+    public static IEnumerator EveryWaitEnumerator(WaitForSeconds wait, Fn<bool> f) {
       while (f()) yield return wait;
     }
 
