@@ -58,6 +58,15 @@ namespace com.tinylabproductions.TLPLib.Functional {
 
     public static IList<A> ilist<A>(params A[] args) { return list(args); }
 
+    public static Dictionary<K, V> dict<K, V>(params Tpl<K, V>[] args) {
+      var dict = new Dictionary<K, V>();
+      for (var idx = 0; idx < args.Length; idx++) {
+        var tpl = args[idx];
+        dict.Add(tpl._1, tpl._2);
+      }
+      return dict;
+    }
+
     public static Unit unit { get { return Unit.instance; } }
 
     public static Lazy<A> lazy<A>(Fn<A> func) {
