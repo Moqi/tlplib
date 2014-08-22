@@ -12,8 +12,12 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     ) {
       var items = (
         from object item in enumerable
+        let str = item as String // String is IEnumerable as well
         let enumItem = item as IEnumerable
-        select enumItem == null ? item.ToString() : enumItem.asString()
+        select str ?? (
+          enumItem == null 
+            ? item.ToString() : enumItem.asString(newlines, fullClasses)
+        )
       ).ToArray();
       var itemsStr = 
         string.Join(string.Format(",{0} ", newlines ? "\n " : ""), items);
