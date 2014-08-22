@@ -53,6 +53,8 @@ namespace com.tinylabproductions.TLPLib.Functional {
 
     public void voidFold(Act<A> onLeft, Act<B> onRight) 
       { if (isLeft) onLeft(_leftValue); else onRight(_rightValue); }
+
+    public Option<B> toOpt() { return rightValue; }
   }
 
   public static class EitherBuilderExts {
