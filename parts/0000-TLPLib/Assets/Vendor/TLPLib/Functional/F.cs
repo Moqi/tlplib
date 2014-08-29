@@ -74,10 +74,11 @@ namespace com.tinylabproductions.TLPLib.Functional {
     }
 
     public static Act andThen(this Act first, Act second) {
-      return () => {
-        first();
-        second();
-      };
+      return () => { first(); second(); };
+    }
+
+    public static Action andThenSys(this Action first, Act second) {
+      return () => { first(); second(); };
     }
 
     public static Fn<B> andThen<A, B>(this Fn<A> first, Fn<A, B> second) {
