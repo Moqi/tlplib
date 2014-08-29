@@ -33,23 +33,17 @@ namespace com.tinylabproductions.TLPLib.Functional {
     public A getOrThrow 
       { get { return isSuccess ? _value : F.throws<A>(_exception); } }
 
+    public B fold<B>(Fn<A, B> onValue, Fn<Exception, B> onException) 
+    { return isSuccess ? onValue(_value) : onException(_exception); }
+
+    public Try<B> map<B>(Fn<A, B> onValue) 
+    { return flatMap(a => F.scs(onValue(a))); }
+
+    public Try<B> flatMap<B>(Fn<A, Try<B>> onValue) 
+    { return isSuccess ? onValue(_value) : F.err<B>(_exception); }
+
     public override string ToString() {
       return isSuccess ? "Success(" + _value + ")" : "Error(" + _exception + ")";
     }
-  }
-
-  public static class TryExts {
-    public static B fold<A, B>(
-      this Try<A> t, Fn<A, B> onValue, Fn<Exception, B> onException
-    ) {
-      return t.isSuccess ? onValue(t.value.get) : onException(t.exception.get);
-    }
-
-    public static Try<B> map<A, B>(
-      this Try<A> t, Fn<A, B> onValue
-    ) { return t.flatMap(a => F.scs(onValue(a))); }
-
-    public static Try<B> flatMap<A, B>(this Try<A> t, Fn<A, Try<B>> onValue) 
-    { return t.isSuccess ? onValue(t.value.get) : F.err<B>(t.exception.get); }
   }
 }

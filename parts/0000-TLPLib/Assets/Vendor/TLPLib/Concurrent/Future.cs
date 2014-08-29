@@ -243,7 +243,7 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     }
 
     public CancellationToken onComplete(Act<Try<A>> action) {
-      return value.fold<Try<A>, CancellationToken>(() => {
+      return value.fold<CancellationToken>(() => {
         listeners.Add(action);
         return new CancellationTokenImpl(action, this);
       }, v => {

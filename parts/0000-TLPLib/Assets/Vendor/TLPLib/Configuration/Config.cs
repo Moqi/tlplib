@@ -173,70 +173,70 @@ namespace com.tinylabproductions.TLPLib.Configuration {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.get(key, stringParser).
-        fold<string, string, Try<string>>(tryArgEx<string>, F.scs);
+        fold<Try<string>>(tryArgEx<string>, F.scs);
     }
 
     public static Try<IList<string>> tryStringList(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.getList(key, stringParser).
-        fold<string, IList<string>, Try<IList<string>>>(tryArgEx<IList<string>>, F.scs);
+        fold<Try<IList<string>>>(tryArgEx<IList<string>>, F.scs);
     }
 
     public static Try<int> tryInt(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.get(key, n => n.Value.parseInt().rightValue).
-        fold<string, int, Try<int>>(tryArgEx<int>, F.scs);
+        fold<Try<int>>(tryArgEx<int>, F.scs);
     }
 
     public static Try<IList<int>> tryIntList(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.getList(key, intParser).
-        fold<string, IList<int>, Try<IList<int>>>(tryArgEx<IList<int>>, F.scs);
+        fold<Try<IList<int>>>(tryArgEx<IList<int>>, F.scs);
     }
 
     public static Try<float> tryFloat(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.get(key, n => n.Value.parseFloat().rightValue).
-        fold<string, float, Try<float>>(tryArgEx<float>, F.scs);
+        fold<Try<float>>(tryArgEx<float>, F.scs);
     }
 
     public static Try<IList<float>> tryFloatList(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.getList(key, floatParser).
-        fold<string, IList<float>, Try<IList<float>>>(tryArgEx<IList<float>>, F.scs);
+        fold<Try<IList<float>>>(tryArgEx<IList<float>>, F.scs);
     }
 
     public static Try<bool> tryBool(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.get(key, n => n.Value.parseBool().rightValue).
-        fold<string, bool, Try<bool>>(tryArgEx<bool>, F.scs);
+        fold<Try<bool>>(tryArgEx<bool>, F.scs);
     }
 
     public static Try<IList<bool>> tryBoolList(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.getList(key, boolParser).
-        fold<string, IList<bool>, Try<IList<bool>>>(tryArgEx<IList<bool>>, F.scs);
+        fold<Try<IList<bool>>>(tryArgEx<IList<bool>>, F.scs);
     }
 
     public static Try<Config> trySubConfig(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.fetchSubConfig(key).
-        fold<string, Config, Try<Config>>(tryArgEx<Config>, F.scs);
+        fold<Try<Config>>(tryArgEx<Config>, F.scs);
     }
 
     public static Try<IList<Config>> trySubConfigList(this Config cfg, string key) {
       // ReSharper disable once RedundantTypeArgumentsOfMethod
       // Mono compiler bug
       return cfg.fetchSubConfigList(key).
-        fold<string, IList<Config>, Try<IList<Config>>>(tryArgEx<IList<Config>>, F.scs);
+        fold<Try<IList<Config>>>(tryArgEx<IList<Config>>, F.scs);
     }
 
     private static Try<A> tryArgEx<A>(string msg) {
@@ -304,7 +304,7 @@ namespace com.tinylabproductions.TLPLib.Configuration {
         part, key, current
       ));
       var node = current[part];
-      return parser(node).fold(
+      return parser(node).fold<Either<string, A>>(
         () => F.left<string, A>(string.Format(
           "Cannot convert part '{0}' from key '{1}' to {2}. {3} Contents: {4}",
           part, key, typeof(A), node.GetType(), node
