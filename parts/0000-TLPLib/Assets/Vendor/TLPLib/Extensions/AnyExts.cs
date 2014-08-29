@@ -21,5 +21,10 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     public static B mapVal<A, B>(this A any, Fn<A, B> mapper) {
       return mapper(any);
     }
+
+    public static A tap<A>(this A any, Act<A> tapper) {
+      tapper(any);
+      return any;
+    }
   }
 }
