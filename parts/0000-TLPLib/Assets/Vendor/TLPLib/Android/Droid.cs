@@ -1,9 +1,13 @@
-﻿using UnityEngine;
+﻿using com.tinylabproductions.TLPLib.Functional;
+using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Android {
 #if UNITY_ANDROID
   /* DSL for nicer android object instantiation. */
   public static class Droid {
+    private static readonly Lazy<AndroidJavaObject> packageManager = 
+      F.lazy(() => AndroidActivity.activity.cjo("getPackageManager"));
+
     #region class names
 
     public const string CN_CONTEXT = "android.content.Context";
@@ -28,6 +32,17 @@ namespace com.tinylabproductions.TLPLib.Android {
     /* New intent. */
     public static AndroidJavaObject intent(params object[] args)
     { return jo(CN_INTENT, args); }
+
+    public static bool hasSystemFeature(string feature) {
+      if (Application.isEditor) return true;
+      return packageManager.get.Call<bool>("hasSystemFeature", feature);
+    }
+
+    private static readonly Lazy<bool> _hasTouchscreen = 
+      F.lazy(() => hasSystemFeature("android.hardware.touchscreen"));
+
+    /* Is touchscreen supported? */
+    public static bool hasTouchscreen { get { return _hasTouchscreen.get; } }
 
     #endregion
 
