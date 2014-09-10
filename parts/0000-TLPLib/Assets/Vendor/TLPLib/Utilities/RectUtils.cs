@@ -32,5 +32,14 @@ namespace com.tinylabproductions.TLPLib.Utilities {
         width ?? rect.width, height ?? rect.height
       );
     }
+
+    /* Scale (pivot point: center) */
+    public static Rect scale(this Rect rect, float scale) {
+      var newW = rect.width * scale;
+      var newH = rect.height * scale;
+      var wDiff = newW - rect.width;
+      var hDiff = newH - rect.height;
+      return new Rect(rect.xMin - wDiff / 2, rect.yMin - hDiff / 2, newW, newH);
+    }
   }
 }
