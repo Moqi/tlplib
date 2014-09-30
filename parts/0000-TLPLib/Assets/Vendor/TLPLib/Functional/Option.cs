@@ -148,10 +148,6 @@ public
     return isSome && predicate(value);
   }
 
-  public bool exists(A a) {
-    return exists(a, Smooth.Collections.EqComparer<A>.Default);
-  }
-
   public bool exists(A a, IEqualityComparer<A> comparer) {
     return isSome && comparer.Equals(value, a); ;
   }
@@ -169,14 +165,6 @@ public
 
   public override bool Equals(object o) {
     return o is Option<A> && Equals((Option<A>)o);
-  }
-
-  public bool Equals(Option<A> other) {
-    return isSome ? other.exists(value) : other.isEmpty;
-  }
-
-  public override int GetHashCode() {
-    return Smooth.Collections.EqComparer<A>.Default.GetHashCode(value);
   }
 
   public static bool operator == (Option<A> lhs, Option<A> rhs) {

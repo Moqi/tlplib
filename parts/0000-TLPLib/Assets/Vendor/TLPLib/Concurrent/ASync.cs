@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
-using com.tinylabproductions.TLPLib.Reactive;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -17,12 +14,17 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
 
     private static CoroutineHelperBehaviour _behaviour;
 
+    public static event CoroutineHelperBehaviour.OnPause onAppPause;
+    public static event CoroutineHelperBehaviour.OnQuit onAppQuit;
+
     private static CoroutineHelperBehaviour behaviour { get {
       if (_behaviour == null) { 
         const string name = "Coroutine Helper";
         var go = new GameObject(name);
         Object.DontDestroyOnLoad(go);
         _behaviour = coroutineHelper(go);
+        _behaviour.onPause += paused => F.opt(onAppPause).each(a => a(paused));
+        _behaviour.onQuit += () => F.opt(onAppQuit).each(a => a());
       }
       return _behaviour;
     } }
@@ -164,42 +166,6 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
 
     public static IEnumerator EveryWaitEnumerator(WaitForSeconds wait, Fn<bool> f) {
       while (f()) yield return wait;
-    }
-
-    public static IObservable<bool> onAppPause 
-      { get { return behaviour.onPause; } }
-
-    public static IObservable<Unit> onAppQuit
-      { get { return behaviour.onQuit; } }
-
-    /**
-     * Takes a function that transforms an element into a future and 
-     * applies it to all elements in given sequence.
-     * 
-     * However instead of applying all elements concurrently it waits
-     * for the future from previous element to complete before applying
-     * the next element.
-     * 
-     * Returns reactive value that can be used to observe current stage
-     * of the application.
-     **/
-    public static IRxVal<Option<Try<B>>> inAsyncSeq<A, B>(
-      this IEnumerable<A> enumerable, Fn<A, Future<B>> asyncAction
-    ) {
-      var rxRef = RxRef.a(F.none<Try<B>>());
-      inAsyncSeq(enumerable.GetEnumerator(), rxRef, asyncAction);
-      return rxRef;
-    }
-
-    private static void inAsyncSeq<A, B>(
-      IEnumerator<A> e, IRxRef<Option<Try<B>>> rxRef, 
-      Fn<A, Future<B>> asyncAction
-    ) {
-      if (! e.MoveNext()) return;
-      asyncAction(e.Current).onComplete(b => {
-        rxRef.value = F.some(b);
-        inAsyncSeq(e, rxRef, asyncAction);
-      });
     }
   }
 }
