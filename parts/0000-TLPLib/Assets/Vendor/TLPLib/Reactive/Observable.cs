@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
+using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Iter;
 using Smooth.Collections;
 using UnityEngine;
 
@@ -22,6 +24,11 @@ namespace com.tinylabproductions.TLPLib.Reactive {
      * in returned enumerable.
      **/
     IObservable<B> flatMap<B>(Fn<A, IEnumerable<B>> mapper);
+    /** 
+     * Maps events coming from this observable and emits all events contained 
+     * in returned enumerable.
+     **/
+    IObservable<B> flatMap<B, Ctx>(Fn<A, Iter<B, Ctx>> mapper);
     /** Only emits events that pass the predicate. **/
     IObservable<A> filter(Fn<A, bool> predicate);
     /**
@@ -119,7 +126,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return everyFrameInstance ?? (
         everyFrameInstance = new Observable<Unit>(observer => {
           var cr = ASync.StartCoroutine(everyFrameCR(observer));
-          return new Subscription(() => ASync.StopCoroutine(cr));
+          return new Subscription(cr.stop);
         })
       );
     } }
@@ -140,7 +147,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 #endif
       return new Observable<DateTime>(observer => {
         var cr = ASync.StartCoroutine(interval(observer, intervalS, delayS));
-        return new Subscription(() => ASync.StopCoroutine(cr));
+        return new Subscription(cr.stop);
       });
     }
 
@@ -294,6 +301,15 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return builder(obs => subscribe(val => {
         foreach (var b in mapper(val)) obs.push(b);
       }));
+    }
+
+    public IObservable<B> flatMap<B, Ctx>(Fn<A, Iter<B, Ctx>> mapper) {
+      return flatMapImpl(mapper, builder<B>());
+    }
+
+    public O flatMapImpl<B, Ctx, O>
+    (Fn<A, Iter<B, Ctx>> mapper, ObserverBuilder<B, O> builder) {
+      return builder(obs => subscribe(val => mapper(val).each(obs.push)));
     }
 
     public IObservable<A> filter(Fn<A, bool> predicate) {
