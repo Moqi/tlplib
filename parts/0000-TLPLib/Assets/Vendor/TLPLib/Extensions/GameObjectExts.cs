@@ -1,5 +1,8 @@
 ﻿using System;
+using Assets.Vendor.TLPLib.Components.Forwarders;
 using com.tinylabproductions.TLPLib.Concurrent;
+using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Reactive;
 using UnityEngine;
 using Coroutine = com.tinylabproductions.TLPLib.Concurrent.Coroutine;
 using Object = UnityEngine.Object;
@@ -33,8 +36,8 @@ namespace com.tinylabproductions.TLPLib.Extensions {
 
     public static Coroutine everyFrame(this GameObject go, Fn<bool> f) {
       var behaviour =
-        go.GetComponent<CoroutineHelperBehaviour>() ??
-        go.AddComponent<CoroutineHelperBehaviour>();
+        go.GetComponent<ASyncHelperBehaviour>() ??
+        go.AddComponent<ASyncHelperBehaviour>();
       return ASync.EveryFrame(behaviour, f);
     }
 
