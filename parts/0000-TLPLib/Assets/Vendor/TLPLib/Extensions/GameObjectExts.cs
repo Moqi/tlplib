@@ -1,5 +1,8 @@
 ﻿using System;
+using Assets.Vendor.TLPLib.Components.Forwarders;
 using com.tinylabproductions.TLPLib.Concurrent;
+using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Reactive;
 using UnityEngine;
 using Coroutine = com.tinylabproductions.TLPLib.Concurrent.Coroutine;
 using Object = UnityEngine.Object;
@@ -32,14 +35,25 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     }
 
     public static Coroutine everyFrame(this GameObject go, Fn<bool> f) {
-      var behaviour =
-        go.GetComponent<CoroutineHelperBehaviour>() ??
-        go.AddComponent<CoroutineHelperBehaviour>();
-      return ASync.EveryFrame(behaviour, f);
+      return ASync.EveryFrame(go, f);
     }
 
     public static Coroutine everyFrame(this GameObject go, Act a) {
       return go.everyFrame(() => { a(); return true; });
+    }
+
+    public static IObservable<Unit> onMouseDown(this GameObject go) {
+      return (
+        go.GetComponent<OnMouseDownForwarder>() ?? 
+        go.AddComponent<OnMouseDownForwarder>()
+      ).onMouseDown;
+    }
+
+    public static IObservable<Vector3> onMouseDown(
+      this GameObject go, Camera camera, float raycastDistance=1000
+    ) {
+      return go.AddComponent<OnMouseDownCoordsForwarder>().
+        init(camera, raycastDistance).onMouseDown;
     }
   }
 }

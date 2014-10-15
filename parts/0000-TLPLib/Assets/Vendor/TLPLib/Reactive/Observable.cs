@@ -111,6 +111,10 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return F.t(obj, (IObservable<Evt>) observable);
     }
 
+    public static IObservable<A> empty<A>() {
+      return new Observable<A>(_ => new Subscription(() => {}));
+    }
+
     public static IObservable<A> fromEvent<A>(
       Act<Act<A>> registerCallback, Act unregisterCallback
     ) {
