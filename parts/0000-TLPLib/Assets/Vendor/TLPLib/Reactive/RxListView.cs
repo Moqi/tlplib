@@ -7,8 +7,12 @@ using com.tinylabproductions.TLPLib.Functional;
 namespace com.tinylabproductions.TLPLib.Reactive {
   public static class RxListView {
     public static RxListView<A> a<A>(
-      RxList<A> list, int startIndex, int windowSize
+      IRxList<A> list, int startIndex, int windowSize
     ) { return new RxListView<A>(list, startIndex, windowSize); }
+
+    public static RxListView<A> view<A>(
+      this IRxList<A> list, int startIndex, int windowSize
+    ) { return a(list, startIndex, windowSize); }
   }
 
   /**
@@ -25,7 +29,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
   {
     public readonly int windowSize;
 
-    private readonly RxList<A> list;
+    private readonly IRxList<A> list;
     private readonly IList<ISubscription> subscriptions = 
       new List<ISubscription>();
     private readonly List<Option<A>> viewValues;
@@ -58,7 +62,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       }
     }
 
-    public RxListView(RxList<A> list, int startIndex, int windowSize) {
+    public RxListView(IRxList<A> list, int startIndex, int windowSize) {
       this.list = list;
       this.windowSize = windowSize;
       viewValues = new List<Option<A>>(windowSize);
