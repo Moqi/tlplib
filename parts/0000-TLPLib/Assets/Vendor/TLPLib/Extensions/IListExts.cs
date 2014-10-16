@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using com.tinylabproductions.TLPLib.Functional;
 using Random = UnityEngine.Random;
@@ -89,6 +90,10 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         if (idx < end) yield return item;
         idx++;
       }
+    }
+
+    public static IEnumerable<A> last<A>(this IList<A> list, int count) {
+      return list.Skip(Math.Max(0, list.Count() - count)).Take(count); 
     }
 
     public static IList<A> toIList<A>(this List<A> list) { return list; }
