@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace com.tinylabproductions.TLPLib.Functional {
   public static class F {
@@ -65,6 +66,10 @@ namespace com.tinylabproductions.TLPLib.Functional {
         dict.Add(tpl._1, tpl._2);
       }
       return dict;
+    }
+
+    public static Dictionary<K, V> dict<K, V>(IEnumerable<Tpl<K, V>> args) {
+      return args.ToDictionary(tpl => tpl._1, tpl => tpl._2);
     }
 
     public static Unit unit { get { return Unit.instance; } }
