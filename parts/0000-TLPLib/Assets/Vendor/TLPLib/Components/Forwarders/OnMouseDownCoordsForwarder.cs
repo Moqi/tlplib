@@ -3,23 +3,25 @@ using game_general.Annotations;
 using UnityEngine;
 
 namespace Assets.Vendor.TLPLib.Components.Forwarders {
-  public class OnMouseDownCoordsForwarder : MonoBehaviour {
+  public class OnMouseDownCoordsForwarder : OnMouseDownBase {
     private readonly Subject<Vector3> _onMouseDown = new Subject<Vector3>();
     public IObservable<Vector3> onMouseDown { get { return _onMouseDown; } }
     public new Camera camera { get; private set; }
     public float raycastDistance { get; private set; }
 
-    public OnMouseDownCoordsForwarder init(Camera camera, float raycastDistance) {
+    public OnMouseDownCoordsForwarder init(
+      bool ignoreIfUGUIClicked, Camera camera, float raycastDistance
+    ) {
+      init(ignoreIfUGUIClicked);
       this.camera = camera;
       this.raycastDistance = raycastDistance;
       return this;
     }
 
-    [UsedImplicitly]
-    private void OnMouseDown() {
+    protected override void mouseDown() {
       RaycastHit hit;
       var ray = camera.ScreenPointToRay(Input.mousePosition);
-      if (collider.Raycast(ray, out hit, raycastDistance)){
+      if (collider.Raycast(ray, out hit, raycastDistance)) {
         _onMouseDown.push(hit.point);
       }
     }

@@ -42,18 +42,16 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return go.everyFrame(() => { a(); return true; });
     }
 
-    public static IObservable<Unit> onMouseDown(this GameObject go) {
-      return (
-        go.GetComponent<OnMouseDownForwarder>() ?? 
-        go.AddComponent<OnMouseDownForwarder>()
-      ).onMouseDown;
+    public static IObservable<Unit> onMouseDown(this GameObject go, bool uguiBlocks=true) {
+      return go.AddComponent<OnMouseDownForwarder>().init(uguiBlocks).onMouseDown;
     }
 
     public static IObservable<Vector3> onMouseDown(
-      this GameObject go, Camera camera, float raycastDistance=1000
+      this GameObject go, Camera camera, float raycastDistance=1000, 
+      bool uguiBlocks=true
     ) {
       return go.AddComponent<OnMouseDownCoordsForwarder>().
-        init(camera, raycastDistance).onMouseDown;
+        init(uguiBlocks, camera, raycastDistance).onMouseDown;
     }
   }
 }
