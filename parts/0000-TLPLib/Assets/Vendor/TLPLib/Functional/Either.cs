@@ -55,6 +55,9 @@ namespace com.tinylabproductions.TLPLib.Functional {
       { if (isLeft) onLeft(_leftValue); else onRight(_rightValue); }
 
     public Option<B> toOpt() { return rightValue; }
+
+    public B getOrElse(Fn<A, B> onLeft) 
+    { return isLeft ? onLeft(_leftValue) : _rightValue; }
   }
 
   public static class EitherBuilderExts {
