@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CF89FC35-A547-42C9-A006-39802FED77FB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>com.tinylabproductions.TLPLib</RootNamespace>
+    <AssemblyName>TLPLib</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\target\tlplib-base\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine-windows">
+      <HintPath>..\libs\unity-4.6.0b20\UnityEngine-windows.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\libs\unity-4.6.0b20\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\gokit\gokit.csproj">
+      <Project>{de6fc6c3-fbf5-4c19-a297-745a335a0ee7}</Project>
+      <Name>gokit</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Binding\UGUIBind.cs" />
+    <Compile Include="Collection\BiMap.cs" />
+    <Compile Include="Collection\CarouselEmitter.cs" />
+    <Compile Include="Collection\Editor\CarouselEmitterTest.cs" />
+    <Compile Include="Collection\Editor\RandomListTest.cs" />
+    <Compile Include="Collection\RandomList.cs" />
+    <Compile Include="Collection\ReadOnlyException.cs" />
+    <Compile Include="Collection\ReadOnlyLinkedList.cs" />
+    <Compile Include="Compare\Comparers\EnumComparers.cs" />
+    <Compile Include="Compare\Comparers\KeyValuePairComparers.cs" />
+    <Compile Include="Compare\Configuration.cs" />
+    <Compile Include="Compare\Events.cs" />
+    <Compile Include="Compare\Examples\ExampleConfiguration.cs" />
+    <Compile Include="Compare\Factory.cs" />
+    <Compile Include="Compare\Finder.cs" />
+    <Compile Include="Compare\Utilities\LogUnregisteredOnDestroy.cs" />
+    <Compile Include="Comparisons\Comparisons.cs" />
+    <Compile Include="Comparisons\EquatableEqComparer.cs" />
+    <Compile Include="Comparisons\FuncComparer.cs" />
+    <Compile Include="Comparisons\FuncEqComparer.cs" />
+    <Compile Include="Comparisons\IComparableComparer.cs" />
+    <Compile Include="Components\Forwarders\CollisionEnter2DForwarder.cs" />
+    <Compile Include="Components\Forwarders\OnMouseDownBase.cs" />
+    <Compile Include="Components\Forwarders\OnMouseDownCoordsForwarder.cs" />
+    <Compile Include="Components\Forwarders\OnMouseDownForwarder.cs" />
+    <Compile Include="Components\Forwarders\TriggerEnter2DForwarder.cs" />
+    <Compile Include="Components\HUDFPS.cs" />
+    <Compile Include="Concurrent\ASync.cs" />
+    <Compile Include="Concurrent\ASyncHelperBehaviour.cs" />
+    <Compile Include="Concurrent\Coroutine.cs" />
+    <Compile Include="Concurrent\Future.cs" />
+    <Compile Include="Concurrent\NextPostRenderBehaviour.cs" />
+    <Compile Include="Configuration\Config.cs" />
+    <Compile Include="Configuration\ConfigBase.cs" />
+    <Compile Include="Configuration\Editor\ConfigTest.cs" />
+    <Compile Include="Configuration\Editor\VariableConfigTest.cs" />
+    <Compile Include="Configuration\IConfig.cs" />
+    <Compile Include="Configuration\VariableConfig.cs" />
+    <Compile Include="Cryptography\CryptUtil.cs" />
+    <Compile Include="Data\MarkovChain.cs" />
+    <Compile Include="Data\Point2D.cs" />
+    <Compile Include="Data\PointBounds.cs" />
+    <Compile Include="Data\Range.cs" />
+    <Compile Include="Data\Ref.cs" />
+    <Compile Include="Data\Size2.cs" />
+    <Compile Include="Data\ValueWithStorage.cs" />
+    <Compile Include="Dispose\Disposable.cs" />
+    <Compile Include="Dispose\DisposalQueue.cs" />
+    <Compile Include="Dispose\SmoothDisposer.cs" />
+    <Compile Include="Events\GenericEvents.cs" />
+    <Compile Include="Extensions\AndroidExts.cs" />
+    <Compile Include="Extensions\AnyExts.cs" />
+    <Compile Include="Extensions\ArrayExts.cs" />
+    <Compile Include="Extensions\BoolExts.cs" />
+    <Compile Include="Extensions\ColorExts.cs" />
+    <Compile Include="Extensions\ComponentExts.cs" />
+    <Compile Include="Extensions\Editor\ArrayExtsTest.cs" />
+    <Compile Include="Extensions\Editor\IEnumerableExtsTest.cs" />
+    <Compile Include="Extensions\FuncExts.cs" />
+    <Compile Include="Extensions\GameObjectExts.cs" />
+    <Compile Include="Extensions\IDictionaryExts.cs" />
+    <Compile Include="Extensions\IEnumerableExts.cs" />
+    <Compile Include="Extensions\IListExts.cs" />
+    <Compile Include="Extensions\LinkedListExts.cs" />
+    <Compile Include="Extensions\PlayerPrefsExts.cs" />
+    <Compile Include="Extensions\StringExts.cs" />
+    <Compile Include="Extensions\Texture2DExts.cs" />
+    <Compile Include="Extensions\TimeSpanExts.cs" />
+    <Compile Include="Extensions\TransformExts.cs" />
+    <Compile Include="Extensions\VectorExts.cs" />
+    <Compile Include="Formats\SimpleJSON.cs" />
+    <Compile Include="Functional\Either.cs" />
+    <Compile Include="Functional\F.cs" />
+    <Compile Include="Functional\Functions.cs" />
+    <Compile Include="Functional\Lazy.cs" />
+    <Compile Include="Functional\Matching\Match.cs" />
+    <Compile Include="Functional\Option.cs" />
+    <Compile Include="Functional\Try.cs" />
+    <Compile Include="Functional\Tuple.cs" />
+    <Compile Include="Functional\Unit.cs" />
+    <Compile Include="IllegalStateException.cs" />
+    <Compile Include="Iter\Editor\IterExtsTest.cs" />
+    <Compile Include="Iter\Editor\IterTest.cs" />
+    <Compile Include="Iter\Iter.cs" />
+    <Compile Include="Iter\IterExts.cs" />
+    <Compile Include="Logger\Log.cs" />
+    <Compile Include="Platform\BasePlatform.cs" />
+    <Compile Include="Platform\Runtime.cs" />
+    <Compile Include="Pools\KeyedPool.cs" />
+    <Compile Include="Pools\KeyedPoolWithDefaultKey.cs" />
+    <Compile Include="Pools\Pool.cs" />
+    <Compile Include="Pools\PoolWithInitializer.cs" />
+    <Compile Include="Pools\SystemPools.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Reactive\Editor\IObservableTest.cs" />
+    <Compile Include="Reactive\Observable.cs" />
+    <Compile Include="Reactive\RxList.cs" />
+    <Compile Include="Reactive\RxListView.cs" />
+    <Compile Include="Reactive\RxRef.cs" />
+    <Compile Include="Reactive\Subjects.cs" />
+    <Compile Include="Reactive\Subscription.cs" />
+    <Compile Include="SFCollections\Comparer.cs" />
+    <Compile Include="SFCollections\CreateWithComparer.cs" />
+    <Compile Include="SFCollections\EqComparer.cs" />
+    <Compile Include="SFCollections\FuncEnumerable.cs" />
+    <Compile Include="SFCollections\ICollectionExtensions.cs" />
+    <Compile Include="SFCollections\IDictionaryExtensions.cs" />
+    <Compile Include="SFCollections\IListExtensions.cs" />
+    <Compile Include="SFCollections\IListStepper.cs" />
+    <Compile Include="SFCollections\InspectorKeyValuePair.cs" />
+    <Compile Include="SFCollections\LinkedListStepper.cs" />
+    <Compile Include="Threads\OnMainThread.cs" />
+    <Compile Include="Threads\OnMainThreadBehaviour.cs" />
+    <Compile Include="Tween\FuncTween.cs" />
+    <Compile Include="Tween\GoF.cs" />
+    <Compile Include="Utilities\Base36.cs" />
+    <Compile Include="Utilities\FPS.cs" />
+    <Compile Include="Utilities\Geometry2D.cs" />
+    <Compile Include="Utilities\MathUtils.cs" />
+    <Compile Include="Utilities\Platform.cs" />
+    <Compile Include="Utilities\RectUtils.cs" />
+    <Compile Include="Utilities\Rng.cs" />
+    <Compile Include="Utilities\ScreenUtils.cs" />
+    <Compile Include="WWWException.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)\..\unity\Assets\Code\"
+cd "$(TargetDir)" &amp;&amp; $(SolutionDir)\..\tools\pdb2mdb "$(TargetName).dll"
+copy /y "$(TargetDir)\$(TargetName)."* "$(SolutionDir)\..\unity\Assets\Code\"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

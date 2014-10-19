@@ -1,9 +1,6 @@
-# Backup files
-*~
-
-# Binary VS files
-bin
-obj
-
 # Solution User Options
 *.suo
+
+# Built binary files
+target
+obj

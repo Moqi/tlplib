@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DE6FC6C3-FBF5-4C19-A297-745A335A0EE7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>gokit</RootNamespace>
+    <AssemblyName>gokit</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\target\gokit\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine-windows">
+      <HintPath>..\libs\unity-4.6.0b20\UnityEngine-windows.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GoKit\base\AbstractGoTween.cs" />
+    <Compile Include="GoKit\base\AbstractGoTweenCollection.cs" />
+    <Compile Include="GoKit\easing\GoEaseBack.cs" />
+    <Compile Include="GoKit\easing\GoEaseBounce.cs" />
+    <Compile Include="GoKit\easing\GoEaseCircular.cs" />
+    <Compile Include="GoKit\easing\GoEaseCubic.cs" />
+    <Compile Include="GoKit\easing\GoEaseElastic.cs" />
+    <Compile Include="GoKit\easing\GoEaseExponential.cs" />
+    <Compile Include="GoKit\easing\GoEaseLinear.cs" />
+    <Compile Include="GoKit\easing\GoEaseQuadratic.cs" />
+    <Compile Include="GoKit\easing\GoEaseQuartic.cs" />
+    <Compile Include="GoKit\easing\GoEaseQuintic.cs" />
+    <Compile Include="GoKit\easing\GoEaseSinusoidal.cs" />
+    <Compile Include="GoKit\enums\GoDuplicatePropertyRuleType.cs" />
+    <Compile Include="GoKit\enums\GoEaseType.cs" />
+    <Compile Include="GoKit\enums\GoLogLevel.cs" />
+    <Compile Include="GoKit\enums\GoLookAtType.cs" />
+    <Compile Include="GoKit\enums\GoLoopType.cs" />
+    <Compile Include="GoKit\enums\GoShakeType.cs" />
+    <Compile Include="GoKit\enums\GoSplineType.cs" />
+    <Compile Include="GoKit\enums\GoTweenState.cs" />
+    <Compile Include="GoKit\enums\GoUpdateType.cs" />
+    <Compile Include="GoKit\extensions\GoKitTweenExtensions.cs" />
+    <Compile Include="GoKit\Go.cs" />
+    <Compile Include="GoKit\GoDummyPath.cs" />
+    <Compile Include="GoKit\GoTween.cs" />
+    <Compile Include="GoKit\GoTweenChain.cs" />
+    <Compile Include="GoKit\GoTweenCollectionConfig.cs" />
+    <Compile Include="GoKit\GoTweenConfig.cs" />
+    <Compile Include="GoKit\GoTweenFlow.cs" />
+    <Compile Include="GoKit\properties\abstracts\AbstractColorTweenProperty.cs" />
+    <Compile Include="GoKit\properties\abstracts\AbstractQuaternionTweenProperty.cs" />
+    <Compile Include="GoKit\properties\abstracts\AbstractTweenProperty.cs" />
+    <Compile Include="GoKit\properties\abstracts\AbstractVector3TweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\ColorTweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\FloatTweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\IGenericProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\IntTweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\Vector2TweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\Vector3PathTweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\Vector3TweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\Vector3XTweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\Vector3YTweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\Vector3ZTweenProperty.cs" />
+    <Compile Include="GoKit\properties\genericTypes\Vector4TweenProperty.cs" />
+    <Compile Include="GoKit\properties\GoTweenUtils.cs" />
+    <Compile Include="GoKit\properties\smoothing\GoSmoothedQuaternion.cs" />
+    <Compile Include="GoKit\properties\smoothing\GoSmoothedVector3.cs" />
+    <Compile Include="GoKit\properties\smoothing\GoSmoothingType.cs" />
+    <Compile Include="GoKit\properties\specificTypes\EulerAnglesTweenProperty.cs" />
+    <Compile Include="GoKit\properties\specificTypes\MaterialColorTweenProperty.cs" />
+    <Compile Include="GoKit\properties\specificTypes\PositionPathTweenProperty.cs" />
+    <Compile Include="GoKit\properties\specificTypes\PositionTweenProperty.cs" />
+    <Compile Include="GoKit\properties\specificTypes\RotationQuaternionTweenProperty.cs" />
+    <Compile Include="GoKit\properties\specificTypes\RotationTweenProperty.cs" />
+    <Compile Include="GoKit\properties\specificTypes\ScalePathTweenProperty.cs" />
+    <Compile Include="GoKit\properties\specificTypes\ScaleTweenProperty.cs" />
+    <Compile Include="GoKit\properties\specificTypes\ShakeTweenProperty.cs" />
+    <Compile Include="GoKit\properties\splines\AbstractGoSplineSolver.cs" />
+    <Compile Include="GoKit\properties\splines\GoSpline.cs" />
+    <Compile Include="GoKit\properties\splines\GoSplineCatmullRomSolver.cs" />
+    <Compile Include="GoKit\properties\splines\GoSplineCubicBezierSolver.cs" />
+    <Compile Include="GoKit\properties\splines\GoSplineQuadraticBezierSolver.cs" />
+    <Compile Include="GoKit\properties\splines\GoSplineStraightLineSolver.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="GoKit\easing\easeEquationsLicense.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)\..\unity\Assets\Code\"
+cd "$(TargetDir)" &amp;&amp; $(SolutionDir)\..\tools\pdb2mdb "$(TargetName).dll"
+copy /y "$(TargetDir)\$(TargetName)."* "$(SolutionDir)\..\unity\Assets\Code\"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
