@@ -1,4 +1,5 @@
 ﻿using System;
+using com.tinylabproductions.TLPLib.Components;
 using com.tinylabproductions.TLPLib.Components.Forwarders;
 using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Functional;
@@ -40,6 +41,13 @@ namespace com.tinylabproductions.TLPLib.Extensions {
 
     public static Coroutine everyFrame(this GameObject go, Act a) {
       return go.everyFrame(() => { a(); return true; });
+    }
+
+    public static IObservable<Vector2> mouseDrag(this GameObject go) {
+      return (
+        go.GetComponent<DragObservable>() ??
+        go.AddComponent<DragObservable>()
+      ).dragDelta;
     }
 
     public static IObservable<Unit> onMouseDown(this GameObject go, bool uguiBlocks=true) {
