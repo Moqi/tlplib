@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Smooth.Collections;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
@@ -45,6 +46,10 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public static IRxRef<A> a<A>(A value) {
       return new RxRef<A>(value);
     }
+
+    public static IRxRef<A> a<A>(A value, IEqualityComparer<A> comparer) {
+      return new RxRef<A>(value, comparer);
+    }
   }
 
   public abstract class RxRefBase<A> : Observable<A> {
@@ -65,16 +70,22 @@ namespace com.tinylabproductions.TLPLib.Reactive {
   }
 
   public class RxRef<A> : RxRefBase<A>, IRxRef<A> {
+    private static readonly IEqualityComparer<A> defaultComparer = EqComparer<A>.Default;
+    private readonly IEqualityComparer<A> comparer;
+
     public new A value { 
       get { return _value; }
       set {
-        if (EqComparer<A>.Default.Equals(_value, value)) return;
+        if (comparer.Equals(_value, value)) return;
         _value = value;
         submit(value);
       }
     }
 
-    public RxRef(A initialValue) : base(initialValue) {}
+    public RxRef(A initialValue) : base(initialValue) { comparer = defaultComparer; }
+
+    public RxRef(A initialValue, IEqualityComparer<A> comparer) : base(initialValue) 
+    { this.comparer = comparer; }
 
     public IRxRef<B> comap<B>(Fn<A, B> mapper, Fn<B, A> comapper) {
       var bRef = mapImpl(mapper, RxRef.builder(mapper(value)));
