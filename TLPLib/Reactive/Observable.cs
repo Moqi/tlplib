@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
-using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 using com.tinylabproductions.TLPLib.Iter;
 using Smooth.Collections;
@@ -17,6 +16,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     ISubscription subscribe(Act<A, ISubscription> onChange);
     /** Emits first value to the future and unsubscribes. **/
     Future<A> toFuture();
+    /* Pipes values to given observer. */
+    ISubscription pipeTo(IObserver<A> observer);
     /** Maps events coming from this observable. **/
     IObservable<B> map<B>(Fn<A, B> mapper);
     /** 
@@ -289,6 +290,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       f.onComplete(_ => subscription.unsubscribe());
       return f;
     }
+
+    public ISubscription pipeTo(IObserver<A> observer) 
+    { return subscribe(observer.push); }
 
     public IObservable<B> map<B>(Fn<A, B> mapper) {
       return mapImpl(mapper, builder<B>());
