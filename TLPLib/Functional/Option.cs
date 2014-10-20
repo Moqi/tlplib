@@ -190,5 +190,13 @@ public
   public override string ToString() {
     return isSome ? "Some(" + value + ")" : "None";
   }
+
+  public Either<B, A> toEither<B>(Fn<B> ifEmpty) {
+    return isSome ? new Either<B, A>(value) : new Either<B, A>(ifEmpty());
+  }
+
+  public Either<B, A> toEither<B>(B ifEmpty) {
+    return isSome ? new Either<B, A>(value) : new Either<B, A>(ifEmpty);
+  }
 }
 }
