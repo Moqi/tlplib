@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Data {
-  public struct ValueWithStorage {
+  public struct ValueWithStorage : IEquatable<ValueWithStorage> {
     public uint value;
     public uint storage;
 
@@ -68,5 +69,41 @@ namespace com.tinylabproductions.TLPLib.Data {
     public override string ToString() {
       return string.Format("ValueWithStorage[{0}]", AsString());
     }
+
+    #region Equality
+
+    public bool Equals(ValueWithStorage other) {
+      return value == other.value && storage == other.storage;
+    }
+
+    public override bool Equals(object obj) {
+      if (ReferenceEquals(null, obj)) return false;
+      return obj is ValueWithStorage && Equals((ValueWithStorage) obj);
+    }
+
+    public override int GetHashCode() {
+      unchecked { return ((int) value * 397) ^ (int) storage; }
+    }
+
+    public static bool operator ==(ValueWithStorage left, ValueWithStorage right) { return left.Equals(right); }
+    public static bool operator !=(ValueWithStorage left, ValueWithStorage right) { return !left.Equals(right); }
+
+    private sealed class ValueStorageEqualityComparer : IEqualityComparer<ValueWithStorage> {
+      public bool Equals(ValueWithStorage x, ValueWithStorage y) {
+        return x.value == y.value && x.storage == y.storage;
+      }
+
+      public int GetHashCode(ValueWithStorage obj) {
+        unchecked { return ((int) obj.value * 397) ^ (int) obj.storage; }
+      }
+    }
+
+    private static readonly IEqualityComparer<ValueWithStorage> ValueStorageComparerInstance = new ValueStorageEqualityComparer();
+
+    public static IEqualityComparer<ValueWithStorage> valueStorageComparer {
+      get { return ValueStorageComparerInstance; }
+    }
+
+    #endregion
   }
 }
