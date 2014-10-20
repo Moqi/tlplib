@@ -20,6 +20,11 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     ISubscription pipeTo(IObserver<A> observer);
     /** Maps events coming from this observable. **/
     IObservable<B> map<B>(Fn<A, B> mapper);
+    /**
+     * Discards values that this observable emits, turning it into event 
+     * source that does not carry data with it.
+     **/
+    IObservable<Unit> discardValue();
     /** 
      * Maps events coming from this observable and emits all events contained 
      * in returned enumerable.
@@ -301,6 +306,12 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     protected O mapImpl<B, O>(Fn<A, B> mapper, ObserverBuilder<B, O> builder) {
       return builder(obs => subscribe(val => obs.push(mapper(val))));
     }
+
+    public IObservable<Unit> discardValue() 
+    { return discardValueImpl(builder<Unit>()); }
+
+    protected O discardValueImpl<O>(ObserverBuilder<Unit, O> builder) 
+    { return mapImpl(_ => F.unit, builder); }
 
     public IObservable<B> flatMap<B>(Fn<A, IEnumerable<B>> mapper) {
       return flatMapImpl(mapper, builder<B>());
