@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using com.tinylabproductions.TLPLib.Functional;
+using Smooth.Collections;
 
 namespace com.tinylabproductions.TLPLib.Collection {
   /* A list which has random order inside. 
@@ -11,6 +13,10 @@ namespace com.tinylabproductions.TLPLib.Collection {
    */
   public class RandomList<A> : IList<A> {
     private readonly List<A> backing = new List<A>();
+    private readonly Random rng = new Random();
+
+    public RandomList() {}
+    public RandomList(IEnumerable<A> source) : this() { backing.AddAll(source); }
 
     public void Add(A item) { backing.Add(item); }
     public void Clear() { backing.Clear(); }
@@ -55,6 +61,17 @@ namespace com.tinylabproductions.TLPLib.Collection {
         backing[index] = backing[lastIndex];
         backing.RemoveAt(lastIndex);
       }
+    }
+
+    /* Removes and returns random element. Returns None if the list is empty. */
+    public Option<A> RemoveRandom() {
+      if (Count > 0) {
+        var idx = rng.Next(Count);
+        var a = this[idx];
+        RemoveAt(idx);
+        return F.some(a);
+      }
+      return F.none<A>();
     }
 
     /* Removes elements where predicate returns true. */
