@@ -10,6 +10,16 @@ namespace com.tinylabproductions.TLPLib.Extensions {
         ? F.some(outVal) : F.none<V>();
     }
 
+    /* as #[], but has a better error message */
+    public static V a<K, V>(this IDictionary<K, V> dict, K key) {
+      return dict.get(key).fold(
+        () => { throw new ArgumentException(string.Format(
+          "Cannot find {0} in {1}", key, dict.asString()
+        )); },
+        _ => _
+      );
+    }
+
     public static V getOrElse<K, V>(
       this IDictionary<K, V> dict, K key, Fn<V> orElse
     ) {
