@@ -55,14 +55,6 @@ public static class Option {
     return opt.fold(() => null, _ => _);
   }
 
-  public static B fold<A, B>(this Option<A> opt, Fn<B> ifEmpty, Fn<A, B> ifNonEmpty) {
-    return opt.isSome ? ifNonEmpty(opt.get) : ifEmpty();
-  }
-
-  public static B fold<A, B>(this Option<A> opt, B ifEmpty, Fn<A, B> ifNonEmpty) {
-    return opt.isSome ? ifNonEmpty(opt.get) : ifEmpty;
-  }
-
   // Alias for #fold with elements switched up.
   public static B cata<A, B>(this Option<A> opt, Fn<A, B> ifNonEmpty, Fn<B> ifEmpty) {
     return opt.fold(ifEmpty, ifNonEmpty);
@@ -101,22 +93,11 @@ public static class Option {
   }
 }
 
-public 
-#if UNITY_IOS
-  class
-#else
-  struct 
-#endif
-	Option<A> 
-{
+public struct Option<A> {
   public static Option<A> None { get { return new Option<A>(); } }
 
   private readonly A value;
   public readonly bool isSome;
-
-#if UNITY_IOS
-  public Option() {}
-#endif
 
   public Option(A value) : this() {
     this.value = value;
@@ -189,6 +170,14 @@ public
 
   public override string ToString() {
     return isSome ? "Some(" + value + ")" : "None";
+  }
+
+  public B fold<B>(Fn<B> ifEmpty, Fn<A, B> ifNonEmpty) {
+    return isSome ? ifNonEmpty(value) : ifEmpty();
+  }
+
+  public B fold<B>(B ifEmpty, Fn<A, B> ifNonEmpty) {
+    return isSome ? ifNonEmpty(value) : ifEmpty;
   }
 
   public Either<B, A> toEither<B>(Fn<B> ifEmpty) {

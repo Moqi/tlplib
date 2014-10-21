@@ -2,13 +2,7 @@
 using com.tinylabproductions.TLPLib.Extensions;
 
 namespace com.tinylabproductions.TLPLib.Functional {
-  public 
-#if UNITY_IOS
-  class
-#else
-  struct
-#endif
-  Either<A, B> {
+  public struct Either<A, B> {
     public static Either<A, B> Left(A value) { return new Either<A, B>(value); }
     public static Either<A, B> Right(B value) { return new Either<A, B>(value); }
 
@@ -69,13 +63,7 @@ namespace com.tinylabproductions.TLPLib.Functional {
     }
   }
 
-  public 
-#if UNITY_IOS
-    class
-#else
-    struct 
-#endif
-    LeftEitherBuilder<A> {
+  public struct LeftEitherBuilder<A> {
     public readonly A leftValue;
 
     public LeftEitherBuilder(A leftValue) {
@@ -85,13 +73,7 @@ namespace com.tinylabproductions.TLPLib.Functional {
     public Either<A, B> r<B>() { return new Either<A, B>(leftValue); }
   }
 
-  public 
-#if UNITY_IOS
-    class
-#else
-    struct 
-#endif
-    RightEitherBuilder<B> {
+  public struct RightEitherBuilder<B> {
     public readonly B rightValue;
 
     public RightEitherBuilder(B rightValue) {
