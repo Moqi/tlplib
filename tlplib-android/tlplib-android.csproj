@@ -35,8 +35,9 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine-android">
-      <HintPath>..\libs\unity-4.6.0b20\UnityEngine-android.dll</HintPath>
+    <Reference Include="UnityEngine-android, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\libs\unity-4.6.0b21\UnityEngine-android.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
