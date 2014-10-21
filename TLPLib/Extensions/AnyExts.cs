@@ -26,5 +26,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       tapper(any);
       return any;
     }
+
+    public static Option<A> some<A>(this A any) { return F.some(any); }
   }
 }
