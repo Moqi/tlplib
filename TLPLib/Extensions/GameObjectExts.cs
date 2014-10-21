@@ -50,6 +50,13 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       ).dragDelta;
     }
 
+    public static IObservable<Vector2> scrollWheel(this GameObject go) {
+      return (
+        go.GetComponent<ScrollWheelObservable>() ??
+        go.AddComponent<ScrollWheelObservable>()
+      ).scrollDelta;
+    }
+
     public static IObservable<Unit> onMouseDown(this GameObject go, bool uguiBlocks=true) {
       return go.AddComponent<OnMouseDownForwarder>().init(uguiBlocks).onMouseDown;
     }
