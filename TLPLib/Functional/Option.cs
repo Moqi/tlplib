@@ -69,10 +69,6 @@ public static class Option {
     if (opt.isSome) ifNonEmpty(opt.get);
     else ifEmpty();
   }
-  // Downcast an option.
-  public static Option<B> to<A, B>(this Option<A> opt) where A : B {
-    return opt.map(_ => (B) _);
-  }
 
   public static Option<B> map<A, B>(this Option<A> opt, Fn<A, B> func) {
     return opt.isDefined ? F.some(func(opt.get)) : F.none<B>();
