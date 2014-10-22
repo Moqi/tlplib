@@ -43,11 +43,8 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return go.everyFrame(() => { a(); return true; });
     }
 
-    public static IObservable<Vector2> mouseDrag(this GameObject go) {
-      return (
-        go.GetComponent<DragObservable>() ??
-        go.AddComponent<DragObservable>()
-      ).dragDelta;
+    public static IObservable<Vector2> mouseDrag(this GameObject go, float dragThreshold) {
+      return go.AddComponent<DragObservable>().init(dragThreshold).dragDelta;
     }
 
     public static IObservable<Vector2> scrollWheel(this GameObject go) {
@@ -61,12 +58,24 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return go.AddComponent<OnMouseDownForwarder>().init(uguiBlocks).onMouseDown;
     }
 
+    public static IObservable<Unit> onMouseClick(this GameObject go, bool uguiBlocks = true) {
+      return go.AddComponent<OnMouseClickForwarder>().init(uguiBlocks).onMouseClick;
+    }
+
     public static IObservable<Vector3> onMouseDown(
       this GameObject go, Camera camera, float raycastDistance=1000, 
       bool uguiBlocks=true
     ) {
       return go.AddComponent<OnMouseDownCoordsForwarder>().
         init(uguiBlocks, camera, raycastDistance).onMouseDown;
+    }
+
+    public static IObservable<Vector3> onMouseClick(
+      this GameObject go, Camera camera, float raycastDistance = 1000,
+      bool uguiBlocks = true
+    ) {
+      return go.AddComponent<OnMouseClickCoordsForwarder>().
+        init(uguiBlocks, camera, raycastDistance).onMouseClick;
     }
   }
 }
