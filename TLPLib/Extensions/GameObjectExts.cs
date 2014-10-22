@@ -68,5 +68,9 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       return go.AddComponent<OnMouseDownCoordsForwarder>().
         init(uguiBlocks, camera, raycastDistance).onMouseDown;
     }
+
+    public static IObservable<Unit> doubleClick(
+      this GameObject go, float intervalS = 0.25f, bool uguiBlocks = true
+    ) { return go.onMouseDown(uguiBlocks).withinTimeframe(2, intervalS).discardValue(); }
   }
 }
