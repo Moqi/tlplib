@@ -24,7 +24,7 @@ namespace com.tinylabproductions.TLPLib.Components.Forwarders {
       if (downPosition.isEmpty) return;
       var startPos = downPosition.get;
       var diff = Input.mousePosition - startPos;
-      if (diff.sqrMagnitude >= DragObservable.dragThresholdSqr) 
+      if (diff.sqrMagnitude >= DragObservable.dragThresholdSqr)
         downPosition = F.none<Vector3>();
     }
 
