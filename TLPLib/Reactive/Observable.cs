@@ -32,6 +32,11 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     IObservable<B> flatMap<B>(Fn<A, IEnumerable<B>> mapper);
     /** 
      * Maps events coming from this observable and emits all events contained 
+     * in returned observable.
+     **/
+    IObservable<B> flatMap<B>(Fn<A, IObservable<B>> mapper);
+    /** 
+     * Maps events coming from this observable and emits all events contained 
      * in returned enumerable.
      **/
     IObservable<B> flatMap<B, Ctx>(Fn<A, Iter<B, Ctx>> mapper);
@@ -331,6 +336,22 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public O flatMapImpl<B, Ctx, O>
     (Fn<A, Iter<B, Ctx>> mapper, ObserverBuilder<B, O> builder) {
       return builder(obs => subscribe(val => mapper(val).each(obs.push)));
+    }
+
+    public IObservable<B> flatMap<B>(Fn<A, IObservable<B>> mapper)
+    { return flatMapImpl(mapper, builder<B>()); }
+
+    public O flatMapImpl<B, O>
+    (Fn<A, IObservable<B>> mapper, ObserverBuilder<B, O> builder) {
+      return builder(obs => {
+        ISubscription innerSub = null;
+        Act innerUnsub = () => { if (innerSub != null) innerSub.unsubscribe(); };
+        var thisSub = subscribe(val => {
+          innerUnsub();
+          innerSub = mapper(val).subscribe(obs.push);
+        });
+        return thisSub.join(new Subscription(innerUnsub));
+      });
     }
 
     public IObservable<A> filter(Fn<A, bool> predicate) {
