@@ -45,8 +45,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
 
     public static IObservable<Vector2> mouseDrag(this GameObject go) {
       return (
-        go.GetComponent<DragObservable>() ??
-        go.AddComponent<DragObservable>()
+        go.GetComponent<DragObservable>() ?? go.AddComponent<DragObservable>()
       ).dragDelta;
     }
 
@@ -57,20 +56,20 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       ).scrollDelta;
     }
 
-    public static IObservable<Unit> onMouseDown(this GameObject go, bool uguiBlocks=true) {
-      return go.AddComponent<OnMouseDownForwarder>().init(uguiBlocks).onMouseDown;
+    public static IObservable<Unit> click(this GameObject go, bool uguiBlocks = true) {
+      return go.AddComponent<OnMouseClickForwarder>().init(uguiBlocks).onMouseClick;
     }
 
-    public static IObservable<Vector3> onMouseDown(
-      this GameObject go, Camera camera, float raycastDistance=1000, 
-      bool uguiBlocks=true
+    public static IObservable<Vector3> click(
+      this GameObject go, Camera camera, float raycastDistance = 1000,
+      bool uguiBlocks = true
     ) {
-      return go.AddComponent<OnMouseDownCoordsForwarder>().
-        init(uguiBlocks, camera, raycastDistance).onMouseDown;
+      return go.AddComponent<OnMouseClickCoordsForwarder>().
+        init(uguiBlocks, camera, raycastDistance).onMouseClick;
     }
 
     public static IObservable<Unit> doubleClick(
       this GameObject go, float intervalS = 0.25f, bool uguiBlocks = true
-    ) { return go.onMouseDown(uguiBlocks).withinTimeframe(2, intervalS).discardValue(); }
+    ) { return go.click(uguiBlocks).withinTimeframe(2, intervalS).discardValue(); }
   }
 }

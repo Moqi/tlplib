@@ -2,13 +2,13 @@
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Components.Forwarders {
-  public class OnMouseDownCoordsForwarder : OnMouseDownBase {
-    private readonly Subject<Vector3> _onMouseDown = new Subject<Vector3>();
-    public IObservable<Vector3> onMouseDown { get { return _onMouseDown; } }
+  public class OnMouseClickCoordsForwarder : OnMouseClickBase {
+    private readonly Subject<Vector3> _onMouseClick = new Subject<Vector3>();
+    public IObservable<Vector3> onMouseClick { get { return _onMouseClick; } }
     public new Camera camera { get; private set; }
     public float raycastDistance { get; private set; }
 
-    public OnMouseDownCoordsForwarder init(
+    public OnMouseClickCoordsForwarder init(
       bool ignoreIfUGUIClicked, Camera camera, float raycastDistance
     ) {
       init(ignoreIfUGUIClicked);
@@ -17,11 +17,11 @@ namespace com.tinylabproductions.TLPLib.Components.Forwarders {
       return this;
     }
 
-    protected override void mouseDown() {
+    protected override void mouseClick() {
       RaycastHit hit;
       var ray = camera.ScreenPointToRay(Input.mousePosition);
       if (collider.Raycast(ray, out hit, raycastDistance)) {
-        _onMouseDown.push(hit.point);
+        _onMouseClick.push(hit.point);
       }
     }
   }

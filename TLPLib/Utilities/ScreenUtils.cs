@@ -4,6 +4,8 @@ namespace com.tinylabproductions.TLPLib.Utilities {
   public static class ScreenUtils {
     private static float sw { get { return Screen.width; } }
     private static float sh { get { return Screen.height; } }
+    private static float DEFAULT_DPI { get { return Application.isMobilePlatform ? 160 : 96; } }
+    private static float dpi { get { return Screen.dpi == 0 ? DEFAULT_DPI : Screen.dpi; } }
 
     /** Convert screen width percentage to absolute value. **/
     public static float pWidthToAbs(this float percentWidth) {
@@ -23,6 +25,10 @@ namespace com.tinylabproductions.TLPLib.Utilities {
     /** Convert screen height absolute value to percentage. **/
     public static float aHeightToPerc(this float absoluteHeight) {
       return absoluteHeight / sh;
+    }
+
+    public static float cmToPixels(float cm) {
+      return cm * 0.393701f * dpi;
     }
   }
 }
