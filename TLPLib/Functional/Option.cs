@@ -26,14 +26,6 @@ public static class Option {
     return opt.isDefined ? opt.get.Yield() : Enumerable.Empty<A>();
   }
 
-  public static A getOrElse<A>(this Option<A> opt, Fn<A> orElse) {
-    return opt.isDefined ? opt.get : orElse();
-  }
-
-  public static A getOrElse<A>(this Option<A> opt, A orElse) {
-    return opt.isDefined ? opt.get : orElse;
-  }
-
   public static Option<A> createOrTap<A>(
     this Option<A> opt, Fn<A> ifEmpty, Act<A> ifNonEmpty
   ) {
@@ -183,5 +175,9 @@ public struct Option<A> {
   public Either<B, A> toEither<B>(B ifEmpty) {
     return isSome ? new Either<B, A>(value) : new Either<B, A>(ifEmpty);
   }
+
+  public A getOrElse(Fn<A> orElse) { return isSome ? value : orElse(); }
+
+  public A getOrElse(A orElse) { return isSome ? value : orElse; }
 }
 }
