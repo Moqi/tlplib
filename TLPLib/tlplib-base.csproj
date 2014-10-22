@@ -81,9 +81,6 @@
     <Compile Include="Components\ScrollWheelObservable.cs" />
     <Compile Include="Components\DragObservable.cs" />
     <Compile Include="Components\Forwarders\CollisionEnter2DForwarder.cs" />
-    <Compile Include="Components\Forwarders\OnMouseDownBase.cs" />
-    <Compile Include="Components\Forwarders\OnMouseDownCoordsForwarder.cs" />
-    <Compile Include="Components\Forwarders\OnMouseDownForwarder.cs" />
     <Compile Include="Components\Forwarders\TriggerEnter2DForwarder.cs" />
     <Compile Include="Components\HUDFPS.cs" />
     <Compile Include="Concurrent\ASync.cs" />
