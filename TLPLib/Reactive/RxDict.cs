@@ -46,8 +46,10 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     IObservable<KeyValuePair<K, V>> keySet { get; }
   }
 
+  public interface IRxDict<K, V> : IDictionary<K, V>, IRxDictObs<K, V> {}
+
   /* Reactive dictionary */
-  public class RxDict<K, V> : IDictionary<K, V>, IRxDictObs<K, V> {
+  public class RxDict<K, V> : IRxDict<K, V> {
     private readonly Subject<KeyValuePair<K, V>> _keyAdded = 
       new Subject<KeyValuePair<K, V>>();
     /* Emits key and new value on key add. */
