@@ -104,7 +104,7 @@ public struct Option<A> {
     return this;
   }
 
-  public void voidFold(Action ifEmpty, Act<A> ifNonEmpty) {
+  public void voidFold(Act ifEmpty, Act<A> ifNonEmpty) {
     if (isSome) ifNonEmpty(value);
     else ifEmpty();
   }
