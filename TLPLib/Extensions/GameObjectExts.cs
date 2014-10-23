@@ -10,6 +10,8 @@ using Object = UnityEngine.Object;
 
 namespace com.tinylabproductions.TLPLib.Extensions {
   public static class GameObjectExts {
+    public const float DOUBLE_CLICK_INTERVAL = 0.25f;
+
     public static void changeAlpha(this GameObject go, float alpha) {
       foreach (var childRenderer in go.GetComponentsInChildren<Renderer>()) {
         var material = childRenderer.material;
@@ -69,7 +71,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     }
 
     public static IObservable<Unit> doubleClick(
-      this GameObject go, float intervalS = 0.25f, bool uguiBlocks = true
+      this GameObject go, float intervalS = DOUBLE_CLICK_INTERVAL, bool uguiBlocks = true
     ) { return go.click(uguiBlocks).withinTimeframe(2, intervalS).discardValue(); }
   }
 }
