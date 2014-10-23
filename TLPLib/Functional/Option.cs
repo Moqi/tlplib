@@ -179,5 +179,20 @@ public struct Option<A> {
   public A getOrElse(Fn<A> orElse) { return isSome ? value : orElse(); }
 
   public A getOrElse(A orElse) { return isSome ? value : orElse; }
+
+  /**
+   * If this option is:
+   * * None - returns Some(ifEmpty())
+   * * Some - applies ifSome and returns None.
+   */
+  public Option<B> swap<B>(Fn<B> ifEmpty, Act<A> ifSome) {
+    return fold(
+      () => F.some(ifEmpty()),
+      v => {
+        ifSome(v);
+        return F.none<B>();
+      }
+    );
+  }
 }
 }
