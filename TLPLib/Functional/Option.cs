@@ -194,5 +194,15 @@ public struct Option<A> {
       }
     );
   }
+
+  public Option<B> swap<B>(B ifEmpty, Act<A> ifSome) {
+    return fold(
+      () => F.some(ifEmpty),
+      v => {
+        ifSome(v);
+        return F.none<B>();
+      }
+    );
+  }
 }
 }
