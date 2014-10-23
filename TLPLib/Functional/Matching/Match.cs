@@ -1,13 +1,16 @@
 ﻿using System;
 
 namespace com.tinylabproductions.TLPLib.Functional.Matching {
-  public interface IVoidMatcher<in Base> where Base : class {
+  public interface IVoidMatcher<Base> where Base : class {
     IVoidMatcher<Base> when<T>(Act<T> onMatch) where T : Base;
+    void orElse(Act<Base> act);
   }
 
   public interface IMatcher<in Base, Return> where Base : class {
-    IMatcher<Base,Return> when<T>(Fn<T, Return> onMatch)
-    where T : Base;
+    IMatcher<Base,Return> when<T>(Fn<T, Return> onMatch) where T : class, Base;
+    /* Unrestrained version of when, needed to work around C# type system 
+     * sometimes. */
+    IMatcher<Base, Return> whenU<T>(Fn<T, Return> onMatch) where T : class;
 
     Return get();
     Return getOrElse(Fn<Return> elseFunc);
@@ -34,10 +37,14 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
       else return this;
     }
 
+    public void orElse(Act<Base> act) { act(subject); }
+
     public IMatcher<Base, Return> when<T>(Fn<T, Return> onMatch)
-    where T : Base {
-      if (subject is T) {
-        var casted = (T) subject;
+    where T : class, Base { return whenU(onMatch); }
+
+    public IMatcher<Base, Return> whenU<T>(Fn<T, Return> onMatch) where T : class {
+      var casted = subject as T;
+      if (casted != null) {
         return new SuccessfulMatcher<Base, Return>(onMatch.Invoke(casted));
       }
 
@@ -66,8 +73,13 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
     public IVoidMatcher<Base> when<T>(Act<T> onMatch) 
     where T : Base { return this; }
 
+    public void orElse(Act<Base> act) {}
+
     public IMatcher<Base, Return> when<T>(Fn<T, Return> onMatch)
-    where T : Base { return this; }
+    where T : class, Base { return this; }
+
+    public IMatcher<Base, Return> whenU<T>(Fn<T, Return> onMatch) 
+    where T : class { return this; }
 
     public Return get() { return result; }
 
