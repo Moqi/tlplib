@@ -1,4 +1,5 @@
 ﻿using com.tinylabproductions.TLPLib.Annotations;
+using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Functional;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,15 +18,17 @@ namespace com.tinylabproductions.TLPLib.Components.Forwarders {
         return;
 
       downPosition = F.some(Input.mousePosition);
-    }
 
-    [UsedImplicitly]
-    private void Update() {
-      if (downPosition.isEmpty) return;
-      var startPos = downPosition.get;
-      var diff = Input.mousePosition - startPos;
-      if (diff.sqrMagnitude >= DragObservable.dragThresholdSqr)
-        downPosition = F.none<Vector3>();
+      ASync.EveryFrame(this, () => {
+        if (downPosition.isEmpty) return false;
+        var startPos = downPosition.get;
+        var diff = Input.mousePosition - startPos;
+        if (diff.sqrMagnitude >= DragObservable.dragThresholdSqr) {
+          downPosition = F.none<Vector3>();
+          return false;
+        }
+        return true;
+      });
     }
 
     [UsedImplicitly]
@@ -33,6 +36,7 @@ namespace com.tinylabproductions.TLPLib.Components.Forwarders {
       if (downPosition.isEmpty) return;
       if (uguiBlocks && EventSystem.current.IsPointerOverGameObject()) return;
       mouseClick();
+      downPosition = F.none<Vector3>();
     }
 
     protected abstract void mouseClick();
