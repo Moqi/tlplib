@@ -52,10 +52,10 @@ namespace com.tinylabproductions.TLPLib.Logger {
       ) { AutoFlush = true };
 
       Log.info("Runtime Logfile: " + logfilePath);
-      log("\n\nLog opened at " + DateTime.Now + "\n\n");
+      log("############ Log opened ############\n\n");
     }
 
     [Conditional("DEBUG")]
-    public static void log(object o) { logfile.WriteLine(o); }
+    public static void log(object o) { logfile.WriteLine(DateTime.Now + "|" + o); }
   }
 }
