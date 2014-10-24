@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Tween {
   /** TweenFacade helper class to make tweens type-safe **/
@@ -9,15 +10,12 @@ namespace com.tinylabproductions.TLPLib.Tween {
     public static TweenFacade<A> a<A>(Fn<A> getter, Act<A> setter) {
       return new TweenFacade<A>(getter, setter);
     }
+
+    public static TweenFacade<Vector3> transformPosition(Transform t) 
+    { return a(() => t.position, v => t.position = v); }
   }
 
-  public 
-#if UNITY_IOS
-    class
-#else
-    struct 
-#endif
-    TweenFacade<A> {
+  public struct TweenFacade<A> {
     private readonly Fn<A> getter;
     private readonly Act<A> setter;
 
@@ -32,7 +30,6 @@ namespace com.tinylabproductions.TLPLib.Tween {
     }
   }
 
-#if GOTWEEN
   public static class TweenCfg {
     public static TweenCfg<A> a<A>(TweenFacade<A> facade, GoTweenConfig config) {
       return new TweenCfg<A>(facade, config);
@@ -48,5 +45,4 @@ namespace com.tinylabproductions.TLPLib.Tween {
       this.config = config;
     }
   }
-#endif
 }
