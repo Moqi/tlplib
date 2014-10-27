@@ -172,6 +172,7 @@
     <Compile Include="Threads\OnMainThreadBehaviour.cs" />
     <Compile Include="Tween\FuncTween.cs" />
     <Compile Include="Tween\GoF.cs" />
+    <Compile Include="Tween\TweenFuture.cs" />
     <Compile Include="Utilities\Base36.cs" />
     <Compile Include="Utilities\FPS.cs" />
     <Compile Include="Utilities\Geometry2D.cs" />
