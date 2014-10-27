@@ -4,12 +4,53 @@ using System.Collections.Generic;
 using System.Linq;
 using com.tinylabproductions.TLPLib.Collection;
 using com.tinylabproductions.TLPLib.Concurrent;
+using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 using com.tinylabproductions.TLPLib.Iter;
+using com.tinylabproductions.TLPLib.Logger;
 using Smooth.Collections;
 using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Reactive {
+  /**
+   * Notes:
+   * 
+   * #subscribe - if you subscribe to an observable during a callback, you 
+   * will not get the current event.
+   * 
+   * <code>
+   * void example(IObservable<A> observable) {
+   *   observable.subscribe(a => {
+   *     Log.info("A " + a);
+   *     observable.subscribe(a1 => {
+   *       Log.info("A1 " + a);
+   *     });
+   *   });
+   * }
+   * </code>
+   * 
+   * You will not get the A1 log statement here if you only submit one value into the observable.
+   * TODO: write test
+   * 
+   * #submit - all subscribers will be notified about current value, before 
+   * doing a submission of next value. Thus
+   * 
+   * <code>
+   * void example(Subject<int> observable) {
+   *   observable.subscribe(a => {
+   *     Log.info("A1=" + a);
+   *     if (a == 0) observable.push(a + 1);
+   *   });
+   *   observable.subscribe(a => {
+   *     Log.info("A2=" + a);
+   *   });
+   *   observable.push(0);
+   * }
+   * </code>
+   * 
+   * Will print A1=0,A2=0 and then A1=1,A2=1, not A1=0,A1=1,A2=1,A2=0
+   * TODO: write test
+   **/
   public interface IObservable<A> {
     int subscribers { get; }
     ISubscription subscribe(Act<A> onChange);
@@ -124,9 +165,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return F.t(obj, (IObservable<Evt>) observable);
     }
 
-    public static IObservable<A> empty<A>() {
-      return new Observable<A>(_ => new Subscription(() => {}));
-    }
+    public static IObservable<A> empty<A>() { return Observable<A>.empty; }
 
     public static IObservable<A> fromEvent<A>(
       Act<Act<A>> registerCallback, Act unregisterCallback
@@ -152,16 +191,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     { return interval(intervalS, F.some(delayS)); }
 
     public static IObservable<DateTime> interval(
-      float intervalS, Option<float> delayS=
-#if UNITY_IOS
-      null
-#else
-      new Option<float>()
-#endif
+      float intervalS, Option<float> delayS=new Option<float>()
     ) {
-#if UNITY_IOS
-      if (delayS == null) delayS = new Option<float>();
-#endif
       return new Observable<DateTime>(observer => {
         var cr = ASync.StartCoroutine(interval(observer, intervalS, delayS));
         return new Subscription(cr.stop);
@@ -199,6 +230,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
   >(Fn<IObserver<Elem>, ISubscription> subscriptionFn);
 
   public class Observable<A> : IObservable<A> {
+    public static readonly Observable<A> empty = 
+      new Observable<A>(_ => new Subscription(() => {}));
+
     /** Properties if this observable was created from other source. **/
     private class SourceProperties {
       private readonly IObserver<A> observer;
@@ -238,8 +272,21 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return subscribeFn => new Observable<Elem>(subscribeFn);
     }
 
-    private readonly RandomList<Tpl<Subscription, Act<A>>> subscriptions =
-      new RandomList<Tpl<Subscription, Act<A>>>();
+    struct Sub {
+      public readonly Subscription subscription;
+      public bool active;
+      public readonly Act<A> onSubmit;
+
+      public Sub(Subscription subscription, bool active, Act<A> onSubmit) {
+        this.subscription = subscription;
+        this.active = active;
+        this.onSubmit = onSubmit;
+      }
+    }
+
+    // We need to preserve the order of subscriptions here.
+    private readonly LinkedList<Sub> subscriptions = new LinkedList<Sub>();
+    private readonly LinkedList<A> pendingSubmits = new LinkedList<A>();
 
     // Are we currently iterating through subscriptions?
     private bool iterating;
@@ -259,29 +306,39 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     protected void submit(A value) {
+      if (iterating) {
+        Log.debug("Adding value to pending submits for " + this + ": " + value);
+        // Do not submit if iterating.
+        pendingSubmits.AddLast(value);
+        Log.debug("pending submits = " + pendingSubmits.Count);
+        return;
+      }
+
       // Mark a flag to prevent concurrent modification of subscriptions array.
       iterating = true;
       try {
-        // ReSharper disable once ForCanBeConvertedToForeach
-        for (var idx = 0; idx < subscriptions.Count; idx++) {
-          var t = subscriptions[idx];
-          var subscription = t._1;
-          var act = t._2;
-          if (subscription.isSubscribed) act(value);
-        }
+        subscriptions.iterateWhileChanged(sub => {
+          if (sub.active && sub.subscription.isSubscribed) 
+            sub.onSubmit(value);
+        });
       }
       finally {
         iterating = false;
         cleanupSubscriptions();
+        // Process pending submits.
+        pendingSubmits.shift().each(a => {
+          Log.debug("processing pending submit " + a);
+          submit(a);
+        });
       }
     }
 
-    public int subscribers { get { return subscriptions.Count - pendingRemovals; } }
+    public int subscribers 
+    { get { return subscriptions.Count - pendingRemovals; } }
 
     public virtual ISubscription subscribe(Act<A> onChange) {
       var subscription = new Subscription(onUnsubscribed);
-      // We can safely add to the subscriptions lists end.
-      subscriptions.Add(F.t(subscription, onChange));
+      subscriptions.AddLast(new Sub(subscription, !iterating, onChange));
       // Subscribe to source if we have a first subscriber.
       sourceProps.each(_ => _.trySubscribe());
       return subscription;
@@ -480,29 +537,20 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
 
     public IObservable<Tpl<A, B, C>> zip<B, C>(IObservable<B> o1, IObservable<C> o2) {
-      // ReSharper disable once RedundantTypeArgumentsOfMethod
-      // Mono compiler bug.
-      return zip<B>(o1).zip<C>(o2).
-        map<Tpl<A, B, C>>(t => F.t(t._1._1, t._1._2, t._2));
+      return zip(o1).zip(o2).map(t => F.t(t._1._1, t._1._2, t._2));
     }
 
     public IObservable<Tpl<A, B, C, D>> zip<B, C, D>(
       IObservable<B> o1, IObservable<C> o2, IObservable<D> o3
     ) {
-      // ReSharper disable once RedundantTypeArgumentsOfMethod
-      // Mono compiler bug.
-      return zip<B, C>(o1, o2).zip<D>(o3).
-        map<Tpl<A, B, C, D>>(t => F.t(t._1._1, t._1._2, t._1._3, t._2));
+      return zip(o1, o2).zip(o3).map(t => F.t(t._1._1, t._1._2, t._1._3, t._2));
     }
 
     public IObservable<Tpl<A, B, C, D, E>> zip<B, C, D, E>(
       IObservable<B> o1, IObservable<C> o2, IObservable<D> o3, IObservable<E> o4
     ) {
-      // ReSharper disable once RedundantTypeArgumentsOfMethod
-      // Mono compiler bug.
-      return zip<B, C, D>(o1, o2, o3).zip<E>(o4).map<Tpl<A, B, C, D, E>>(t => 
-        F.t(t._1._1, t._1._2, t._1._3, t._1._4, t._2)
-      );
+      return zip(o1, o2, o3).zip(o4).
+        map(t => F.t(t._1._1, t._1._2, t._1._3, t._1._4, t._2));
     }
 
     protected O zipImpl<B, O>
@@ -587,7 +635,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     private void cleanupSubscriptions() {
       if (pendingRemovals == 0) return;
 
-      subscriptions.RemoveWhere(t => !t._1.isSubscribed);
+      subscriptions.removeWhere(sub => ! sub.subscription.isSubscribed);
       pendingRemovals = 0;
     }
   }

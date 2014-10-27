@@ -69,20 +69,31 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     }
   }
 
+  /**
+   * Mutable reference which is also an observable.
+   * 
+   * Notes:
+   * 
+   * * Beware that RxRef#value setter does not change the value immediately 
+   *   if you do it from a subscription to this observable. The value is only
+   *   changed when the value broadcast for current subscriber list is complete.
+   *   TODO: test this
+   * 
+   **/
   public class RxRef<A> : RxRefBase<A>, IRxRef<A> {
     private static readonly IEqualityComparer<A> defaultComparer = EqComparer<A>.Default;
     private readonly IEqualityComparer<A> comparer;
 
     public new A value { 
       get { return _value; }
-      set {
-        if (comparer.Equals(_value, value)) return;
-        _value = value;
-        submit(value);
-      }
+      set { if (! comparer.Equals(_value, value)) submit(value); }
     }
 
-    public RxRef(A initialValue) : base(initialValue) { comparer = defaultComparer; }
+    public RxRef(A initialValue) : base(initialValue) {
+      comparer = defaultComparer;
+      // Assign values to this ref when the subscribers get them.
+      base.subscribe(a => _value = a);
+    }
 
     public RxRef(A initialValue, IEqualityComparer<A> comparer) : base(initialValue) 
     { this.comparer = comparer; }
