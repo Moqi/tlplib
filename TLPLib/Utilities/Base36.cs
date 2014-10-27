@@ -30,6 +30,15 @@ namespace com.tinylabproductions.TLPLib.Utilities {
       return Reverse(sb.ToString());
     }
 
+    public static string Encode(long inputNumber) {
+      var sb = new StringBuilder();
+      do {
+        sb.Append(Clistarr[Math.Abs(inputNumber % Clist.Length)]);
+        inputNumber /= Clist.Length;
+      } while (inputNumber != 0);
+      return Reverse(sb.ToString());
+    }
+
     public static string Reverse(string s) {
       var charArray = s.ToCharArray();
       Array.Reverse(charArray);
