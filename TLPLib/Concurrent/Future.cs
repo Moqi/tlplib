@@ -132,6 +132,10 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
       return new FutureImpl<A>();
     }
 
+    public static Future<Unit> nextFrame() {
+      return a<Unit>(p => ASync.NextFrame(() => p.completeSuccess(F.unit)));
+    }
+
     /**
      * Converts enumerable of futures into future of enumerable that is completed
      * when all futures complete.
