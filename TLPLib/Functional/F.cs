@@ -91,6 +91,7 @@ namespace com.tinylabproductions.TLPLib.Functional {
     }
 
 #region Generated code
+    public static Tpl<P1> t<P1>(P1 p1) { return new Tpl<P1>(p1); }
     public static Tpl<P1, P2> t<P1, P2>(P1 p1, P2 p2) { return new Tpl<P1, P2>(p1, p2); }
     public static Tpl<P1, P2, P3> t<P1, P2, P3>(P1 p1, P2 p2, P3 p3) { return new Tpl<P1, P2, P3>(p1, p2, p3); }
     public static Tpl<P1, P2, P3, P4> t<P1, P2, P3, P4>(P1 p1, P2 p2, P3 p3, P4 p4) { return new Tpl<P1, P2, P3, P4>(p1, p2, p3, p4); }
