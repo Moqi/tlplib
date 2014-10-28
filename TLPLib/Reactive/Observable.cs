@@ -7,7 +7,6 @@ using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Extensions;
 using com.tinylabproductions.TLPLib.Functional;
 using com.tinylabproductions.TLPLib.Iter;
-using com.tinylabproductions.TLPLib.Logger;
 using Smooth.Collections;
 using UnityEngine;
 
@@ -307,10 +306,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     protected void submit(A value) {
       if (iterating) {
-        Log.debug("Adding value to pending submits for " + this + ": " + value);
         // Do not submit if iterating.
         pendingSubmits.AddLast(value);
-        Log.debug("pending submits = " + pendingSubmits.Count);
         return;
       }
 
@@ -326,10 +323,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
         iterating = false;
         cleanupSubscriptions();
         // Process pending submits.
-        pendingSubmits.shift().each(a => {
-          Log.debug("processing pending submit " + a);
-          submit(a);
-        });
+        pendingSubmits.shift().each(submit);
       }
     }
 
