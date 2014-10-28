@@ -84,6 +84,9 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     CancellationToken onComplete(Act<Try<A>> action);
     CancellationToken onSuccess(Act<A> action);
     CancellationToken onFailure(Act<Exception> action);
+    Future<A> tapComplete(Act<Try<A>> action);
+    Future<A> tapSuccess(Act<A> action);
+    Future<A> tapFailure(Act<Exception> action);
   }
 
   /**
@@ -269,6 +272,10 @@ namespace com.tinylabproductions.TLPLib.Concurrent {
     public CancellationToken onFailure(Act<Exception> action) {
       return onComplete(t => t.exception.each(action));
     }
+
+    public Future<A> tapComplete(Act<Try<A>> action) { onComplete(action); return this; }
+    public Future<A> tapSuccess(Act<A> action) { onSuccess(action); return this; }
+    public Future<A> tapFailure(Act<Exception> action) { onFailure(action); return this; }
 
     public void completed(Try<A> v) {
       foreach (var listener in listeners) listener(v);

@@ -49,6 +49,10 @@ namespace com.tinylabproductions.TLPLib.Tween {
       return Future.FinishedCancellationToken.instance;
     }
 
+    public Future<Unit> tapComplete(Act<Try<Unit>> action) { return this; }
+    public Future<Unit> tapSuccess(Act<Unit> action) { return this; }
+    public Future<Unit> tapFailure(Act<Exception> action) { return this; }
+
     public void destroy() {}
   }
 }
