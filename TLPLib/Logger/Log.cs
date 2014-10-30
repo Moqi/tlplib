@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System;
 using System.Diagnostics;
 using System.IO;
+using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Functional;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -50,6 +51,8 @@ namespace com.tinylabproductions.TLPLib.Logger {
         Debug.isDebugBuild ? FileMode.Append : FileMode.Create,
         FileAccess.Write, FileShare.Read
       )) { AutoFlush = true };
+
+      ASync.onAppQuit.subscribe(_ => logfile.Close());
 
       Debug.Log("Runtime Logfile: " + logfilePath);
       log("\n\n", "############ Log opened ############\n\n");
