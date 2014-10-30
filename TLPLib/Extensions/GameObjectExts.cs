@@ -58,6 +58,10 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       ).scrollDelta;
     }
 
+    public static IObservable<KeyCode> keyDown(this GameObject go, KeyCode key) {
+      return go.AddComponent<OnKeyDownForwarder>().init(key).onKeyDown;
+    }
+
     public static IObservable<Unit> click(this GameObject go, bool uguiBlocks = true) {
       return go.AddComponent<OnMouseClickForwarder>().init(uguiBlocks).onMouseClick;
     }
