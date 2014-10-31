@@ -52,7 +52,10 @@ namespace com.tinylabproductions.TLPLib.Logger {
         FileAccess.Write, FileShare.Read
       )) { AutoFlush = true };
 
-      ASync.onAppQuit.subscribe(_ => logfile.Close());
+      ASync.onAppQuit.subscribe(_ => {
+        log("\n\n", "############ Log closed ############\n\n");
+        logfile.Close();
+      });
 
       Debug.Log("Runtime Logfile: " + logfilePath);
       log("\n\n", "############ Log opened ############\n\n");
