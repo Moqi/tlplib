@@ -13,6 +13,12 @@ namespace com.tinylabproductions.TLPLib.Tween {
 
     public static TweenFacade<Vector3> transformPosition(Transform t) 
     { return a(() => t.position, v => t.position = v); }
+
+    public static TweenFacade<Quaternion> transformRotation(Transform t) 
+    { return a(() => t.rotation, v => t.rotation = v); }
+
+    public static TweenFacade<Vector3> transformEulerRotation(Transform t) 
+    { return a(() => t.rotation.eulerAngles, v => t.rotation = Quaternion.Euler(v)); }
   }
 
   public struct TweenFacade<A> {
