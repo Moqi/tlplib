@@ -13,7 +13,7 @@ namespace com.tinylabproductions.TLPLib.Extensions {
     /* as #[], but has a better error message */
     public static V a<K, V>(this IDictionary<K, V> dict, K key) {
       return dict.get(key).fold(
-        () => { throw new ArgumentException(string.Format(
+        () => { throw new KeyNotFoundException(string.Format(
           "Cannot find {0} in {1}", key, dict.asString()
         )); },
         _ => _
