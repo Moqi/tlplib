@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Functional;
@@ -45,12 +46,9 @@ namespace com.tinylabproductions.TLPLib.Logger {
     private readonly static StreamWriter logfile;
     
     static FileLog() {
-      var logfilePath = Application.temporaryCachePath + "/runtime.log";
-      logfile = new StreamWriter(File.Open(
-        logfilePath, 
-        Debug.isDebugBuild ? FileMode.Append : FileMode.Create,
-        FileAccess.Write, FileShare.Read
-      )) { AutoFlush = true };
+      var t = tryOpen(Application.temporaryCachePath + "/runtime.log");
+      logfile = t._1;
+      var logfilePath = t._2;
 
       ASync.onAppQuit.subscribe(_ => {
         log("\n\n", "############ Log closed ############\n\n");
@@ -80,6 +78,26 @@ namespace com.tinylabproductions.TLPLib.Logger {
 #else
       Application.RegisterLogCallback(unityLogs);
 #endif
+    }
+
+    private static StreamWriter open(string path) {
+      return new StreamWriter(File.Open(
+        path,
+        Debug.isDebugBuild ? FileMode.Append : FileMode.Create,
+        FileAccess.Write, FileShare.Read
+      )) { AutoFlush = true };
+    }
+
+    private static Tpl<StreamWriter, string> tryOpen(string path) {
+      var i = 0;
+      while (true) {
+        var realPath = i == 0 ? path : path + "." + i;
+        try { return F.t(open(realPath), realPath); }
+        catch (IOException e) {
+          if (File.Exists(realPath)) i++;
+          else throw;
+        }
+      }
     }
 
     private static void write(Tpl<string, DateTime, object> t) {
