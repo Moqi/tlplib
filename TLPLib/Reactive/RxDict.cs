@@ -140,7 +140,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public bool TryGetValue(K key, out V value) { return backing.TryGetValue(key, out value); }
 
     public V this[K key] {
-      get { return backing[key]; }
+      get { return backing.a(key); }
       set { backing.get(key).voidFold(
         () => Add(key, value),
         oldValue => {
