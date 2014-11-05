@@ -3,7 +3,7 @@ using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.TLPLib.Tween {
-  /* Future which completes when the tween completes. */
+  /* Future which completes when the tween completes or is destroyed. */
   public interface ITweenFuture : Future<Unit> {
     void destroy();
   }
@@ -22,9 +22,19 @@ namespace com.tinylabproductions.TLPLib.Tween {
     private readonly AbstractGoTween tween;
 
     internal TweenFutureImpl(TweenFutureCreator creator) {
-      tween = creator(
-        new GoTweenConfig().startPaused().onComplete(t => completeSuccess(F.unit))
-      );
+      tween = creator(new GoTweenConfig().startPaused());
+      /* Don't you love when there are no appropriate events? */
+      ASync.EveryFrame(() => {
+        switch (tween.state) {
+          case GoTweenState.Complete:
+          case GoTweenState.Destroyed:
+            completeSuccess(F.unit);
+            return false;
+          default:
+            return true;
+        }
+      });
+      
       tween.play();
     }
 
