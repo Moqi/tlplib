@@ -17,16 +17,17 @@ public class PositionPathTweenProperty : AbstractTweenProperty
 	
 	private GoSpline _path;
 	private GoLookAtType _lookAtType = GoLookAtType.None;
-	private Transform _lookTarget;
+	private Transform _lookTarget, _lookRotationTarget;
 	private GoSmoothedQuaternion _smoothedRotation;
 	
 
-	public PositionPathTweenProperty( GoSpline path, bool isRelative = false, bool useLocalPosition = false, GoLookAtType lookAtType = GoLookAtType.None, Transform lookTarget = null ) : base( isRelative )
+	public PositionPathTweenProperty( GoSpline path, bool isRelative = false, bool useLocalPosition = false, GoLookAtType lookAtType = GoLookAtType.None, Transform lookTarget = null, Transform lookRotationTarget = null ) : base( isRelative )
 	{
 		_path = path;
 		_useLocalPosition = useLocalPosition;
 		_lookAtType = lookAtType;
 		_lookTarget = lookTarget;
+	  _lookRotationTarget = lookRotationTarget;
 	}
 	
 	
@@ -108,7 +109,7 @@ public class PositionPathTweenProperty : AbstractTweenProperty
 			case GoLookAtType.NextPathNode:
 			{
 				_smoothedRotation.smoothValue = vec.Equals( _target.position ) ? Quaternion.identity : Quaternion.LookRotation( vec - _target.position );
-				_target.rotation = _smoothedRotation.smoothValue;
+				(_lookRotationTarget ?? _target).rotation = _smoothedRotation.smoothValue;
 				//var lookAtNode = ( _ownerTween.isReversed || _ownerTween.isLoopoingBackOnPingPong ) ? _path.getPreviousNode() : _path.getNextNode();
 				//_target.LookAt( lookAtNode, Vector3.up );
 				break;
