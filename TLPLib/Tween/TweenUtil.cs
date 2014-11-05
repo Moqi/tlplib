@@ -1,17 +1,59 @@
 ﻿using System;
+using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Functional;
+using UnityEngine;
 
 namespace com.tinylabproductions.TLPLib.Tween {
   public static class TweenUtil {
+    struct Destroyable {
+      public readonly Act destroy;
+
+      public Destroyable(AbstractGoTween tween) { destroy = tween.destroy; }
+      public Destroyable(ITweenFuture tween) { destroy = tween.destroy; }
+    }
+
+    private delegate void SetCurrentDestroyable(Destroyable tween);
     public delegate void SetCurrentTween(AbstractGoTween tween);
+    public delegate void SetCurrentTweenFuture(ITweenFuture tween);
 
     /* Allows you to have only one running tween per closure. */
-    public static void withTween(Act<SetCurrentTween> runTween) {
-      var current = F.none<AbstractGoTween>();
-      runTween(tween => {
+    private static A withTweenDestroyable<A>(Fn<SetCurrentDestroyable, A> runTween) {
+      var current = F.none<Destroyable>();
+      return runTween(tween => {
         current.each(_ => _.destroy());
         current = F.some(tween);
       });
+    }
+
+    /* Allows you to have only one running tween per closure. */
+    public static A withTween<A>(Fn<SetCurrentTween, A> runTween) {
+      return withTweenDestroyable(setDestroyable => 
+        runTween(tween => setDestroyable(new Destroyable(tween)))
+      );
+    }
+
+    /* Allows you to have only one running tween per closure. */
+    public static A withTweenFuture<A>(Fn<SetCurrentTweenFuture, A> runTween) {
+      return withTweenDestroyable(setDestroyable => 
+        runTween(tween => setDestroyable(new Destroyable(tween)))
+      );
+    }
+
+    /* Sets target position to source position every frame, until unbindWhen is completed. */
+    public static A bindPosition<A>(
+      this A unbindWhen, Fn<Vector3> getSourcePosition, Act<Vector3> setTargetPosition
+    ) where A : Future<Unit> {
+      ASync.EveryFrame(() => {
+        setTargetPosition(getSourcePosition());
+        return unbindWhen.value.isEmpty;
+      });
+      return unbindWhen;
+    }
+
+    public static A bindPosition<A>(
+      this A unbindWhen, Transform source, Transform target
+    ) where A : Future<Unit> {
+      return unbindWhen.bindPosition(() => source.position, p => target.position = p);
     }
   }
 }
