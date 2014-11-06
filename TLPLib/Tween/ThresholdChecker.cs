@@ -1,18 +1,19 @@
 ﻿using System;
 
 namespace com.tinylabproductions.TLPLib.Tween {
-  public struct ThresholdChecker {
+  public class ThresholdChecker {
     public delegate float GetThreshold();
     public delegate bool CheckThreshold(float last, float current);
 
-    public static CheckThreshold minimize = (last, cur) => last > cur;
-    public static CheckThreshold maximize = (last, cur) => last < cur;
+    public static CheckThreshold minimize = (last, cur) => cur >= last;
+    public static CheckThreshold maximize = (last, cur) => cur <= last;
 
-    private readonly CheckThreshold checkThreshold;
-    private readonly GetThreshold getThreshold;
-    private readonly Act onThresholdReached;
+    readonly CheckThreshold checkThreshold;
+    readonly GetThreshold getThreshold;
+    readonly Act onThresholdReached;
 
-    private float threshold;
+    float threshold;
+    bool thresholdMet;
 
     public ThresholdChecker(
       GetThreshold getThreshold, CheckThreshold checkThreshold,
@@ -26,7 +27,13 @@ namespace com.tinylabproductions.TLPLib.Tween {
 
     public void check() {
       var curThreshold = getThreshold();
-      if (checkThreshold(threshold, curThreshold)) onThresholdReached();
+      if (thresholdMet && threshold != curThreshold) thresholdMet = false;
+//      Log.trace(string.Format("ThresholdChecker: last={0} current={1}", threshold, curThreshold));
+      if (! thresholdMet && checkThreshold(threshold, curThreshold)) {
+        //        Log.trace("ThresholdChecker: threshold reached");
+        thresholdMet = true;
+        onThresholdReached();
+      }
       threshold = curThreshold;
     }
   }

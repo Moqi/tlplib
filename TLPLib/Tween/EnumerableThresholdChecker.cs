@@ -44,7 +44,10 @@ namespace com.tinylabproductions.TLPLib.Tween {
       if (enumerator.MoveNext()) {
         index++;
         var a = enumerator.Current;
-        Log.debug("Threshold reached, switching to next element: " + a);
+        Log.debug(string.Format(
+          "EnumerableThresholdChecker: threshold reached, switching to next element [idx={0}]: {1}",
+          index, a
+        ));
         checker = F.some(new ThresholdChecker(
           () => toThreshold(a), checkerFn, () => {
             onThresholdReached(index, a);
