@@ -49,8 +49,8 @@ public class GoSplineCatmullRomSolver : AbstractGoSplineSolver
 	public override Vector3 getPoint( float t )
 	{
 		int numSections = _nodes.Count - 3;
-		int currentNode = Mathf.Min( Mathf.FloorToInt( t * (float)numSections ), numSections - 1 );
-		float u = t * (float)numSections - (float)currentNode;
+		int currentNode = Mathf.Min( Mathf.FloorToInt( t * numSections ), numSections - 1 );
+		float u = t * numSections - currentNode;
 
 		Vector3 a = _nodes[currentNode];
 		Vector3 b = _nodes[currentNode + 1];

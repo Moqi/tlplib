@@ -2,7 +2,6 @@
 
 using UnityEngine;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 
 
@@ -16,43 +15,44 @@ public class GoSpline
 	public List<Vector3> nodes { get { return _solver.nodes; } }
 
 	private bool _isReversed; // internal flag that lets us know if our nodes are reversed or not
-	private AbstractGoSplineSolver _solver;
+	private readonly AbstractGoSplineSolver _solver;
 	
-	
-	// default constructor
-	public GoSpline( List<Vector3> nodes, bool useStraightLines = false )
-	{
-		// determine spline type and solver based on number of nodes
-		if( useStraightLines || nodes.Count == 2 )
-		{
-			splineType = GoSplineType.StraightLine;
-			_solver = new GoSplineStraightLineSolver( nodes );
-		}
-		else if( nodes.Count == 3 )
-		{
-			splineType = GoSplineType.QuadraticBezier;
-			_solver = new GoSplineQuadraticBezierSolver( nodes );
-		}
-		else if( nodes.Count == 4 )
-		{
-			splineType = GoSplineType.CubicBezier;
-			_solver = new GoSplineCubicBezierSolver( nodes );
-		}
-		else
-		{
-			splineType = GoSplineType.CatmullRom;
-			_solver = new GoSplineCatmullRomSolver( nodes );
-		}
+  // straight line solver
+  public GoSpline(Vector3 start, Vector3 end) {
+    splineType = GoSplineType.StraightLine;
+    _solver = new GoSplineStraightLineSolver(new List<Vector3> { start, end });
+  }
+
+  // quadratic bezier solver
+  public GoSpline(Vector3 start, Vector3 control, Vector3 end) {
+		splineType = GoSplineType.QuadraticBezier;
+		_solver = new GoSplineQuadraticBezierSolver(new List<Vector3> { start, control, end });
+  }
+
+  public GoSpline(Vector3 start, Vector3 control1, Vector3 control2, Vector3 end) {
+		splineType = GoSplineType.CubicBezier;
+		_solver = new GoSplineCubicBezierSolver(new List<Vector3> { start, end, control1, control2 });
+  }
+
+  public GoSpline(List<Vector3> nodes) {
+		splineType = GoSplineType.CatmullRom;
+		_solver = new GoSplineCatmullRomSolver( nodes );
 	}
-	
-	
-	public GoSpline( Vector3[] nodes, bool useStraightLines = false ) : this( new List<Vector3>( nodes ), useStraightLines )
-	{}
-	
-	
-	public GoSpline( string pathAssetName, bool useStraightLines = false ) : this( nodeListFromAsset( pathAssetName ), useStraightLines )
-	{}
-	
+
+  public GoSpline(IEnumerable<Vector3> nodes) {
+		splineType = GoSplineType.CatmullRom;
+		_solver = new GoSplineCatmullRomSolver( new List<Vector3>(nodes) );
+	}
+
+  public static GoSpline fromAsset(
+    string pathAssetName, bool useStraightLines = false
+  ) {
+    var nodes = nodeListFromAsset(pathAssetName);
+    if (useStraightLines || nodes.Count == 2) return new GoSpline(nodes[0], nodes[1]);
+    else if (nodes.Count == 3) return new GoSpline(nodes[0], nodes[1], nodes[2]);
+    else if (nodes.Count == 4) return new GoSpline(nodes[0], nodes[1], nodes[2], nodes[3]);
+    else return new GoSpline(nodes);
+  }
 	
 	/// <summary>
 	/// helper to get a node list from an asset created with the visual editor
