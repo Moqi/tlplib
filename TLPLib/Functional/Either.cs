@@ -2,6 +2,11 @@
 using com.tinylabproductions.TLPLib.Extensions;
 
 namespace com.tinylabproductions.TLPLib.Functional {
+  public static class Either {
+    public static Either<A, B> cond<A, B>(bool isRight, Fn<B> onRight, Fn<A> onLeft) 
+    { return isRight ? new Either<A, B>(onRight()) : new Either<A, B>(onLeft()); }
+  }
+
   public struct Either<A, B> {
     public static Either<A, B> Left(A value) { return new Either<A, B>(value); }
     public static Either<A, B> Right(B value) { return new Either<A, B>(value); }
