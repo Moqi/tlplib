@@ -92,7 +92,11 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       }
     }
 
-    public static IEnumerable<A> last<A>(this IList<A> list, int count) {
+    public static Option<A> last<A>(this IList<A> list, int fromEnd=0) {
+      return list.Count < (fromEnd + 1) ? F.none<A>() : list[list.Count - fromEnd - 1].some();
+    }
+
+    public static IEnumerable<A> lastN<A>(this IList<A> list, int count) {
       return list.Skip(Math.Max(0, list.Count() - count)).Take(count); 
     }
 
