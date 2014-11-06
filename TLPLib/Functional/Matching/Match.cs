@@ -3,6 +3,7 @@
 namespace com.tinylabproductions.TLPLib.Functional.Matching {
   public interface IVoidMatcher<Base> where Base : class {
     IVoidMatcher<Base> when<T>(Act<T> onMatch) where T : Base;
+    IVoidMatcher<Base> when<T>(Fn<T, bool> predicate, Act<T> onMatch) where T : Base;
     void orElse(Act<Base> act);
   }
 
@@ -29,9 +30,13 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
       this.subject = subject;
     }
 
-    public IVoidMatcher<Base> when<T>(Act<T> onMatch) where T : Base {
+    public IVoidMatcher<Base> when<T>(Act<T> onMatch) where T : Base 
+    { return when(_ => true, onMatch); }
+
+    public IVoidMatcher<Base> when<T>(Fn<T, bool> predicate, Act<T> onMatch) where T : Base {
       if (subject is T) {
-        onMatch((T) subject);
+        var casted = (T) subject;
+        if (predicate(casted)) onMatch(casted);
         return new SuccessfulMatcher<Base, Unit>(F.unit);
       }
       else return this;
@@ -71,6 +76,9 @@ namespace com.tinylabproductions.TLPLib.Functional.Matching {
     }
 
     public IVoidMatcher<Base> when<T>(Act<T> onMatch) 
+    where T : Base { return this; }
+
+    public IVoidMatcher<Base> when<T>(Fn<T, bool> predicate, Act<T> onMatch) 
     where T : Base { return this; }
 
     public void orElse(Act<Base> act) {}
