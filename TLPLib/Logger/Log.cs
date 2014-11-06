@@ -21,12 +21,15 @@ namespace com.tinylabproductions.TLPLib.Logger {
    * We also intercept unity logs here and add them to our own.
    **/
   public static class Log {
+    public const string P_TRACE = "[TRACE]> ";
     public const string P_DEBUG = "[DEBUG]> ";
     public const string P_INFO = "[INFO]> ";
     public const string P_WARN = "[WARN]> ";
     public const string P_EXCEPTION = "[ERROR:EXCEPTION]> ";
     public const string P_ERROR = "[ERROR]> ";
 
+    [Conditional("TRACE")]
+    public static void trace(object o) { file(P_TRACE, o); }
     [Conditional("DEBUG")]
     public static void debug(object o) { file(P_DEBUG, o); }
     public static void info(object o) { file(P_INFO, o); }
