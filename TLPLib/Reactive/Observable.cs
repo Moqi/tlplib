@@ -53,7 +53,8 @@ namespace com.tinylabproductions.TLPLib.Reactive {
   public interface IObservable<A> {
     int subscribers { get; }
     ISubscription subscribe(Act<A> onChange);
-    ISubscription subscribe(Act<A, ISubscription> onChange);
+    ISubscription subscribe(Act<A> onChange, Act onFinish);
+    ISubscription subscribe(IObserver<A> observer);
     /** Emits first value to the future and unsubscribes. **/
     Future<A> toFuture();
     /* Pipes values to given observer. */
@@ -135,18 +136,25 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
   public interface IObserver<in A> {
     void push(A value);
+    void finish();
   }
 
   public class Observer<A> : IObserver<A> {
-    private readonly Act<A> onValuePush;
+    readonly Act<A> onValuePush;
+    readonly Act onFinish;
+
+    public Observer(Act<A> onValuePush, Act onFinish) {
+      this.onValuePush = onValuePush;
+      this.onFinish = onFinish;
+    }
 
     public Observer(Act<A> onValuePush) {
       this.onValuePush = onValuePush;
+      onFinish = () => {};
     }
 
-    public void push(A value) {
-      onValuePush(value);
-    }
+    public void push(A value) { onValuePush(value); }
+    public void finish() { onFinish(); }
   }
 
   public static class Observable {
@@ -228,6 +236,10 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     in Elem, out ObservableImplementation
   >(Fn<IObserver<Elem>, ISubscription> subscriptionFn);
 
+  public class ObservableFinishedException : Exception {
+    public ObservableFinishedException(string message) : base(message) {}
+  }
+
   public class Observable<A> : IObservable<A> {
     public static readonly Observable<A> empty = 
       new Observable<A>(_ => new Subscription(() => {}));
@@ -274,12 +286,12 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     struct Sub {
       public readonly Subscription subscription;
       public bool active;
-      public readonly Act<A> onSubmit;
+      public readonly IObserver<A> observer;
 
-      public Sub(Subscription subscription, bool active, Act<A> onSubmit) {
+      public Sub(Subscription subscription, bool active, IObserver<A> observer) {
         this.subscription = subscription;
         this.active = active;
-        this.onSubmit = onSubmit;
+        this.observer = observer;
       }
     }
 
@@ -288,7 +300,11 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     private readonly LinkedList<A> pendingSubmits = new LinkedList<A>();
 
     // Are we currently iterating through subscriptions?
-    private bool iterating;
+    bool iterating;
+    // We were iterating when #finish was called, so we have to finish when we clean up.
+    bool willFinish;
+    // Is this observable finished and will not take any more submits.
+    bool finished;
     // How many subscription removals we have pending?
     private int pendingRemovals;
 
@@ -300,11 +316,15 @@ namespace com.tinylabproductions.TLPLib.Reactive {
 
     public Observable(Fn<IObserver<A>, ISubscription> subscribeFn) {
       sourceProps = F.some(new SourceProperties(
-        new Observer<A>(submit), subscribeFn
+        new Observer<A>(submit, finish), subscribeFn
       ));
     }
 
     protected void submit(A value) {
+      if (finished) throw new ObservableFinishedException(string.Format(
+        "Observable {0} is finished, but #submit called with {1}", this, value
+      ));
+
       if (iterating) {
         // Do not submit if iterating.
         pendingSubmits.AddLast(value);
@@ -316,32 +336,48 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       try {
         subscriptions.iterateWhileChanged(sub => {
           if (sub.active && sub.subscription.isSubscribed) 
-            sub.onSubmit(value);
+            sub.observer.push(value);
         });
       }
       finally {
         iterating = false;
-        cleanupSubscriptions();
+        afterIteration();
         // Process pending submits.
         pendingSubmits.shift().each(submit);
       }
     }
 
+    protected void finish() {
+      if (iterating) {
+        willFinish = true;
+        return;
+      }
+
+      finished = true;
+      iterating = true;
+      foreach (var sub in subscriptions) {
+        sub.observer.finish();
+        sub.subscription.unsubscribe();
+      }
+      iterating = false;
+      afterIteration();
+      subscriptions.Clear();
+    }
+
     public int subscribers 
     { get { return subscriptions.Count - pendingRemovals; } }
 
-    public virtual ISubscription subscribe(Act<A> onChange) {
+    public ISubscription subscribe(Act<A> onChange) 
+    { return subscribe(onChange, () => { }); }
+
+    public ISubscription subscribe(Act<A> onChange, Act onFinish) 
+    { return subscribe(new Observer<A>(onChange, onFinish)); }
+
+    public virtual ISubscription subscribe(IObserver<A> observer) {
       var subscription = new Subscription(onUnsubscribed);
-      subscriptions.AddLast(new Sub(subscription, !iterating, onChange));
+      subscriptions.AddLast(new Sub(subscription, !iterating, observer));
       // Subscribe to source if we have a first subscriber.
       sourceProps.each(_ => _.trySubscribe());
-      return subscription;
-    }
-
-    public ISubscription subscribe(Act<A, ISubscription> onChange) {
-      ISubscription subscription = null;
-      // ReSharper disable once AccessToModifiedClosure
-      subscription = subscribe(a => onChange(a, subscription));
       return subscription;
     }
 
@@ -619,18 +655,22 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     private void onUnsubscribed() {
       pendingRemovals++;
       if (iterating) return;
-      cleanupSubscriptions();
+      afterIteration();
 
       // Unsubscribe from source if we don't have any subscribers that are
       // subscribed to us.
       if (subscribers == 0) sourceProps.each(_ => _.tryUnsubscribe());
     }
 
-    private void cleanupSubscriptions() {
-      if (pendingRemovals == 0) return;
-
-      subscriptions.removeWhere(sub => ! sub.subscription.isSubscribed);
-      pendingRemovals = 0;
+    private void afterIteration() {
+      if (pendingRemovals != 0) {
+        subscriptions.removeWhere(sub => ! sub.subscription.isSubscribed);
+        pendingRemovals = 0;
+      }
+      if (willFinish) {
+        willFinish = false;
+        finish();
+      }
     }
   }
 }

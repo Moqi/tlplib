@@ -5,5 +5,6 @@
    **/
   public class Subject<A> : Observable<A>, IObserver<A> {
     public void push(A value) { submit(value); }
+    void IObserver<A>.finish() { finish(); }
   }
 }

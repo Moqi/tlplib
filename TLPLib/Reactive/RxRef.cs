@@ -14,7 +14,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
   /**
    * RxRef is a reactive reference, which stores a value and also acts as a IObserver.
    **/
-  public interface IRxRef<A> : IRxVal<A>, IObserver<A> {
+  public interface IRxRef<A> : IRxVal<A> {
     new A value { get; set; }
     /** Returns a new ref that is bound to this ref and vice versa. **/
     IRxRef<B> comap<B>(Fn<A, B> mapper, Fn<B, A> comapper);
@@ -38,7 +38,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public static ObserverBuilder<Elem, IRxRef<Elem>> builder<Elem>(Elem value) {
       return subscriptionFn => {
         var rxRef = new RxRef<Elem>(value);
-        subscriptionFn(rxRef);
+        subscriptionFn(new Observer<Elem>(v => rxRef.value = v));
         return rxRef;
       };
     }
@@ -62,9 +62,9 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       return mapImpl(mapper, RxVal.builder(mapper(value)));
     }
 
-    public override ISubscription subscribe(Act<A> onChange) {
-      var subscription = base.subscribe(onChange);
-      onChange(value); // Emit current value on subscription.
+    public override ISubscription subscribe(IObserver<A> observer) {
+      var subscription = base.subscribe(observer);
+      observer.push(value); // Emit current value on subscription.
       return subscription;
     }
   }
@@ -92,7 +92,7 @@ namespace com.tinylabproductions.TLPLib.Reactive {
     public RxRef(A initialValue) : base(initialValue) {
       comparer = defaultComparer;
       // Assign values to this ref when the subscribers get them.
-      base.subscribe(a => _value = a);
+      subscribe(a => _value = a);
     }
 
     public RxRef(A initialValue, IEqualityComparer<A> comparer) : base(initialValue) 
@@ -103,8 +103,6 @@ namespace com.tinylabproductions.TLPLib.Reactive {
       bRef.subscribe(b => value = comapper(b));
       return bRef;
     }
-
-    public void push(A pushedValue) { value = pushedValue; }
   }
 
   public class RxMutRef {
