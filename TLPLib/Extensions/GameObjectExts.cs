@@ -58,6 +58,13 @@ namespace com.tinylabproductions.TLPLib.Extensions {
       ).scrollDelta;
     }
 
+    public static IObservable<float> pinch(this GameObject go) {
+      return (
+        go.GetComponent<PinchObservable>() ??
+        go.AddComponent<PinchObservable>()
+      ).pinchDelta;
+    }
+
     public static IObservable<KeyCode> keyDown(this GameObject go, KeyCode key) {
       return go.AddComponent<OnKeyDownForwarder>().init(key).onKeyDown;
     }
