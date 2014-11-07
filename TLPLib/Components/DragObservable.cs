@@ -1,5 +1,6 @@
 ﻿using com.tinylabproductions.TLPLib.Annotations;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Logger;
 using com.tinylabproductions.TLPLib.Reactive;
 using com.tinylabproductions.TLPLib.Utilities;
 using UnityEngine;
@@ -19,29 +20,30 @@ namespace com.tinylabproductions.TLPLib.Components {
     [UsedImplicitly]
     private void Update() {
       if (lastDragPosition.isEmpty) {
-        if (Input.GetMouseButtonDown(MOUSE_BUTTON)) {
+        if (isMouseDown()) {
           lastDragPosition = F.some((Vector2) Input.mousePosition);
           dragStarted = false;
         }
       }
       else {
+        if (isMouseUp()) {
+          lastDragPosition = F.none<Vector2>();
+          return;
+        }
+
         var lastPos = lastDragPosition.get;
         var curPos = (Vector2) Input.mousePosition;
-        if (!dragStarted) {
-          if ((curPos - lastPos).sqrMagnitude <= dragThresholdSqr) {
-            if (Input.GetMouseButtonUp(MOUSE_BUTTON)) {
-              lastDragPosition = F.none<Vector2>();
-            }
-            return;
-          }
+        if (!dragStarted && (curPos - lastPos).sqrMagnitude >= dragThresholdSqr) {
           dragStarted = true;
         }
-        if (curPos != lastPos)
+        if (dragStarted && curPos != lastPos) {
           _dragDelta.push(curPos - lastPos);
-
-        lastDragPosition = Input.GetMouseButtonUp(MOUSE_BUTTON)
-          ? F.none<Vector2>() : F.some(curPos);
+          lastDragPosition = F.some(curPos);
+        }
       }
     }
+
+    static bool isMouseDown() { return Input.touchCount <= 1 && Input.GetMouseButtonDown(MOUSE_BUTTON); }
+    static bool isMouseUp() { return Input.touchCount > 1 || Input.GetMouseButtonUp(MOUSE_BUTTON); }
   }
 }
