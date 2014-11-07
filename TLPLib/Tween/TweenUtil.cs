@@ -33,10 +33,20 @@ namespace com.tinylabproductions.TLPLib.Tween {
     }
 
     /* Allows you to have only one running tween per closure. */
+    public static void withTween(Act<SetCurrentTween> runTween) {
+      withTween(set => { runTween(set); return F.unit; });
+    }
+
+    /* Allows you to have only one running tween per closure. */
     public static A withTweenFuture<A>(Fn<SetCurrentTweenFuture, A> runTween) {
       return withTweenDestroyable(setDestroyable => 
         runTween(tween => setDestroyable(new Destroyable(tween)))
       );
+    }
+
+    /* Allows you to have only one running tween per closure. */
+    public static void withTweenFuture(Act<SetCurrentTweenFuture> runTween) {
+      withTweenFuture(set => { runTween(set); return F.unit; });
     }
 
     /* Sets target position to source position every frame, until unbindWhen is completed. */
