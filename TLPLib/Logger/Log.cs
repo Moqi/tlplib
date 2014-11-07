@@ -7,7 +7,6 @@ using System.Collections.Generic;
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Functional;
@@ -38,6 +37,8 @@ namespace com.tinylabproductions.TLPLib.Logger {
     public static void error(object o) { Debug.LogError(o); }
 
     public static void file(string prefix, object o) { FileLog.log(prefix, o); }
+
+    public static string debugObj<A>(this A obj) { return obj + "(" + obj.GetHashCode() + ")"; }
   }
 
   class FileLog {
