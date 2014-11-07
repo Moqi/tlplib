@@ -1,6 +1,7 @@
 ﻿using System;
 using com.tinylabproductions.TLPLib.Concurrent;
 using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Logger;
 
 namespace com.tinylabproductions.TLPLib.Tween {
   /* Future which completes when the tween completes or is destroyed. */
@@ -28,6 +29,10 @@ namespace com.tinylabproductions.TLPLib.Tween {
         switch (tween.state) {
           case GoTweenState.Complete:
           case GoTweenState.Destroyed:
+            Log.debug(string.Format(
+              "Tween {0} completed in future {1}, state = {2}",
+              tween.debugObj(), this.debugObj(), tween.state
+            ));
             completeSuccess(F.unit);
             return false;
           default:
